@@ -110,7 +110,7 @@ The connector interface should stay small and operational:
 ```ts
 type PlatformConnector = {
   platform: ContentPlatform;
-  canonicalizeUrl(url: string): string;
+  canonicalizeUrl(url: string): string | null;
   extractPostId(url: string): string | null;
   inferRightsStatus(url: string): CatalogRightsStatus;
   normalizeCreatorHandle?(handle: string): string | null;
@@ -122,12 +122,20 @@ The intended behavior:
 - `canonicalizeUrl`
   - remove irrelevant query params
   - normalize to the most stable direct post form the connector can support
+  - return `null` when the URL cannot be canonicalized into a supported direct-post surface
 - `extractPostId`
   - return a stable platform post identifier when the URL surface supports it
 - `inferRightsStatus`
   - classify obvious direct-source versus search-like surfaces conservatively
+  - never upgrade an unsupported or non-canonicalizable surface into `direct_source`
 - `normalizeCreatorHandle`
   - optional cleanup only, not identity invention
+
+This contract is intentionally narrow:
+
+- unsupported profile, search, collection, or otherwise non-post surfaces may receive best-effort parsing
+- but if `canonicalizeUrl` returns `null`, downstream normalization and verification must treat that surface as unsupported for direct-link purposes
+- connector-specific convenience normalization must never be used as evidence that a URL is a valid `direct_source`
 
 ### Integration Points
 
@@ -192,17 +200,60 @@ A seed candidate should preserve, when available:
 
 This layer may contain candidates that are not yet strong enough for `contents.ts`.
 
+### Candidate Layer Location And Minimal Schema
+
+The Xiaohongshu seed-candidate layer should live outside `contents.ts` and outside retrieval inputs.
+
+The planned landing point is:
+
+- `ops/quality/xiaohongshu-seed-candidates.json`
+
+The minimal record shape should be:
+
+```ts
+type XiaohongshuSeedCandidate = {
+  candidateId: string;
+  creatorName: string;
+  platform: "xiaohongshu";
+  canonicalUrl: string | null;
+  rawUrl: string;
+  postId: string | null;
+  title: string | null;
+  thumbnailUrl: string | null;
+  evidence: {
+    creatorEvidence: string[];
+    contentEvidence: string[];
+    thumbnailEvidence: string[];
+  };
+  preliminaryProblemTags: string[];
+  crossPlatformNotes?: string | null;
+  reviewStatus: "needs_review";
+};
+```
+
+Constraints:
+
+- this file is QA-preparation data only
+- it must not be consumed by retrieval
+- it may hold partially verified candidates
+- every candidate should preserve enough evidence to justify later review or rejection
+
 ### Promotion Bar For `contents.ts`
 
-An item should only be promoted into `contents.ts` when:
+An item is eligible for promotion into `contents.ts` only if all of the following are true:
 
 - creator identity is clear
 - tennis-teaching relevance is clear
 - the problem-tag assignment is justifiable
-- the direct link is stable enough or manually confirmed
-- the key metadata used in the curated content record is supported strongly enough by evidence
+- and either:
+  - remote verification evidence is strong enough for the direct link and key metadata
+  - or manual confirmation is recorded through the existing PR3 review/import path
 
-If any of these are weak, the item should remain in the candidate or review layer.
+Operationally, this means:
+
+- “probably correct” is not enough
+- a candidate that lacks strong remote evidence may still be promoted, but only when the missing confidence is replaced by explicit manual confirmation in the QA workflow
+- if neither strong remote evidence nor recorded manual confirmation exists, the item must remain outside `contents.ts`
 
 ## Cross-Platform Overlap Policy
 
