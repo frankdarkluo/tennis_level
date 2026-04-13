@@ -180,6 +180,22 @@ describe("surface localization", () => {
     expect(screen.getByText("输入邮箱后，我们会给你发登录链接。")).toBeInTheDocument();
   });
 
+  it("renders localized rate-limit copy in the login modal", async () => {
+    mockAuthState.sendMagicLink.mockResolvedValue({ error: "email rate limit exceeded" });
+    mockShellState.language = "zh";
+
+    renderWithI18n(<LoginModal open onClose={() => {}} />);
+
+    fireEvent.change(screen.getByPlaceholderText("you@example.com"), {
+      target: { value: "player@example.com" }
+    });
+    fireEvent.click(screen.getByRole("button", { name: "发送登录链接" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("邮件发送过于频繁，请稍后再试。")).toBeInTheDocument();
+    });
+  });
+
   it("renders AuthCallbackCard in English with localized error copy", async () => {
     renderWithI18n(<AuthCallbackCard />);
 

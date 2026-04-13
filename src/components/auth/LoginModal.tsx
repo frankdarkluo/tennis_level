@@ -27,6 +27,20 @@ export function LoginModal({ open, onClose, contextMessage }: LoginModalProps) {
     return t("auth.modal.helper");
   }, [t, user?.email]);
 
+  function localizeAuthErrorMessage(error: string) {
+    const normalizedError = error.trim().toLowerCase();
+
+    if (
+      normalizedError.includes("email rate limit exceeded")
+      || normalizedError.includes("over_email_send_rate_limit")
+      || normalizedError.includes("rate limit")
+    ) {
+      return t("auth.modal.errorRateLimit");
+    }
+
+    return error;
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setStatus("sending");
@@ -36,7 +50,7 @@ export function LoginModal({ open, onClose, contextMessage }: LoginModalProps) {
 
     if (result.error) {
       setStatus("error");
-      setMessage(result.error);
+      setMessage(localizeAuthErrorMessage(result.error));
       return;
     }
 

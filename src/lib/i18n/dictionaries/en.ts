@@ -273,6 +273,7 @@ const en = {
   "auth.modal.signOut": "Sign out",
   "auth.modal.linkSent": "The sign-in link has been sent. Open it from your inbox to finish logging in.",
   "auth.modal.signedOut": "You have signed out.",
+  "auth.modal.errorRateLimit": "Too many sign-in emails were sent. Please try again later.",
   "auth.callback.badge": "Email sign-in",
   "auth.callback.loadingTitle": "Verifying sign-in",
   "auth.callback.successTitle": "Sign-in complete",

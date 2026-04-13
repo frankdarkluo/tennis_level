@@ -273,6 +273,7 @@ const zh = {
   "auth.modal.signOut": "退出登录",
   "auth.modal.linkSent": "登录链接已经发出，去邮箱里点开就能完成登录。",
   "auth.modal.signedOut": "你已经退出登录。",
+  "auth.modal.errorRateLimit": "邮件发送过于频繁，请稍后再试。",
   "auth.callback.badge": "邮箱登录",
   "auth.callback.loadingTitle": "正在验证登录",
   "auth.callback.successTitle": "登录完成",
