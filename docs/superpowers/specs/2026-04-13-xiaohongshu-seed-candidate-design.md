@@ -67,7 +67,7 @@ For each creator:
 
 The default target should stay small:
 
-- approximately `1-3` note candidates per creator
+- approximately `5` high-confidence note candidates per creator
 - prefer fewer high-confidence candidates over more weak ones
 
 ## Candidate Layer
@@ -121,6 +121,17 @@ Preferred evidence:
 - short plain-language justification for tag assignment
 
 If a note only has weak evidence, keep it out of the candidate file.
+
+## Manual Review Handoff
+
+This follow-up should produce a human-reviewable handoff for each creator:
+
+- up to `5` high-confidence Xiaohongshu note candidates
+- the direct note entry URL used for candidate preparation
+- any resolved canonical note URL when obtainable
+- the creator profile URL used as identity evidence
+
+The intent is that a human can manually open and verify these note entry links before any later promotion step.
 
 ## Cross-Platform Handling
 
