@@ -6,10 +6,14 @@ import type { ContentItem, ContentPlatform } from "@/types/content";
 import type { CatalogContentItem, CatalogIngestionMethod, CatalogQualityReview } from "@/lib/content-catalog/schema";
 import type { PlatformConnector } from "@/lib/platform-connectors/types";
 import { bilibiliConnector } from "@/lib/platform-connectors/bilibili";
+import { instagramConnector } from "@/lib/platform-connectors/instagram";
+import { xiaohongshuConnector } from "@/lib/platform-connectors/xiaohongshu";
 import { youtubeConnector } from "@/lib/platform-connectors/youtube";
 
 const connectorByPlatform: Partial<Record<ContentPlatform, PlatformConnector>> = {
   Bilibili: bilibiliConnector,
+  Instagram: instagramConnector,
+  Xiaohongshu: xiaohongshuConnector,
   YouTube: youtubeConnector
 };
 
@@ -25,17 +29,6 @@ function fallbackRightsStatus(url: string): CatalogContentItem["rightsStatus"] {
   return inferContentSourceQuality(url);
 }
 
-function applyGlobalRightsFallback(
-  url: string,
-  current: CatalogContentItem["rightsStatus"]
-): CatalogContentItem["rightsStatus"] {
-  if (current === "search_link") {
-    return current;
-  }
-
-  return fallbackRightsStatus(url);
-}
-
 function getConnector(platform: ContentPlatform): PlatformConnector | null {
   return connectorByPlatform[platform] ?? null;
 }
@@ -43,6 +36,26 @@ function getConnector(platform: ContentPlatform): PlatformConnector | null {
 function inferCreatorHandle(creatorId: string): string | null {
   const normalized = creatorId.replace(/^creator_/, "").trim();
   return normalized.length > 0 ? normalized : null;
+}
+
+function resolveCanonicalUrl(item: ContentItem, connector: PlatformConnector | null): string {
+  return connector?.canonicalizeUrl(item.url) ?? fallbackCanonicalizeUrl(item.url);
+}
+
+function resolveRightsStatus(
+  item: ContentItem,
+  connector: PlatformConnector | null
+): CatalogContentItem["rightsStatus"] {
+  if (!connector) {
+    return fallbackRightsStatus(item.url);
+  }
+
+  const connectorRightsStatus = connector.inferRightsStatus(item.url);
+  if (connectorRightsStatus !== "direct_source") {
+    return connectorRightsStatus;
+  }
+
+  return connector.canonicalizeUrl(item.url) ? "direct_source" : "unknown";
 }
 
 function buildQualityScore(input: {
@@ -105,19 +118,20 @@ function normalizeContentItem(
   qualityReviewMap: Map<string, CatalogQualityReview>
 ): CatalogContentItem {
   const connector = getConnector(item.platform);
-  const canonicalUrl = connector?.canonicalizeUrl(item.url) ?? fallbackCanonicalizeUrl(item.url);
-  const rightsStatus = applyGlobalRightsFallback(
-    item.url,
-    connector?.inferRightsStatus(item.url) ?? fallbackRightsStatus(item.url)
-  );
+  const canonicalUrl = resolveCanonicalUrl(item, connector);
+  const rightsStatus = resolveRightsStatus(item, connector);
   const qualityReview = qualityReviewMap.get(item.id);
+  const rawCreatorHandle = inferCreatorHandle(item.creatorId);
+  const creatorHandle = rawCreatorHandle && connector?.normalizeCreatorHandle
+    ? connector.normalizeCreatorHandle(rawCreatorHandle)
+    : rawCreatorHandle;
 
   return {
     id: item.id,
     sourcePlatform: item.platform,
     canonicalUrl,
     creatorId: item.creatorId,
-    creatorHandle: inferCreatorHandle(item.creatorId),
+    creatorHandle,
     language: item.language,
     contentLanguage: item.contentLanguage,
     subtitleAvailability: item.subtitleAvailability,

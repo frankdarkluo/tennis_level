@@ -2334,6 +2334,93 @@ export const creators: Creator[] = [
     environment: ["testing", "production"]
   },
   {
+    id: "creator_gaiao_xiaohongshu_hidden",
+    name: "盖奥",
+    shortDescription: "小红书真实上传源，暂不参与博主榜",
+    tags: ["基础筑形", "正手基础", "脚步跟练"],
+    region: "domestic",
+    platforms: ["Xiaohongshu"],
+    levels: ["2.5", "3.0", "3.5"],
+    specialties: ["forehand", "movement", "basics"],
+    styleTags: ["真实上传源", "非榜单博主", "小红书直链"],
+    bio: "用于承载已人工审核通过的小红书真实上传源，保证平台分开的直链记录可以进入内容库，同时不参与博主榜展示。",
+    suitableFor: ["真实上传源", "小红书直链"],
+    featuredContentIds: ["content_xhs_gaiao_01"],
+    rankingEligible: false,
+    discoveryEligible: false,
+    profileUrl: "https://www.xiaohongshu.com/user/profile/5c3b619e000000000703fccc",
+    platformLinks: {
+      Xiaohongshu: "https://www.xiaohongshu.com/user/profile/5c3b619e000000000703fccc"
+    },
+    rankingSignals: {
+      subscriberScore: 0,
+      averageViewsScore: 0,
+      activityScore: 0,
+      catalogScore: 0,
+      authorityScore: 0,
+      curatorBoost: 0
+    },
+    environment: ["testing", "production"]
+  },
+  {
+    id: "creator_lingxi_xiaohongshu_hidden",
+    name: "灵熙🎾",
+    shortDescription: "小红书真实上传源，暂不参与博主榜",
+    tags: ["网前意识", "脚步思路", "进攻组织"],
+    region: "domestic",
+    platforms: ["Xiaohongshu"],
+    levels: ["3.0", "3.5", "4.0"],
+    specialties: ["net", "movement", "matchplay"],
+    styleTags: ["真实上传源", "非榜单博主", "小红书直链"],
+    bio: "用于承载已人工审核通过的小红书真实上传源，作为灵熙目前已确认的平台主直链记录，不参与博主榜展示。",
+    suitableFor: ["真实上传源", "小红书直链"],
+    featuredContentIds: ["content_xhs_lingxi_01", "content_xhs_lingxi_02", "content_xhs_lingxi_03"],
+    rankingEligible: false,
+    discoveryEligible: false,
+    profileUrl: "https://www.xiaohongshu.com/user/profile/63aef7df000000002702a346",
+    platformLinks: {
+      Xiaohongshu: "https://www.xiaohongshu.com/user/profile/63aef7df000000002702a346"
+    },
+    rankingSignals: {
+      subscriberScore: 0,
+      averageViewsScore: 0,
+      activityScore: 0,
+      catalogScore: 0,
+      authorityScore: 0,
+      curatorBoost: 0
+    },
+    environment: ["testing", "production"]
+  },
+  {
+    id: "creator_mouratoglou_xiaohongshu_hidden",
+    name: "冠军教练 - 莫拉托格鲁",
+    shortDescription: "小红书真实上传源，暂不参与博主榜",
+    tags: ["职业视角", "正手发力", "系统化"],
+    region: "domestic",
+    platforms: ["Xiaohongshu"],
+    levels: ["3.0", "3.5", "4.0", "4.5"],
+    specialties: ["forehand", "serve", "matchplay"],
+    styleTags: ["真实上传源", "非榜单博主", "小红书直链"],
+    bio: "用于承载已人工审核通过的小红书真实上传源，保证莫拉托格鲁内容在不同平台保持独立记录，不参与博主榜展示。",
+    suitableFor: ["真实上传源", "小红书直链"],
+    featuredContentIds: ["content_xhs_mouratoglou_01"],
+    rankingEligible: false,
+    discoveryEligible: false,
+    profileUrl: "https://www.xiaohongshu.com/user/profile/6050684100000000010047d5",
+    platformLinks: {
+      Xiaohongshu: "https://www.xiaohongshu.com/user/profile/6050684100000000010047d5"
+    },
+    rankingSignals: {
+      subscriberScore: 0,
+      averageViewsScore: 0,
+      activityScore: 0,
+      catalogScore: 0,
+      authorityScore: 0,
+      curatorBoost: 0
+    },
+    environment: ["testing", "production"]
+  },
+  {
     id: "creator_search_curated",
     name: "教练整理搜索入口",
     shortDescription: "暂未绑定单一博主",
