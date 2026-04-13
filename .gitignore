@@ -13,6 +13,9 @@ build/
 *.tsbuildinfo
 # local artifact emitted by thumbnail scripts
 scripts/thumbnail-results.json
+ops/quality/*.latest.json
+ops/quality/*.latest.md
+ops/quality/*.latest.csv
 
 # logs
 npm-debug.log*

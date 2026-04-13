@@ -1,4 +1,5 @@
 import { contents } from "../src/data/contents";
+import { contentQualityReviews } from "../src/data/contentQualityReviews";
 import { expandedContents } from "../src/data/expandedContents";
 import { creators } from "../src/data/creators";
 import { diagnosisRules } from "../src/data/diagnosisRules";
@@ -38,6 +39,7 @@ const creatorIds = new Set(creators.map((creator) => creator.id));
 const problemTags = new Set(diagnosisRules.map((rule) => rule.problemTag));
 const curatedContentIds = new Set(contents.map((item) => item.id));
 const TEMPLATE_ONLY_PROBLEM_TAGS = new Set(["cant-self-practice", "general-improvement"]);
+const reviewedContentIds = new Set<string>();
 
 for (const rule of diagnosisRules) {
   if (new Set(rule.recommendedContentIds).size !== rule.recommendedContentIds.length) {
@@ -125,6 +127,43 @@ for (const template of planTemplates) {
   }
 }
 
+for (const review of contentQualityReviews) {
+  if (reviewedContentIds.has(review.contentId)) {
+    pushError(
+      `contentQualityReviews:${review.contentId}`,
+      `contentId "${review.contentId}" 存在重复 review 记录`
+    );
+  }
+  reviewedContentIds.add(review.contentId);
+
+  if (!contentIds.has(review.contentId)) {
+    pushError(
+      `contentQualityReviews:${review.contentId}`,
+      `contentId "${review.contentId}" 在内容库中不存在`
+    );
+  }
+
+  if (review.lastVerifiedAt) {
+    const timestamp = Date.parse(review.lastVerifiedAt);
+    if (Number.isNaN(timestamp)) {
+      pushError(
+        `contentQualityReviews:${review.contentId}`,
+        `lastVerifiedAt "${review.lastVerifiedAt}" 不是合法时间戳`
+      );
+    }
+  }
+
+  if (
+    typeof review.metadataSimilarityScore === "number" &&
+    (review.metadataSimilarityScore < 0 || review.metadataSimilarityScore > 1)
+  ) {
+    pushError(
+      `contentQualityReviews:${review.contentId}`,
+      `metadataSimilarityScore 必须落在 0 到 1 之间`
+    );
+  }
+}
+
 const expandedConcentrationMap = new Map<string, string[]>();
 for (const item of expandedContents) {
   const signature = getNormalizedProblemTagSignature(item.problemTags);
@@ -151,6 +190,7 @@ const summaryLines = [
   `静态内容: ${contents.length} 条`,
   `扩展内容: ${expandedContents.length} 条`,
   `总内容条目: ${allContents.length} 条`,
+  `质量 review: ${contentQualityReviews.length} 条`,
   `博主数量: ${creators.length} 位`,
   `训练计划: ${planTemplates.length} 套`,
   `错误: ${errorIssues.length} 项`,

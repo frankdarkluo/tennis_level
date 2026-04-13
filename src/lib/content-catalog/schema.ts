@@ -5,6 +5,22 @@ import type { ProblemTag } from "@/types/problemTag";
 
 export type CatalogRightsStatus = "direct_source" | "search_link" | "unknown";
 export type CatalogIngestionMethod = "curated" | "expanded";
+export type CatalogReviewStatus = "verified" | "needs_review" | "suspect" | "rejected";
+export type CatalogThumbnailStatus = "ok" | "fallback" | "missing" | "broken" | "unknown";
+
+export type CatalogQualityReview = {
+  contentId: string;
+  reviewStatus: CatalogReviewStatus;
+  thumbnailStatus?: CatalogThumbnailStatus;
+  lastVerifiedAt?: string;
+  httpStatus?: number;
+  remoteTitle?: string;
+  remoteDescriptionExcerpt?: string;
+  metadataSimilarityScore?: number;
+  manualQcScore?: number;
+  duplicateClusterId?: string;
+  verifiedBy?: string;
+};
 
 export type CatalogContentItem = {
   id: string;
@@ -23,6 +39,7 @@ export type CatalogContentItem = {
   rightsStatus: CatalogRightsStatus;
   qualityScore: number;
   ingestionMethod: CatalogIngestionMethod;
+  qualityReview?: CatalogQualityReview;
   environment?: EnvironmentValue;
   display: {
     title: string;

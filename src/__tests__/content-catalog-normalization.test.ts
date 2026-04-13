@@ -39,4 +39,53 @@ describe("content catalog normalization", () => {
     });
     expect((curatedDirect?.qualityScore ?? 0)).toBeGreaterThan(expandedDirect?.qualityScore ?? Number.POSITIVE_INFINITY);
   });
+
+  it("merges optional quality-review overlay data without changing base content ownership", () => {
+    const catalog = buildCatalogCorpus({
+      curatedContents: [
+        {
+          id: "content_quality_overlay",
+          title: "Serve rhythm",
+          creatorId: "creator_overlay",
+          platform: "YouTube",
+          type: "video",
+          levels: ["3.0"],
+          skills: ["serve"],
+          problemTags: ["serve-rhythm"],
+          language: "en",
+          summary: "summary",
+          reason: "reason",
+          useCases: ["use case"],
+          coachReason: "coach reason",
+          url: "https://www.youtube.com/watch?v=qualityOverlay"
+        }
+      ],
+      expandedContents: [],
+      qualityReviews: [
+        {
+          contentId: "content_quality_overlay",
+          reviewStatus: "verified",
+          thumbnailStatus: "ok",
+          lastVerifiedAt: "2026-04-12T00:00:00.000Z",
+          manualQcScore: 2
+        }
+      ]
+    });
+
+    const item = catalog.find((entry) => entry.id === "content_quality_overlay");
+
+    expect(item).toMatchObject({
+      id: "content_quality_overlay",
+      ingestionMethod: "curated",
+      rightsStatus: "direct_source",
+      qualityReview: {
+        reviewStatus: "verified",
+        thumbnailStatus: "ok",
+        lastVerifiedAt: "2026-04-12T00:00:00.000Z",
+        manualQcScore: 2
+      }
+    });
+    expect(item?.sourceItem.id).toBe("content_quality_overlay");
+    expect(item?.qualityScore).toBeGreaterThan(100);
+  });
 });

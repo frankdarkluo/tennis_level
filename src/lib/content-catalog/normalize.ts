@@ -1,8 +1,9 @@
 import { contents as defaultCuratedContents } from "@/data/contents";
+import { contentQualityReviews as defaultQualityReviews } from "@/data/contentQualityReviews";
 import { expandedContents as defaultExpandedContents } from "@/data/expandedContents";
 import { inferContentSourceQuality, inferContentTeachingIntent } from "@/lib/content/recommendationSignals";
 import type { ContentItem, ContentPlatform } from "@/types/content";
-import type { CatalogContentItem, CatalogIngestionMethod } from "@/lib/content-catalog/schema";
+import type { CatalogContentItem, CatalogIngestionMethod, CatalogQualityReview } from "@/lib/content-catalog/schema";
 import type { PlatformConnector } from "@/lib/platform-connectors/types";
 import { bilibiliConnector } from "@/lib/platform-connectors/bilibili";
 import { youtubeConnector } from "@/lib/platform-connectors/youtube";
@@ -47,6 +48,7 @@ function inferCreatorHandle(creatorId: string): string | null {
 function buildQualityScore(input: {
   ingestionMethod: CatalogIngestionMethod;
   rightsStatus: CatalogContentItem["rightsStatus"];
+  qualityReview?: CatalogQualityReview;
 }): number {
   const base = input.ingestionMethod === "curated" ? 90 : 72;
   const rightsAdjustment = input.rightsStatus === "direct_source"
@@ -54,17 +56,61 @@ function buildQualityScore(input: {
     : input.rightsStatus === "search_link"
       ? -16
       : -24;
+  const reviewAdjustment = getQualityReviewAdjustment(input.qualityReview);
 
-  return base + rightsAdjustment;
+  return base + rightsAdjustment + reviewAdjustment;
 }
 
-function normalizeContentItem(item: ContentItem, ingestionMethod: CatalogIngestionMethod): CatalogContentItem {
+function getQualityReviewAdjustment(review?: CatalogQualityReview): number {
+  if (!review) {
+    return 0;
+  }
+
+  let adjustment = 0;
+
+  if (review.reviewStatus === "verified") {
+    adjustment += 4;
+  } else if (review.reviewStatus === "needs_review") {
+    adjustment -= 4;
+  } else if (review.reviewStatus === "suspect") {
+    adjustment -= 12;
+  } else if (review.reviewStatus === "rejected") {
+    adjustment -= 24;
+  }
+
+  if (review.thumbnailStatus === "ok") {
+    adjustment += 2;
+  } else if (review.thumbnailStatus === "fallback") {
+    adjustment -= 1;
+  } else if (review.thumbnailStatus === "missing") {
+    adjustment -= 4;
+  } else if (review.thumbnailStatus === "broken") {
+    adjustment -= 8;
+  }
+
+  if (typeof review.manualQcScore === "number" && Number.isFinite(review.manualQcScore)) {
+    adjustment += Math.max(-2, Math.min(2, review.manualQcScore)) * 2;
+  }
+
+  return adjustment;
+}
+
+function buildQualityReviewMap(reviews: CatalogQualityReview[]): Map<string, CatalogQualityReview> {
+  return new Map(reviews.map((review) => [review.contentId, review]));
+}
+
+function normalizeContentItem(
+  item: ContentItem,
+  ingestionMethod: CatalogIngestionMethod,
+  qualityReviewMap: Map<string, CatalogQualityReview>
+): CatalogContentItem {
   const connector = getConnector(item.platform);
   const canonicalUrl = connector?.canonicalizeUrl(item.url) ?? fallbackCanonicalizeUrl(item.url);
   const rightsStatus = applyGlobalRightsFallback(
     item.url,
     connector?.inferRightsStatus(item.url) ?? fallbackRightsStatus(item.url)
   );
+  const qualityReview = qualityReviewMap.get(item.id);
 
   return {
     id: item.id,
@@ -89,8 +135,9 @@ function normalizeContentItem(item: ContentItem, ingestionMethod: CatalogIngesti
     levelRange: [...item.levels],
     mediaType: item.type,
     rightsStatus,
-    qualityScore: buildQualityScore({ ingestionMethod, rightsStatus }),
+    qualityScore: buildQualityScore({ ingestionMethod, rightsStatus, qualityReview }),
     ingestionMethod,
+    qualityReview,
     environment: item.environment,
     display: {
       title: item.title,
@@ -110,9 +157,11 @@ function normalizeContentItem(item: ContentItem, ingestionMethod: CatalogIngesti
 export function buildCatalogCorpus(input?: {
   curatedContents?: ContentItem[];
   expandedContents?: ContentItem[];
+  qualityReviews?: CatalogQualityReview[];
 }): CatalogContentItem[] {
   const combinedInput = input?.curatedContents;
   const explicitExpanded = input?.expandedContents;
+  const qualityReviewMap = buildQualityReviewMap(input?.qualityReviews ?? defaultQualityReviews);
   const defaultExpandedIdSet = new Set(defaultExpandedContents.map((item) => item.id));
   const curated = explicitExpanded
     ? (combinedInput ?? defaultCuratedContents)
@@ -126,7 +175,7 @@ export function buildCatalogCorpus(input?: {
       : defaultExpandedContents;
 
   return [
-    ...curated.map((item) => normalizeContentItem(item, "curated")),
-    ...expanded.map((item) => normalizeContentItem(item, "expanded"))
+    ...curated.map((item) => normalizeContentItem(item, "curated", qualityReviewMap)),
+    ...expanded.map((item) => normalizeContentItem(item, "expanded", qualityReviewMap))
   ];
 }
