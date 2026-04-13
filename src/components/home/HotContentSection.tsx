@@ -11,7 +11,8 @@ import {
   getContentLanguageTag,
   getContentPrimaryTitle,
   getContentSecondaryTitle,
-  getSubtitleAvailability
+  getSubtitleAvailability,
+  getSubtitleAvailabilityTranslationKey
 } from "@/lib/content/display";
 import { logEvent } from "@/lib/eventLogger";
 import { useI18n } from "@/lib/i18n/config";
@@ -47,13 +48,7 @@ export function HotContentSection() {
           const focusLine = getContentFocusLine(item, language);
           const contentLanguage = getContentLanguageTag(item);
           const subtitleAvailability = getSubtitleAvailability(item);
-          const subtitleLabel = subtitleAvailability === "english"
-            ? t("content.subtitle.yes")
-            : subtitleAvailability === "none"
-              ? t("content.subtitle.no")
-              : subtitleAvailability === "not_needed"
-                ? t("content.subtitle.notNeeded")
-                : t("content.subtitle.unknown");
+          const subtitleLabel = t(getSubtitleAvailabilityTranslationKey(subtitleAvailability));
 
           return (
             <Link

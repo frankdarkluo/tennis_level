@@ -12,13 +12,15 @@ import {
   getContentLanguageTag,
   getContentPrimaryTitle,
   getContentSecondaryTitle,
-  getSubtitleAvailability
+  getSubtitleAvailability,
+  getSubtitleAvailabilityTranslationKey
 } from "@/lib/content/display";
 import {
   buildDeepDiagnosisEvidenceSummary,
   buildEnrichedSceneRecap,
   buildEnrichedSpecificityReasons
 } from "@/lib/diagnose/enrichedContext";
+import { getPreferredOutboundUrl } from "@/lib/content/outbound";
 import { logEvent } from "@/lib/eventLogger";
 import { useI18n } from "@/lib/i18n/config";
 import { getDiagnosisConfidenceLabel } from "@/lib/diagnosis";
@@ -127,13 +129,7 @@ function RecommendationCard({
   const targetLabel = getContentFocusLine(item, language);
   const contentLanguage = getContentLanguageTag(item);
   const subtitleAvailability = getSubtitleAvailability(item);
-  const subtitleLabel = subtitleAvailability === "english"
-    ? t("content.subtitle.yes")
-    : subtitleAvailability === "none"
-      ? t("content.subtitle.no")
-      : subtitleAvailability === "not_needed"
-        ? t("content.subtitle.notNeeded")
-        : t("content.subtitle.unknown");
+  const subtitleLabel = t(getSubtitleAvailabilityTranslationKey(subtitleAvailability));
 
   return (
     <div className="rounded-xl border border-[var(--line)] p-4 text-sm">
@@ -168,7 +164,7 @@ function RecommendationCard({
           href={item.url}
           target="_blank"
           rel="noreferrer"
-          onClick={() => {
+          onClick={(event) => {
             logEvent("diagnose.recommended_content_clicked", {
               problemTag,
               contentId: item.id,
@@ -180,6 +176,15 @@ function RecommendationCard({
               platform: item.platform,
               sourceContext: source
             }, { page: "/diagnose" });
+
+            const outbound = getPreferredOutboundUrl(item, {
+              userAgent: typeof navigator === "undefined" ? undefined : navigator.userAgent
+            });
+
+            if (outbound.href !== item.url && typeof window !== "undefined") {
+              event.preventDefault();
+              window.location.assign(outbound.href);
+            }
           }}
         >
           <Button variant="secondary">{t("content.open")}</Button>

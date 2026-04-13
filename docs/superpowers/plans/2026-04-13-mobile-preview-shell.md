@@ -340,3 +340,119 @@ Check:
 git add src/app/mobile-preview/page.tsx src/lib/mobilePreview/routes.ts src/__tests__/mobile-preview-routes.test.ts src/__tests__/mobile-preview-page.test.tsx
 git commit -m "Add local mobile preview workspace"
 ```
+
+### Task 5: Add Xiaohongshu-only mobile masonry in `/library`
+
+**Files:**
+- Create: `src/lib/library/layout.ts`
+- Modify: `src/app/library/page.tsx`
+- Test: `src/__tests__/library-mobile-layout.test.tsx`
+
+- [ ] **Step 1: Write the failing tests**
+
+```ts
+import { describe, expect, it } from "vitest";
+import { shouldUseMobileXiaohongshuMasonry } from "@/lib/library/layout";
+
+describe("shouldUseMobileXiaohongshuMasonry", () => {
+  it("enables masonry only for Xiaohongshu on mobile width", () => {
+    expect(shouldUseMobileXiaohongshuMasonry({ selectedPlatform: "Xiaohongshu", viewportWidth: 430 })).toBe(true);
+    expect(shouldUseMobileXiaohongshuMasonry({ selectedPlatform: "all", viewportWidth: 430 })).toBe(false);
+    expect(shouldUseMobileXiaohongshuMasonry({ selectedPlatform: "Xiaohongshu", viewportWidth: 768 })).toBe(false);
+  });
+});
+```
+
+```tsx
+it("switches the library list into Xiaohongshu mobile masonry when the platform filter is Xiaohongshu on mobile", async () => {
+  Object.defineProperty(window, "innerWidth", { value: 430, writable: true });
+  const LibraryPage = await loadLibraryPage();
+  render(React.createElement(LibraryPage));
+
+  fireEvent.click(await screen.findByRole("button", { name: "set-xhs-platform" }));
+  expect(screen.getByTestId("library-results")).toHaveAttribute("data-layout", "xhs-mobile-masonry");
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run:
+
+```bash
+npm test -- src/__tests__/library-mobile-layout.test.tsx
+```
+
+Expected: FAIL because the helper and page wiring do not exist yet.
+
+- [ ] **Step 3: Write minimal implementation**
+
+```ts
+export const MOBILE_LIBRARY_MASONRY_MAX_WIDTH = 480;
+
+export function shouldUseMobileXiaohongshuMasonry({
+  selectedPlatform,
+  viewportWidth
+}: {
+  selectedPlatform: string;
+  viewportWidth: number | null;
+}) {
+  return selectedPlatform === "Xiaohongshu"
+    && viewportWidth !== null
+    && viewportWidth <= MOBILE_LIBRARY_MASONRY_MAX_WIDTH;
+}
+```
+
+```tsx
+const [viewportWidth, setViewportWidth] = useState<number | null>(null);
+
+useEffect(() => {
+  const syncViewportWidth = () => setViewportWidth(window.innerWidth);
+  syncViewportWidth();
+  window.addEventListener("resize", syncViewportWidth);
+  return () => window.removeEventListener("resize", syncViewportWidth);
+}, []);
+
+const useXiaohongshuMobileMasonry = shouldUseMobileXiaohongshuMasonry({
+  selectedPlatform,
+  viewportWidth
+});
+```
+
+```tsx
+<div
+  data-testid="library-results"
+  data-layout={useXiaohongshuMobileMasonry ? "xhs-mobile-masonry" : "default"}
+  className={useXiaohongshuMobileMasonry ? "columns-2 gap-3" : "grid items-stretch gap-4 md:grid-cols-2"}
+>
+  {visibleItems.map((item) => (
+    <div
+      key={item.id}
+      className={useXiaohongshuMobileMasonry ? "mb-3 break-inside-avoid" : "h-full"}
+    >
+      <ContentCard ... />
+    </div>
+  ))}
+</div>
+```
+
+- [ ] **Step 4: Run focused tests**
+
+Run:
+
+```bash
+npm test -- src/__tests__/library-mobile-layout.test.tsx
+```
+
+Expected: PASS.
+
+- [ ] **Step 5: Run regression checks**
+
+Run:
+
+```bash
+npm test
+npm run validate:data
+npm run build
+```
+
+Expected: all pass.

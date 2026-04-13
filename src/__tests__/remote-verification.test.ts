@@ -45,6 +45,17 @@ describe("remote verification helpers", () => {
           id: "article_item",
           type: "article",
           url: "https://example.com/article"
+        }),
+        createContentItem({
+          id: "xhs_direct_video",
+          platform: "Xiaohongshu",
+          language: "zh",
+          url: "https://www.xiaohongshu.com/explore/66abc123def4567890123456?xsec_token=abc"
+        }),
+        createContentItem({
+          id: "instagram_direct_video",
+          platform: "Instagram",
+          url: "https://www.instagram.com/reel/C9abcDEF123/?igsh=base"
         })
       ],
       expandedContents: []
@@ -56,29 +67,137 @@ describe("remote verification helpers", () => {
         platform: "YouTube",
         canonicalUrl: "https://www.youtube.com/watch?v=direct_video",
         thumbnailUrl: "https://img.youtube.com/vi/direct_video/maxresdefault.jpg"
+      }),
+      expect.objectContaining({
+        contentId: "xhs_direct_video",
+        platform: "Xiaohongshu",
+        canonicalUrl: "https://www.xiaohongshu.com/explore/66abc123def4567890123456"
+      }),
+      expect.objectContaining({
+        contentId: "instagram_direct_video",
+        platform: "Instagram",
+        canonicalUrl: "https://www.instagram.com/reel/C9abcDEF123/"
       })
     ]);
   });
 
   it("classifies fetch outcomes conservatively", () => {
-    expect(classifyFetchOutcome({ ok: true, status: 200, finalUrl: "https://example.com/watch" })).toMatchObject({
+    expect(classifyFetchOutcome({
+      verificationSurface: "canonical_url",
+      originalUrl: "https://www.youtube.com/watch?v=ok",
+      ok: true,
+      status: 200,
+      finalUrl: "https://www.youtube.com/watch?v=ok"
+    })).toMatchObject({
       status: "reachable",
+      failureClass: null,
+      decisionReason: "http_ok_supported_surface",
+      retrySuggested: false,
       needsManualReview: false
     });
-    expect(classifyFetchOutcome({ ok: false, status: 404, finalUrl: "https://example.com/missing" })).toMatchObject({
+    expect(classifyFetchOutcome({
+      verificationSurface: "canonical_url",
+      originalUrl: "https://www.xiaohongshu.com/explore/66abc123def4567890123456",
+      ok: true,
+      status: 200,
+      finalUrl: "https://www.xiaohongshu.com/explore/66abc123def4567890123456"
+    })).toMatchObject({
+      status: "reachable",
+      failureClass: null,
+      decisionReason: "http_ok_supported_surface"
+    });
+    expect(classifyFetchOutcome({
+      verificationSurface: "canonical_url",
+      originalUrl: "https://www.instagram.com/reel/C9abcDEF123/",
+      ok: true,
+      status: 200,
+      finalUrl: "https://www.instagram.com/reel/C9abcDEF123/"
+    })).toMatchObject({
+      status: "reachable",
+      failureClass: null,
+      decisionReason: "http_ok_supported_surface"
+    });
+    expect(classifyFetchOutcome({
+      verificationSurface: "canonical_url",
+      originalUrl: "https://www.youtube.com/watch?v=missing",
+      ok: false,
+      status: 404,
+      finalUrl: "https://www.youtube.com/watch?v=missing"
+    })).toMatchObject({
       status: "dead",
+      failureClass: null,
       needsManualReview: true
     });
-    expect(classifyFetchOutcome({ ok: false, status: 403, finalUrl: "https://example.com/blocked" })).toMatchObject({
+    expect(classifyFetchOutcome({
+      verificationSurface: "canonical_url",
+      originalUrl: "https://www.youtube.com/watch?v=blocked",
+      ok: false,
+      status: 403,
+      finalUrl: "https://www.youtube.com/watch?v=blocked"
+    })).toMatchObject({
       status: "blocked",
+      failureClass: "platform_blocking",
+      decisionReason: "http_403",
+      retrySuggested: false,
       needsManualReview: true
     });
-    expect(classifyFetchOutcome({ ok: false, status: 500, finalUrl: "https://example.com/error" })).toMatchObject({
+    expect(classifyFetchOutcome({
+      verificationSurface: "canonical_url",
+      originalUrl: "https://www.youtube.com/watch?v=error",
+      ok: false,
+      status: 500,
+      finalUrl: "https://www.youtube.com/watch?v=error"
+    })).toMatchObject({
       status: "ambiguous",
+      failureClass: "unknown",
+      retrySuggested: true,
       needsManualReview: true
     });
-    expect(classifyFetchOutcome({ errorName: "AbortError", errorMessage: "timed out" })).toMatchObject({
+    expect(classifyFetchOutcome({
+      verificationSurface: "canonical_url",
+      originalUrl: "https://www.youtube.com/watch?v=timeout",
+      errorName: "AbortError",
+      errorMessage: "timed out"
+    })).toMatchObject({
       status: "timeout",
+      failureClass: "network_runtime_failure",
+      decisionReason: "abort_timeout",
+      retrySuggested: true,
+      needsManualReview: true
+    });
+    expect(classifyFetchOutcome({
+      verificationSurface: "canonical_url",
+      originalUrl: "https://www.youtube.com/watch?v=network",
+      errorMessage: "fetch failed: ECONNRESET"
+    })).toMatchObject({
+      status: "network_error",
+      failureClass: "network_runtime_failure",
+      decisionReason: "network_runtime_error",
+      retrySuggested: true,
+      needsManualReview: true
+    });
+    expect(classifyFetchOutcome({
+      verificationSurface: "canonical_url",
+      originalUrl: "https://www.youtube.com/watch?v=redirected",
+      ok: true,
+      status: 200,
+      finalUrl: "https://www.youtube.com/post/Ugkxredirected"
+    })).toMatchObject({
+      status: "redirect_unverified",
+      failureClass: "redirect_unverified",
+      decisionReason: "redirected_to_unverified_surface",
+      retrySuggested: false,
+      needsManualReview: true
+    });
+    expect(classifyFetchOutcome({
+      verificationSurface: "remote_thumbnail",
+      originalUrl: "https://img.youtube.com/vi/content_1/maxresdefault.jpg",
+      errorMessage: "Failed to parse URL from ftp://example.com/file.jpg"
+    })).toMatchObject({
+      status: "unsupported",
+      failureClass: "unsupported_surface",
+      decisionReason: "unsupported_verification_surface",
+      retrySuggested: false,
       needsManualReview: true
     });
   });
@@ -112,13 +231,18 @@ describe("remote verification helpers", () => {
         linkStatus: "reachable",
         httpStatus: 200,
         finalUrl: "https://www.youtube.com/watch?v=content_1",
+        verificationSurface: "canonical_url",
+        failureClass: null,
+        decisionReason: "http_ok_supported_surface",
+        retrySuggested: false,
         thumbnailStatus: "reachable",
+        thumbnailDecisionReason: "",
         errorReason: "",
         needsManualReview: false
       }
     ]);
 
-    expect(csv).toContain("contentId,platform,canonicalUrl,thumbnailUrl,checkedAt,linkStatus,httpStatus,finalUrl,thumbnailStatus,errorReason,needsManualReview");
+    expect(csv).toContain("contentId,platform,canonicalUrl,thumbnailUrl,checkedAt,linkStatus,httpStatus,finalUrl,verificationSurface,failureClass,decisionReason,retrySuggested,thumbnailStatus,thumbnailDecisionReason,errorReason,needsManualReview");
     expect(csv).toContain("content_1,YouTube");
   });
 });

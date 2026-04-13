@@ -70,4 +70,19 @@ describe("shared thumbnail fallback", () => {
     expect(within(fallback).queryByText("正")).not.toBeInTheDocument();
     expect(within(fallback).queryByText("BILIBILI")).not.toBeInTheDocument();
   });
+
+  it("does not force no-referrer for Xiaohongshu CDN thumbnails", () => {
+    const item: ContentItem = {
+      ...createItem(),
+      id: "thumbnail_xhs_test",
+      platform: "Xiaohongshu",
+      thumbnail: "https://sns-webpic-qc.xhscdn.com/example-xhs-cover.jpg",
+      url: "https://www.xiaohongshu.com/explore/69c29c5f0000000021012666"
+    };
+
+    render(<ContentCard item={item} />);
+
+    const image = screen.getByRole("img");
+    expect(image.getAttribute("referrerpolicy")).not.toBe("no-referrer");
+  });
 });

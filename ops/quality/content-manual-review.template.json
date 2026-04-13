@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "generatedFromReport": "ops/quality/content-remote-check.latest.json",
+  "records": [
+    {
+      "contentId": "content_gaiao_01",
+      "reviewDecision": "verified",
+      "thumbnailStatus": "ok",
+      "verifiedBy": "qa-user",
+      "lastVerifiedAt": "2026-04-13T00:00:00.000Z",
+      "manualQcScore": 1,
+      "httpStatus": 200,
+      "notes": "Metadata matches the destination content.",
+      "evidence": {
+        "linkStatus": "reachable",
+        "failureClass": "",
+        "decisionReason": "http_ok_supported_surface",
+        "finalUrl": "https://www.youtube.com/watch?v=example"
+      }
+    },
+    {
+      "contentId": "content_zlx_02",
+      "reviewDecision": "skip",
+      "verifiedBy": "qa-user",
+      "lastVerifiedAt": "2026-04-13T00:00:00.000Z",
+      "notes": "Keep unresolved until a human browser check is available."
+    }
+  ]
+}

@@ -16,6 +16,7 @@ scripts/thumbnail-results.json
 ops/quality/*.latest.json
 ops/quality/*.latest.md
 ops/quality/*.latest.csv
+ops/quality/*.input.json
 
 # logs
 npm-debug.log*

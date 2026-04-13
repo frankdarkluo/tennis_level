@@ -123,3 +123,44 @@ Likely next slices:
 - preview polish such as copyable route link or viewport presets
 
 Those are explicitly separate from this slice.
+
+## Approved follow-up update: Xiaohongshu mobile masonry in `/library`
+
+This design is now extended with one narrow follow-up behavior:
+
+- only on `/library`
+- only at mobile width
+- only when the platform filter is explicitly `Xiaohongshu`
+
+the results list may switch from the default single-column mobile list into a two-column Xiaohongshu-style masonry feed.
+
+### Follow-up scope
+
+In scope:
+
+- conditional two-column masonry layout for `/library`
+- reuse of the existing `ContentCard`
+- continued use of the Xiaohongshu `3:4` portrait media ratio
+
+Out of scope:
+
+- changing the default `/library` layout for other platforms
+- changing desktop layout behavior
+- changing `/diagnose`, `/plan`, or `/profile`
+- introducing a second card component
+
+### Follow-up trigger rule
+
+Enable the masonry layout only when all conditions are true:
+
+1. current page is `/library`
+2. viewport is mobile-sized
+3. `selectedPlatform === "Xiaohongshu"`
+
+Otherwise preserve the current layout.
+
+### Follow-up implementation direction
+
+Use a small library-layout helper plus a conditional list-container class switch.
+
+Prefer a true masonry-like presentation such as CSS columns over a generic equal-row grid, so the result feels closer to a RedNote note feed.

@@ -341,6 +341,8 @@ const en = {
   "content.lang.zh": "ZH",
   "content.lang.en": "EN",
   "content.subtitle.yes": "EN subtitles",
+  "content.subtitle.zh": "ZH subtitles",
+  "content.subtitle.zhEn": "ZH+EN subtitles",
   "content.subtitle.no": "No subtitles",
   "content.subtitle.unknown": "Subtitles unknown",
   "content.subtitle.notNeeded": "Native English",

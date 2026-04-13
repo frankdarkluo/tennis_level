@@ -1,7 +1,7 @@
 import { contents } from "@/data/contents";
 import { useState } from "react";
 import { Creator, CreatorFeaturedVideo } from "@/types/creator";
-import { ContentItem } from "@/types/content";
+import { ContentItem, ContentSubtitleAvailability } from "@/types/content";
 import { Modal } from "@/components/ui/Modal";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -21,7 +21,8 @@ import {
     getFeaturedVideoPrimaryTitle,
     getFeaturedVideoSecondaryTitle,
   getFeaturedVideoTarget,
-    getSubtitleAvailability
+    getSubtitleAvailability,
+    getSubtitleAvailabilityTranslationKey
 } from "@/lib/content/display";
 import { logEvent } from "@/lib/eventLogger";
 import { useI18n } from "@/lib/i18n/config";
@@ -34,13 +35,13 @@ type CreatorModalItem = {
   levels: string[];
   focusLine: string;
   url: string;
-  platform: "Bilibili" | "YouTube";
+  platform: "Bilibili" | "YouTube" | "Xiaohongshu";
   thumbnail?: string;
   duration?: string;
   contentId?: string;
   logSource?: string;
   contentLanguage?: "zh" | "en";
-  subtitleAvailability?: "english" | "none" | "unknown" | "not_needed";
+  subtitleAvailability?: ContentSubtitleAvailability;
 };
 
 const SKILL_CARD_MAP: Record<string, { title: string; title_en: string; summary: string; summary_en: string; query: string }> = {
@@ -120,7 +121,7 @@ export function CreatorDetailModal({ creator, open, onClose }: { creator: Creato
     ].filter((topic, index, array) => array.indexOf(topic) === index);
 
     return topics
-      .map((topic) => {
+      .map((topic): CreatorModalItem | null => {
         const template = SKILL_CARD_MAP[topic];
 
         if (!template) {
@@ -160,7 +161,11 @@ export function CreatorDetailModal({ creator, open, onClose }: { creator: Creato
           levels: item.levels,
           focusLine: getContentFocusLine(item, language),
           url: item.url,
-          platform: item.platform === "Bilibili" ? "Bilibili" : "YouTube",
+          platform: item.platform === "Xiaohongshu"
+            ? "Xiaohongshu"
+            : item.platform === "Bilibili"
+              ? "Bilibili"
+              : "YouTube",
           thumbnail: item.thumbnail,
           duration: item.duration,
           contentId: item.id,
@@ -265,13 +270,9 @@ export function CreatorDetailModal({ creator, open, onClose }: { creator: Creato
             {modalItems.length > 0 ? (
               modalItems.map((item) => (
                 (() => {
-                  const subtitleLabel = item.subtitleAvailability === "english"
-                    ? t("content.subtitle.yes")
-                    : item.subtitleAvailability === "none"
-                      ? t("content.subtitle.no")
-                      : item.subtitleAvailability === "not_needed"
-                        ? t("content.subtitle.notNeeded")
-                        : t("content.subtitle.unknown");
+                  const subtitleLabel = item.subtitleAvailability
+                    ? t(getSubtitleAvailabilityTranslationKey(item.subtitleAvailability))
+                    : null;
 
                   return (
                 <a
@@ -311,7 +312,7 @@ export function CreatorDetailModal({ creator, open, onClose }: { creator: Creato
                             {item.contentLanguage === "zh" ? t("content.lang.zh") : t("content.lang.en")}
                           </Badge>
                         ) : null}
-                        {item.subtitleAvailability ? (
+                        {subtitleLabel ? (
                           <Badge className="bg-slate-100 px-3.5 py-1.5 text-sm text-slate-700">
                             {subtitleLabel}
                           </Badge>

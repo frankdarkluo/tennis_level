@@ -57,14 +57,40 @@ async function fetchWithTimeout(url: string, timeoutMs: number): Promise<{
   httpStatus: number | null;
   finalUrl: string | null;
   status: RemoteLinkStatus;
+  failureClass: import("./lib/remoteVerification").RemoteFailureClass | null;
+  decisionReason: string;
+  retrySuggested: boolean;
   errorReason: string;
   needsManualReview: boolean;
+  verificationSurface: "canonical_url" | "remote_thumbnail";
+}> {
+  return fetchWithClassifiedOutcome({
+    url,
+    timeoutMs,
+    verificationSurface: "canonical_url"
+  });
+}
+
+async function fetchWithClassifiedOutcome(input: {
+  url: string;
+  timeoutMs: number;
+  verificationSurface: "canonical_url" | "remote_thumbnail";
+}): Promise<{
+  httpStatus: number | null;
+  finalUrl: string | null;
+  status: RemoteLinkStatus;
+  failureClass: import("./lib/remoteVerification").RemoteFailureClass | null;
+  decisionReason: string;
+  retrySuggested: boolean;
+  errorReason: string;
+  needsManualReview: boolean;
+  verificationSurface: "canonical_url" | "remote_thumbnail";
 }> {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  const timer = setTimeout(() => controller.abort(), input.timeoutMs);
 
   try {
-    const response = await fetch(url, {
+    const response = await fetch(input.url, {
       method: "GET",
       redirect: "follow",
       signal: controller.signal,
@@ -73,6 +99,8 @@ async function fetchWithTimeout(url: string, timeoutMs: number): Promise<{
       }
     });
     const classified = classifyFetchOutcome({
+      verificationSurface: input.verificationSurface,
+      originalUrl: input.url,
       ok: response.ok,
       status: response.status,
       finalUrl: response.url
@@ -83,22 +111,33 @@ async function fetchWithTimeout(url: string, timeoutMs: number): Promise<{
       httpStatus: response.status,
       finalUrl: response.url,
       status: classified.status,
+      failureClass: classified.failureClass,
+      decisionReason: classified.decisionReason,
+      retrySuggested: classified.retrySuggested,
       errorReason: classified.errorReason,
-      needsManualReview: classified.needsManualReview
+      needsManualReview: classified.needsManualReview,
+      verificationSurface: classified.verificationSurface
     };
   } catch (error) {
-    const err = error as { name?: string; message?: string };
+    const err = error as { name?: string; message?: string; cause?: { code?: string; message?: string } };
     const classified = classifyFetchOutcome({
+      verificationSurface: input.verificationSurface,
+      originalUrl: input.url,
       errorName: err?.name ?? null,
-      errorMessage: err?.message ?? "request_failed"
+      errorMessage: err?.message ?? err?.cause?.message ?? "request_failed",
+      errorCode: err?.cause?.code ?? null
     });
 
     return {
       httpStatus: null,
       finalUrl: null,
       status: classified.status,
+      failureClass: classified.failureClass,
+      decisionReason: classified.decisionReason,
+      retrySuggested: classified.retrySuggested,
       errorReason: classified.errorReason,
-      needsManualReview: classified.needsManualReview
+      needsManualReview: classified.needsManualReview,
+      verificationSurface: classified.verificationSurface
     };
   } finally {
     clearTimeout(timer);
@@ -107,6 +146,7 @@ async function fetchWithTimeout(url: string, timeoutMs: number): Promise<{
 
 async function verifyThumbnail(url: string | null, timeoutMs: number): Promise<{
   thumbnailStatus: RemoteThumbnailStatus;
+  thumbnailDecisionReason: string;
   errorReason: string;
   needsManualReview: boolean;
 }> {
@@ -118,6 +158,7 @@ async function verifyThumbnail(url: string | null, timeoutMs: number): Promise<{
   if (plan.mode === "missing" || plan.mode === "uncheckable") {
     return {
       thumbnailStatus: plan.thumbnailStatus,
+      thumbnailDecisionReason: plan.decisionReason,
       errorReason: plan.errorReason,
       needsManualReview: plan.needsManualReview
     };
@@ -130,14 +171,20 @@ async function verifyThumbnail(url: string | null, timeoutMs: number): Promise<{
 
     return {
       thumbnailStatus: exists ? "reachable" : "dead",
+      thumbnailDecisionReason: exists ? "local_asset_present" : "local_asset_missing",
       errorReason: exists ? "" : "thumbnail_asset_missing",
       needsManualReview: !exists
     };
   }
 
-  const result = await fetchWithTimeout(plan.thumbnailUrl, timeoutMs);
+  const result = await fetchWithClassifiedOutcome({
+    url: plan.thumbnailUrl,
+    timeoutMs,
+    verificationSurface: "remote_thumbnail"
+  });
   return {
     thumbnailStatus: result.status,
+    thumbnailDecisionReason: result.decisionReason,
     errorReason: result.errorReason,
     needsManualReview: result.needsManualReview
   };
@@ -156,7 +203,12 @@ async function verifyTarget(target: RemoteVerificationTarget, checkedAt: string,
     linkStatus: linkResult.status,
     httpStatus: linkResult.httpStatus,
     finalUrl: linkResult.finalUrl,
+    verificationSurface: "canonical_url",
+    failureClass: linkResult.failureClass,
+    decisionReason: linkResult.decisionReason,
+    retrySuggested: linkResult.retrySuggested,
     thumbnailStatus: thumbnailResult.thumbnailStatus,
+    thumbnailDecisionReason: thumbnailResult.thumbnailDecisionReason,
     errorReason: [linkResult.errorReason, thumbnailResult.errorReason]
       .filter(Boolean)
       .join(";"),
@@ -187,8 +239,18 @@ export async function createRemoteVerificationArtifacts(options?: {
     deadCount: records.filter((record) => record.linkStatus === "dead").length,
     timeoutCount: records.filter((record) => record.linkStatus === "timeout").length,
     blockedCount: records.filter((record) => record.linkStatus === "blocked").length,
+    networkErrorCount: records.filter((record) => record.linkStatus === "network_error").length,
+    redirectUnverifiedCount: records.filter((record) => record.linkStatus === "redirect_unverified").length,
+    unsupportedCount: records.filter((record) => record.linkStatus === "unsupported").length,
     ambiguousCount: records.filter((record) => record.linkStatus === "ambiguous").length,
     needsManualReviewCount: records.filter((record) => record.needsManualReview).length,
+    failureClassCounts: {
+      networkRuntimeFailure: records.filter((record) => record.failureClass === "network_runtime_failure").length,
+      platformBlocking: records.filter((record) => record.failureClass === "platform_blocking").length,
+      redirectUnverified: records.filter((record) => record.failureClass === "redirect_unverified").length,
+      unsupportedSurface: records.filter((record) => record.failureClass === "unsupported_surface").length,
+      unknown: records.filter((record) => record.failureClass === "unknown").length
+    },
     timeoutMs
   };
 

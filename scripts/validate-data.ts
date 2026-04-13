@@ -162,6 +162,26 @@ for (const review of contentQualityReviews) {
       `metadataSimilarityScore 必须落在 0 到 1 之间`
     );
   }
+
+  if (
+    typeof review.manualQcScore === "number" &&
+    (!Number.isFinite(review.manualQcScore) || review.manualQcScore < -2 || review.manualQcScore > 2)
+  ) {
+    pushError(
+      `contentQualityReviews:${review.contentId}`,
+      `manualQcScore 必须落在 -2 到 2 之间`
+    );
+  }
+
+  if (
+    typeof review.httpStatus === "number" &&
+    (!Number.isInteger(review.httpStatus) || review.httpStatus < 100 || review.httpStatus > 599)
+  ) {
+    pushError(
+      `contentQualityReviews:${review.contentId}`,
+      `httpStatus 必须是 100 到 599 之间的整数`
+    );
+  }
 }
 
 const expandedConcentrationMap = new Map<string, string[]>();

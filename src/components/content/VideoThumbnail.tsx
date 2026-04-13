@@ -10,6 +10,10 @@ type VideoThumbnailProps = {
   imageClassName?: string;
 };
 
+function shouldDisableNoReferrer(thumbnail: string) {
+  return /xhscdn\.com|xiaohongshu\.com/i.test(thumbnail);
+}
+
 function ThumbnailFallback() {
   return (
     <div
@@ -54,7 +58,7 @@ export function VideoThumbnail({
           alt={title}
           className={imageClassName}
           loading="lazy"
-          referrerPolicy="no-referrer"
+          referrerPolicy={shouldDisableNoReferrer(normalizedThumbnail ?? "") ? undefined : "no-referrer"}
           onError={() => setThumbnailFailed(true)}
         />
       ) : (

@@ -5,8 +5,8 @@ import {
   CREATOR_TAG_LABELS_ZH
 } from "@/lib/content/localization";
 import { CREATOR_FEATURED_VIDEO_CHINESE_SUBTITLE_OVERRIDES } from "@/lib/content/chineseSubtitleOverrides";
-import { ContentItem, ContentSubtitleAvailability } from "@/types/content";
-import { Creator, CreatorFeaturedVideo } from "@/types/creator";
+import { ContentItem, ContentPlatform, ContentSubtitleAvailability } from "@/types/content";
+import { Creator, CreatorFeaturedVideo, CreatorPlatformName } from "@/types/creator";
 
 type Locale = "zh" | "en";
 export type ChineseSecondaryTitleSource = "manual" | "title_template" | "metadata" | "generic_skill";
@@ -1106,6 +1106,17 @@ export function getContentLanguageTag(item: Pick<ContentItem, "contentLanguage" 
   return item.contentLanguage ?? item.language;
 }
 
+export function getPlatformDisplayName(
+  platform: ContentPlatform | CreatorPlatformName,
+  locale: Locale
+) {
+  if (platform === "Xiaohongshu") {
+    return locale === "zh" ? "小红书" : "RedNote";
+  }
+
+  return platform;
+}
+
 export function getSubtitleAvailability(
   item: Pick<ContentItem, "subtitleAvailability" | "language" | "platform">
 ): ContentSubtitleAvailability {
@@ -1122,6 +1133,30 @@ export function getSubtitleAvailability(
   }
 
   return "unknown";
+}
+
+export function getSubtitleAvailabilityTranslationKey(subtitleAvailability: ContentSubtitleAvailability) {
+  if (subtitleAvailability === "english") {
+    return "content.subtitle.yes";
+  }
+
+  if (subtitleAvailability === "zh") {
+    return "content.subtitle.zh";
+  }
+
+  if (subtitleAvailability === "zh_en") {
+    return "content.subtitle.zhEn";
+  }
+
+  if (subtitleAvailability === "none") {
+    return "content.subtitle.no";
+  }
+
+  if (subtitleAvailability === "not_needed") {
+    return "content.subtitle.notNeeded";
+  }
+
+  return "content.subtitle.unknown";
 }
 
 export function getEnglishGloss(

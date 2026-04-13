@@ -4,7 +4,7 @@ import { ProblemTag } from "@/types/problemTag";
 export type ContentType = "video" | "article" | "post";
 export type ContentPlatform = "Bilibili" | "Xiaohongshu" | "Zhihu" | "YouTube" | "Instagram";
 export type ContentLanguageCode = "zh" | "en";
-export type ContentSubtitleAvailability = "english" | "none" | "unknown" | "not_needed";
+export type ContentSubtitleAvailability = "english" | "zh" | "zh_en" | "none" | "unknown" | "not_needed";
 
 export type ContentItem = {
   id: string;

@@ -222,11 +222,13 @@ describe("content catalog retrieval", () => {
         }),
         createContentItem({
           id: "direct_a",
+          platform: "Bilibili",
           levels: ["3.0"],
           url: "https://www.bilibili.com/video/BV1aA4111111"
         }),
         createContentItem({
           id: "direct_b",
+          platform: "Bilibili",
           levels: ["3.5"],
           url: "https://www.bilibili.com/video/BV1bB4111111"
         }),

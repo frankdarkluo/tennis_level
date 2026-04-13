@@ -120,6 +120,7 @@ describe("quality metrics helpers", () => {
     const directExpanded = createContentItem({
       id: "direct_expanded",
       creatorId: "creator_c",
+      platform: "Bilibili",
       problemTags: ["serve-rhythm"],
       url: "https://www.bilibili.com/video/BV1aA4111111"
     });

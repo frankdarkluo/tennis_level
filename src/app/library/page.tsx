@@ -18,10 +18,11 @@ import {
 } from "@/lib/assessmentStorage";
 import { logEvent } from "@/lib/eventLogger";
 import { useI18n } from "@/lib/i18n/config";
+import { shouldUseMobileXiaohongshuMasonry } from "@/lib/library/layout";
 import { buildLibraryItems, sortLibraryItems } from "@/lib/library/order";
 import { addBookmark, getBookmarkedContentIds, getLatestAssessmentResult, removeBookmark } from "@/lib/userData";
 import { getThumbnail } from "@/lib/thumbnail";
-import { toChineseSkill } from "@/lib/utils";
+import { cn, toChineseSkill } from "@/lib/utils";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useAuthModal } from "@/components/auth/AuthModalProvider";
@@ -63,6 +64,7 @@ function LibraryPageContent() {
   const [bookmarkPendingId, setBookmarkPendingId] = useState<string | null>(null);
   const [showBookmarkedOnly, setShowBookmarkedOnly] = useState(false);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [viewportWidth, setViewportWidth] = useState<number | null>(null);
   const previousFiltersRef = useRef<Record<string, string | boolean> | null>(null);
   const previousKeywordRef = useRef("");
   // Use a deterministic product seed to avoid server/client ordering differences
@@ -221,6 +223,19 @@ function LibraryPageContent() {
   }, [gateState, keyword]);
 
   useEffect(() => {
+    const syncViewportWidth = () => {
+      setViewportWidth(window.innerWidth);
+    };
+
+    syncViewportWidth();
+    window.addEventListener("resize", syncViewportWidth);
+
+    return () => {
+      window.removeEventListener("resize", syncViewportWidth);
+    };
+  }, []);
+
+  useEffect(() => {
     setVisibleCount(PAGE_SIZE);
   }, [keyword, selectedContentLanguage, selectedPlatform, selectedSubtitleAvailability, showBookmarkedOnly]);
 
@@ -250,7 +265,7 @@ function LibraryPageContent() {
       const hitSubtitle = selectedSubtitleAvailability === "all"
         ? true
         : selectedSubtitleAvailability === "english"
-          ? itemSubtitleAvailability === "english" || itemSubtitleAvailability === "not_needed"
+          ? itemSubtitleAvailability === "english" || itemSubtitleAvailability === "zh_en" || itemSubtitleAvailability === "not_needed"
           : itemSubtitleAvailability === "none";
       const hitBookmark = showBookmarkedOnly ? bookmarkedIds.includes(item.id) : true;
       return hitKeyword && hitPlatform && hitContentLanguage && hitSubtitle && hitBookmark;
@@ -271,6 +286,11 @@ function LibraryPageContent() {
     [filtered, visibleCount]
   );
   const hasMore = visibleItems.length < filtered.length;
+  const useCompactMobileLibraryLayout = viewportWidth !== null && viewportWidth <= 480;
+  const useXiaohongshuMobileMasonry = shouldUseMobileXiaohongshuMasonry({
+    selectedPlatform,
+    viewportWidth
+  });
 
   useEffect(() => {
     if (gateState !== "ready") {
@@ -353,11 +373,28 @@ function LibraryPageContent() {
 
   return (
     <PageContainer>
-      <div className="space-y-5">
-        <div>
-          <h1 className="text-3xl font-black text-slate-900">{t("library.title")}</h1>
-          <p className="mt-2 text-slate-600">{t("library.subtitle")}</p>
-        </div>
+      <div className={cn("space-y-5", useCompactMobileLibraryLayout && "space-y-3")}>
+        {useCompactMobileLibraryLayout ? (
+          <div data-testid="library-mobile-header" className="-mx-4 px-4 pt-1">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-700/75">Library</p>
+                <h1 className="mt-1 text-[1.75rem] font-black leading-none text-slate-900">{t("library.title")}</h1>
+              </div>
+              <Link
+                href="/profile"
+                className="inline-flex min-h-9 shrink-0 items-center rounded-full border border-[var(--line)] bg-white px-3 text-xs font-semibold text-slate-600"
+              >
+                {t("nav.profile")}
+              </Link>
+            </div>
+          </div>
+        ) : (
+          <div>
+            <h1 className="text-3xl font-black text-slate-900">{t("library.title")}</h1>
+            <p className="mt-2 text-slate-600">{t("library.subtitle")}</p>
+          </div>
+        )}
 
         <LibraryFilters
           keywordDraft={keywordDraft}
@@ -372,20 +409,34 @@ function LibraryPageContent() {
           showBookmarkedOnly={showBookmarkedOnly}
           setShowBookmarkedOnly={setShowBookmarkedOnly}
           bookmarkFilterEnabled={Boolean(user?.id && configured)}
+          compactMobile={useCompactMobileLibraryLayout}
         />
 
         {filtered.length > 0 ? (
           <div className="space-y-6">
-            <div className="grid items-stretch gap-4 md:grid-cols-2">
+            <div
+              data-testid="library-results"
+              data-layout={useXiaohongshuMobileMasonry ? "xhs-mobile-masonry" : "default"}
+              className={cn(
+                useXiaohongshuMobileMasonry
+                  ? "columns-2 [column-gap:10px]"
+                  : "grid items-stretch gap-3 md:grid-cols-2 md:gap-4"
+              )}
+            >
               {visibleItems.map((item) => (
-                <ContentCard
+                <div
                   key={item.id}
-                  item={item}
-                  source="library"
-                  bookmarked={bookmarkedIds.includes(item.id)}
-                  bookmarkLoading={bookmarkPendingId === item.id}
-                  onToggleBookmark={() => void handleToggleBookmark(item.id)}
-                />
+                  className={cn(useXiaohongshuMobileMasonry ? "mb-3 break-inside-avoid" : "h-full")}
+                >
+                  <ContentCard
+                    item={item}
+                    source="library"
+                    bookmarked={bookmarkedIds.includes(item.id)}
+                    bookmarkLoading={bookmarkPendingId === item.id}
+                    onToggleBookmark={() => void handleToggleBookmark(item.id)}
+                    layoutVariant={useXiaohongshuMobileMasonry && item.platform === "Xiaohongshu" ? "xhs-mobile-note" : "default"}
+                  />
+                </div>
               ))}
             </div>
 

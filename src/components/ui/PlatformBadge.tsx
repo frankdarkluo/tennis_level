@@ -1,5 +1,9 @@
+"use client";
+
 import { HTMLAttributes } from "react";
 import { CreatorPlatformName } from "@/types/creator";
+import { getPlatformDisplayName } from "@/lib/content/display";
+import { useI18n } from "@/lib/i18n/config";
 import { cn } from "@/lib/utils";
 
 export type PlatformName = CreatorPlatformName;
@@ -123,6 +127,7 @@ export function PlatformBadge(
     ...props
   }: HTMLAttributes<HTMLSpanElement> & { platform: PlatformName; size?: PlatformBadgeSize }
 ) {
+  const { language } = useI18n();
   const style = platformStyles[platform];
   const sizeStyle = sizeStyles[size];
 
@@ -137,7 +142,7 @@ export function PlatformBadge(
       {...props}
     >
       <PlatformIcon platform={platform} className={style.icon} size={size} />
-      <span>{platform}</span>
+      <span>{getPlatformDisplayName(platform, language)}</span>
     </span>
   );
 }

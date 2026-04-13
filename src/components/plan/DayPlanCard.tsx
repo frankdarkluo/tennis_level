@@ -14,8 +14,10 @@ import {
   getContentLanguageTag,
   getContentPrimaryTitle,
   getContentSecondaryTitle,
-  getSubtitleAvailability
+  getSubtitleAvailability,
+  getSubtitleAvailabilityTranslationKey
 } from "@/lib/content/display";
+import { getPreferredOutboundUrl } from "@/lib/content/outbound";
 import { logEvent } from "@/lib/eventLogger";
 import { useI18n } from "@/lib/i18n/config";
 import { getThumbnail } from "@/lib/thumbnail";
@@ -247,13 +249,7 @@ export function DayPlanCard({
   const focusLine = featuredContent ? getContentFocusLine(featuredContent, language) : null;
   const contentLanguage = featuredContent ? getContentLanguageTag(featuredContent) : null;
   const subtitleAvailability = featuredContent ? getSubtitleAvailability(featuredContent) : null;
-  const subtitleLabel = subtitleAvailability === "english"
-    ? t("content.subtitle.yes")
-    : subtitleAvailability === "none"
-      ? t("content.subtitle.no")
-      : subtitleAvailability === "not_needed"
-        ? t("content.subtitle.notNeeded")
-        : t("content.subtitle.unknown");
+  const subtitleLabel = subtitleAvailability ? t(getSubtitleAvailabilityTranslationKey(subtitleAvailability)) : null;
 
   const featuredContentCard = featuredContent ? (
     <a
@@ -261,12 +257,21 @@ export function DayPlanCard({
       target="_blank"
       rel="noreferrer"
       className="block rounded-2xl border border-[var(--line)] bg-white p-3 transition hover:border-brand-200"
-      onClick={() => {
+      onClick={(event) => {
         logEvent("content.outbound_clicked", {
           contentId: featuredContent.id,
           platform: featuredContent.platform,
           sourceContext: "plan"
         }, { page: "/plan" });
+
+        const outbound = getPreferredOutboundUrl(featuredContent, {
+          userAgent: typeof navigator === "undefined" ? undefined : navigator.userAgent
+        });
+
+        if (outbound.href !== featuredContent.url && typeof window !== "undefined") {
+          event.preventDefault();
+          window.location.assign(outbound.href);
+        }
       }}
     >
       <div className="flex gap-3">

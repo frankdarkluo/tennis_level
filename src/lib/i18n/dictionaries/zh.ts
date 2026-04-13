@@ -341,6 +341,8 @@ const zh = {
   "content.lang.zh": "ZH",
   "content.lang.en": "EN",
   "content.subtitle.yes": "有英文字幕",
+  "content.subtitle.zh": "中文字幕",
+  "content.subtitle.zhEn": "中英字幕",
   "content.subtitle.no": "无英文字幕",
   "content.subtitle.unknown": "字幕未知",
   "content.subtitle.notNeeded": "原生英文",
