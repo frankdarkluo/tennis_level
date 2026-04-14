@@ -72,7 +72,7 @@ function ViewsIcon() {
   );
 }
 
-const STANDARD_META_BADGE_CLASS = "bg-slate-100 px-1.0 py-0.5 text-[9px] font-semibold leading-[1.05] text-slate-700";
+const STANDARD_META_BADGE_CLASS = "bg-slate-100 px-1.0 py-0.5 text-[7px] font-semibold leading-[1.05] text-slate-700";
 const WRAPPING_META_BADGE_CLASS = `${STANDARD_META_BADGE_CLASS} max-w-full whitespace-normal break-words text-center`;
 
 export function ContentCard({
@@ -186,7 +186,7 @@ export function ContentCard({
             <div className="space-y-1">
               <h3 className={cn(
                 "line-clamp-2 text-[0.96rem] font-bold leading-[1.35] text-slate-900 sm:text-[1rem]",
-                isXhsMobileNote && "text-[0.7rem] font-semibold leading-[1.25] sm:text-[0.84rem]"
+                isXhsMobileNote && "text-[0.65rem] font-semibold leading-[1.25] sm:text-[0.84rem]"
               )}>
                 {primaryTitle}
               </h3>
@@ -200,7 +200,7 @@ export function ContentCard({
                   </p>
                 </div>
               ) : null}
-              <p className={cn("text-sm leading-6 text-slate-600", isXhsMobileNote && "line-clamp-1 text-[10px] leading-4.5 text-slate-500")}>
+              <p className={cn("text-sm leading-6 text-slate-600", isXhsMobileNote && "line-clamp-1 text-[7px] leading-4.5 text-slate-500")}>
                 {creatorName}
               </p>
             </div>

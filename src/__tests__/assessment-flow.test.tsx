@@ -5,7 +5,7 @@ import { ASSESSMENT_QUESTIONS, PROFILE_QUESTION_IDS } from "@/data/assessmentQue
 import { calculateAssessmentResult } from "@/lib/assessment";
 import { normalizeDraftStepIndex } from "@/lib/assessmentDraft";
 import { ResultSummary } from "@/components/assessment/ResultSummary";
-import { ASSESSMENT_DRAFT_STORAGE_KEY } from "@/lib/utils";
+import { ASSESSMENT_DRAFT_STORAGE_KEY, ASSESSMENT_STORAGE_KEY } from "@/lib/utils";
 
 const { mockPush, mockReplace, mockPrefetch, mockRouter } = vi.hoisted(() => {
   const mockPush = vi.fn();
@@ -182,6 +182,33 @@ describe("assessment flow and result summary", () => {
     expect(screen.getAllByRole("button").length).toBeGreaterThanOrEqual(4);
     expect(screen.getByText("稳定防守型")).toBeInTheDocument();
     expect(screen.getByText("网前压迫型")).toBeInTheDocument();
+  });
+
+  it("allows users to restart the assessment when retake=1 even with a completed stored result", async () => {
+    const storedResult = calculateAssessmentResult({
+      rally_stability: "rally_3",
+      forehand_weapon: "forehand_4",
+      backhand_slice_reliability: "backhand_slice_3",
+      serve_quality: "serve_1",
+      return_quality: "return_3",
+      movement_recovery: "movement_2",
+      net_transition_volley: "net_3",
+      overhead_highball: "overhead_3",
+      pressure_matchplay: "pressure_3",
+      point_construction: "tactics_2",
+      play_style_profile: "baseline_attack",
+      play_context_modifier: "singles_standard"
+    });
+
+    window.localStorage.setItem(ASSESSMENT_STORAGE_KEY, JSON.stringify(storedResult));
+    window.history.pushState({}, "", "/assessment?retake=1");
+
+    const { default: AssessmentPage } = await import("@/app/assessment/page");
+
+    render(<AssessmentPage />);
+
+    expect(await screen.findByRole("button", { name: "开始评估" })).toBeInTheDocument();
+    expect(mockReplace).not.toHaveBeenCalledWith("/assessment/result");
   });
 
   it("treats legacy branch-era draft answers as stale and keeps valid 10+2 drafts aligned", () => {

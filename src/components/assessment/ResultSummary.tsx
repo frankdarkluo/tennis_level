@@ -15,7 +15,7 @@ export function ResultSummary({ result }: { result: AssessmentResult }) {
 
   if (!result.profileVector) {
     return (
-      <Card className="space-y-2">
+      <Card className="space-y-2 px-5 py-5 sm:px-6 sm:py-6">
         <h1 className="text-2xl font-black text-slate-900">{t("assessment.empty.title")}</h1>
         <p className="text-slate-600">{t("assessment.empty.subtitle")}</p>
       </Card>
@@ -36,38 +36,38 @@ export function ResultSummary({ result }: { result: AssessmentResult }) {
     .map((dimension) => getDimensionLabel(dimension, language));
 
   return (
-    <Card className="space-y-5">
+    <Card className="space-y-4 px-5 py-5 sm:space-y-5 sm:px-6 sm:py-6">
       <div className="space-y-2">
         <h1 className="text-2xl font-black text-slate-900">{t("assessment.result.headline")}</h1>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-2">
-        <div className="rounded-2xl bg-[var(--surface-soft)] p-4">
+      <div className="grid gap-2 sm:gap-3 md:grid-cols-2">
+        <div className="rounded-2xl bg-[var(--surface-soft)] p-3 md:p-4">
           <p className="text-sm font-semibold text-brand-700">{t("assessment.result.level")}</p>
           <p className="mt-2 text-2xl font-black text-slate-900">{rangeLabel}</p>
           <p className="mt-2 text-sm leading-6 text-slate-600">{profileVector.summary.oneLineLevelSummary}</p>
         </div>
 
-        <div className="rounded-2xl border border-[var(--line)] bg-white p-4">
+        <div className="rounded-2xl bg-white px-0 py-1 md:p-4">
           <p className="text-sm font-semibold text-brand-700">{t("assessment.result.headlineLabel")}</p>
           <p className="mt-2 text-base font-semibold text-slate-900">{profileVector.summary.headline}</p>
         </div>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-3">
-        <div className="rounded-2xl border border-[var(--line)] bg-white p-4">
+      <div className="grid gap-2 sm:gap-3 md:grid-cols-3">
+        <div className="rounded-2xl bg-white px-0 py-1 md:p-4">
           <p className="text-sm font-semibold text-slate-700">{t("assessment.result.planHintLabel")}</p>
           <p className="mt-2 text-sm leading-6 text-slate-700">{profileVector.summary.oneLinePlanHint}</p>
         </div>
 
-        <div className="rounded-2xl border border-[var(--line)] bg-white p-4">
+        <div className="rounded-2xl bg-white px-0 py-1 md:p-4">
           <p className="text-sm font-semibold text-slate-700">{t("assessment.result.styleLabel")}</p>
           <p className="mt-2 text-sm font-semibold text-slate-900">
             {getPlayStyleLabel(profileVector.playStyle, language)}
           </p>
         </div>
 
-        <div className="rounded-2xl border border-[var(--line)] bg-white p-4">
+        <div className="rounded-2xl bg-white px-0 py-1 md:p-4">
           <p className="text-sm font-semibold text-slate-700">{t("assessment.result.contextLabel")}</p>
           <p className="mt-2 text-sm font-semibold text-slate-900">
             {getPlayContextLabel(profileVector.playContext, language)}
@@ -75,10 +75,10 @@ export function ResultSummary({ result }: { result: AssessmentResult }) {
         </div>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-2">
-        <div className="rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4">
+      <div className="grid gap-2 sm:gap-3 md:grid-cols-2">
+        <div className="rounded-2xl bg-emerald-50/60 p-3 md:p-4">
           <p className="text-sm font-semibold text-emerald-700">{t("assessment.result.strongLabel")}</p>
-          <div className="mt-3 flex flex-wrap gap-2">
+          <div className="mt-2 flex flex-wrap gap-2 md:mt-3">
             {strongDimensions.length > 0 ? (
               strongDimensions.map((label) => (
                 <span
@@ -94,9 +94,9 @@ export function ResultSummary({ result }: { result: AssessmentResult }) {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-rose-100 bg-rose-50/60 p-4">
+        <div className="rounded-2xl bg-rose-50/60 p-3 md:p-4">
           <p className="text-sm font-semibold text-rose-700">{t("assessment.result.weakLabel")}</p>
-          <div className="mt-3 flex flex-wrap gap-2">
+          <div className="mt-2 flex flex-wrap gap-2 md:mt-3">
             {weakDimensions.length > 0 ? (
               weakDimensions.map((label) => (
                 <span

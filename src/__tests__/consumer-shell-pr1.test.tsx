@@ -215,7 +215,7 @@ describe("consumer shell PR1", () => {
 
     render(React.createElement(Header));
 
-    expect(screen.getAllByRole("link", { name: "问题诊断" }).length).toBeGreaterThan(1);
-    expect(screen.getAllByRole("link", { name: "训练计划" }).length).toBeGreaterThan(1);
+    expect(screen.getByRole("link", { name: "问题诊断" })).toHaveAttribute("href", "/diagnose");
+    expect(screen.getByRole("link", { name: "训练计划" })).toHaveAttribute("href", "/plan");
   });
 });

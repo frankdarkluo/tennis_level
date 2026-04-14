@@ -112,7 +112,7 @@ export default function AssessmentPage() {
   const [coreIndex, setCoreIndex] = useState(0);
   const [profileIndex, setProfileIndex] = useState(0);
   const [draftRestored, setDraftRestored] = useState(false);
-  const [retakeRequested, setRetakeRequested] = useState(false);
+  const [retakeRequested, setRetakeRequested] = useState<boolean | null>(null);
 
   const answersRef = useRef<AssessmentAnswerMap>({});
   const startedRef = useRef(false);
@@ -140,7 +140,7 @@ export default function AssessmentPage() {
   }, []);
 
   useEffect(() => {
-    if (loading) {
+    if (loading || retakeRequested === null) {
       return;
     }
 

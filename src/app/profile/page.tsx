@@ -51,12 +51,12 @@ function EmptyState({
   actionLabel: string;
 }) {
   return (
-    <Card className="space-y-3">
+    <Card className="space-y-3 px-5 py-4 sm:px-6 sm:py-5">
       <div>
         <h2 className="text-lg font-bold text-slate-900">{title}</h2>
         <p className="mt-1 text-sm text-slate-600">{description}</p>
       </div>
-      <Link href={href}>
+      <Link href={href} className="pt-1">
         <Button variant="secondary">{actionLabel}</Button>
       </Link>
     </Card>
@@ -298,7 +298,7 @@ export default function ProfilePage() {
           {assessmentLoading ? (
             <SectionSkeleton lines={4} />
           ) : localizedAssessmentResult ? (
-            <Card className="space-y-4">
+            <Card className="space-y-5 px-5 py-4 sm:px-6 sm:py-5">
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <h2 className="text-lg font-bold text-slate-900">{t("profile.assessment.title")}</h2>

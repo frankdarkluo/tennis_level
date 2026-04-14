@@ -37,7 +37,7 @@ export function SkillBreakdown({ result }: { result: AssessmentResult }) {
           return (
             <div
               key={dimension.key}
-              className="rounded-2xl border border-[var(--line)] bg-white px-4 py-3"
+              className="rounded-2xl bg-white px-4 py-3"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="space-y-1">

@@ -71,15 +71,6 @@ export function LibraryFilters(props: LibraryFiltersProps) {
           </select>
           <select
             className="min-h-9 w-auto shrink-0 rounded-full border border-[var(--line)] bg-white px-4 py-2 text-xs font-semibold text-slate-700"
-            value={props.selectedContentLanguage}
-            onChange={(e) => props.setSelectedContentLanguage(e.target.value as LibraryContentLanguageFilter)}
-          >
-            <option value="all">{t("library.filter.languageAll")}</option>
-            <option value="zh">{t("library.filter.languageZh")}</option>
-            <option value="en">{t("library.filter.languageEn")}</option>
-          </select>
-          <select
-            className="min-h-9 w-auto shrink-0 rounded-full border border-[var(--line)] bg-white px-4 py-2 text-xs font-semibold text-slate-700"
             value={props.selectedSubtitleAvailability}
             onChange={(e) => props.setSelectedSubtitleAvailability(e.target.value as LibrarySubtitleFilter)}
           >

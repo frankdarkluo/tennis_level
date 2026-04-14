@@ -432,7 +432,7 @@ function LibraryPageContent() {
               {visibleItems.map((item) => (
                 <div
                   key={item.id}
-                  className={cn(useXiaohongshuMobileMasonry ? "mb-3 break-inside-avoid" : "h-full")}
+                  className={cn(useXiaohongshuMobileMasonry ? "mb-3 inline-block w-full break-inside-avoid align-top" : "h-full")}
                 >
                   <ContentCard
                     item={item}

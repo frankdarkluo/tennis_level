@@ -14,6 +14,22 @@ type AuthContextValue = {
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
+const FALLBACK_PUBLIC_AUTH_ORIGIN = "https://tennis-decider-staging.vercel.app";
+
+function getMagicLinkRedirectUrl() {
+  const configuredOrigin = process.env.NEXT_PUBLIC_AUTH_REDIRECT_ORIGIN?.trim().replace(/\/$/, "");
+  if (configuredOrigin) {
+    return `${configuredOrigin}/auth/callback`;
+  }
+
+  if (typeof window === "undefined") {
+    return `${FALLBACK_PUBLIC_AUTH_ORIGIN}/auth/callback`;
+  }
+
+  const currentOrigin = window.location.origin.replace(/\/$/, "");
+  const resolvedOrigin = window.location.protocol === "https:" ? currentOrigin : FALLBACK_PUBLIC_AUTH_ORIGIN;
+  return `${resolvedOrigin}/auth/callback`;
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -61,10 +77,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { error: "还没配置登录服务，请先补上 Supabase 环境变量。" };
     }
 
-    const redirectTo = typeof window === "undefined" ? undefined : `${window.location.origin}/auth/callback`;
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: redirectTo }
+      options: { emailRedirectTo: getMagicLinkRedirectUrl() }
     });
 
     if (error) {
