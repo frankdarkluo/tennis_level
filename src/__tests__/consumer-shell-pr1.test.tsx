@@ -156,13 +156,14 @@ describe("consumer shell PR1", () => {
     cleanup();
   });
 
-  it("shows a diagnose-first consumer landing even without a saved assessment", async () => {
+  it("shows the home entry chain for diagnose and assessment CTAs", async () => {
     const { default: HomePage } = await import("@/app/page");
 
     render(React.createElement(HomePage));
 
     expect(await screen.findByText("一句话，帮你找到下一步该练什么")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "立即诊断" })).toHaveAttribute("href", "/diagnose?q=");
+    expect(screen.getByRole("link", { name: "想更准？先做 1 分钟评估" })).toHaveAttribute("href", "/assessment");
     expect(screen.queryByText("先完成一次水平评估")).not.toBeInTheDocument();
   });
 
