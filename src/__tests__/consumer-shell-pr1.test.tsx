@@ -209,13 +209,12 @@ describe("consumer shell PR1", () => {
     expect(container.querySelector('a[href="/admin/export"]')).toBeNull();
   });
 
-  it("keeps consumer shell navigation visible on consumer routes", async () => {
+  it("keeps consumer secondary navigation visible on consumer routes", async () => {
     const { Header } = await import("@/components/layout/Header");
-    const { BottomNav } = await import("@/components/layout/BottomNav");
 
-    render(React.createElement("div", null, React.createElement(Header), React.createElement(BottomNav)));
+    render(React.createElement(Header));
 
-    expect(screen.getAllByRole("link", { name: "首页" }).length).toBeGreaterThan(0);
-    expect(screen.getAllByRole("link", { name: "水平评估" }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("link", { name: "问题诊断" }).length).toBeGreaterThan(1);
+    expect(screen.getAllByRole("link", { name: "训练计划" }).length).toBeGreaterThan(1);
   });
 });

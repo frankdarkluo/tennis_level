@@ -6,11 +6,19 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useAuthModal } from "@/components/auth/AuthModalProvider";
-import { consumerNavItems, shouldShowConsumerShell } from "@/lib/appMode";
+import { consumerSecondaryNavItems, shouldShowConsumerShell } from "@/lib/appMode";
 import { logEvent } from "@/lib/eventLogger";
 import { useI18n } from "@/lib/i18n/config";
 import { cn } from "@/lib/utils";
 import { LocaleValue } from "@/lib/i18n/config";
+
+function isActivePath(pathname: string | null, href: string) {
+  if (!pathname) {
+    return false;
+  }
+
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
 
 export function Header() {
   const pathname = usePathname();
@@ -19,7 +27,6 @@ export function Header() {
   const { language, t, setLanguage, canChangeLanguage } = useI18n();
   const [isSigningOut, setIsSigningOut] = useState(false);
   const showConsumerNav = shouldShowConsumerShell(pathname);
-  const visibleNavItems = showConsumerNav ? consumerNavItems : [];
 
   async function handleSignOut() {
     setIsSigningOut(true);
@@ -83,22 +90,28 @@ export function Header() {
           />
         </Link>
 
-        <nav className="hidden min-w-0 items-center gap-0.5 md:flex md:ml-4 lg:ml-6 lg:gap-1">
-          {visibleNavItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "relative whitespace-nowrap rounded-lg px-2.5 py-1.5 text-[13px] transition lg:px-3 lg:py-2 lg:text-sm",
-                pathname === item.href
-                  ? "font-semibold text-brand-700 after:absolute after:bottom-0 after:left-1/2 after:h-[2px] after:w-3/5 after:-translate-x-1/2 after:rounded-full after:bg-brand-400 after:content-['']"
-                  : "font-medium text-slate-500 hover:bg-slate-50 hover:text-slate-800"
-              )}
-            >
-              {t(item.labelKey)}
-            </Link>
-          ))}
-        </nav>
+        {showConsumerNav ? (
+          <nav className="hidden min-w-0 items-center gap-0.5 md:flex md:ml-4 lg:ml-6 lg:gap-1">
+            {consumerSecondaryNavItems.map((item) => {
+              const active = isActivePath(pathname, item.href);
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "relative whitespace-nowrap rounded-lg px-2.5 py-1.5 text-[13px] transition lg:px-3 lg:py-2 lg:text-sm",
+                    active
+                      ? "font-semibold text-brand-700 after:absolute after:bottom-0 after:left-1/2 after:h-[2px] after:w-3/5 after:-translate-x-1/2 after:rounded-full after:bg-brand-400 after:content-['']"
+                      : "font-medium text-slate-500 hover:bg-slate-50 hover:text-slate-800"
+                  )}
+                >
+                  {t(item.labelKey)}
+                </Link>
+              );
+            })}
+          </nav>
+        ) : null}
 
         <div className="hidden shrink-0 items-center gap-1 md:flex lg:gap-1.5">
           {languageToggle}
@@ -143,6 +156,30 @@ export function Header() {
           ) : null}
         </div>
       </div>
+
+      {showConsumerNav ? (
+        <nav className="border-t border-[var(--line)] bg-white/85 md:hidden">
+          <div className="mx-auto grid w-full max-w-[1480px] grid-cols-2 gap-2 px-4 py-2.5">
+            {consumerSecondaryNavItems.map((item) => {
+              const active = isActivePath(pathname, item.href);
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  aria-current={active ? "page" : undefined}
+                  className={cn(
+                    "flex min-h-12 items-center justify-center rounded-2xl px-2 text-center text-[15px] font-semibold transition",
+                    active ? "bg-brand-50 text-brand-700" : "text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+                  )}
+                >
+                  {t(item.labelKey)}
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
+      ) : null}
     </header>
   );
 }
