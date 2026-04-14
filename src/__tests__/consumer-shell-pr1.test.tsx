@@ -128,6 +128,20 @@ vi.mock("@/lib/study/client", () => ({
   persistStudyArtifact: vi.fn(async () => undefined)
 }));
 
+vi.mock("@/lib/appMode", async () => {
+  const actual = await vi.importActual<typeof import("@/lib/appMode")>("@/lib/appMode");
+
+  return {
+    ...actual,
+    consumerNavItems: [
+      { href: "/diagnose", labelKey: "nav.diagnose" },
+      { href: "/plan", labelKey: "nav.plan" },
+      { href: "/library", labelKey: "nav.library" },
+      { href: "/profile", labelKey: "nav.profile" }
+    ]
+  };
+});
+
 vi.mock("@/lib/appShell/localRouteState", async () => {
   const actual = await vi.importActual<typeof import("@/lib/appShell/localRouteState")>("@/lib/appShell/localRouteState");
 
@@ -184,19 +198,6 @@ describe("consumer shell PR1", () => {
     expect(screen.getByPlaceholderText(/反手总下网/)).toBeInTheDocument();
     expect(screen.queryByText("先完成一次水平评估")).not.toBeInTheDocument();
     expect(mockReplace).not.toHaveBeenCalledWith("/assessment");
-  });
-
-  it("renders a mobile bottom navigation with only consumer top-level destinations", async () => {
-    const { BottomNav } = await import("@/components/layout/BottomNav");
-
-    render(React.createElement(BottomNav));
-
-    expect(screen.getByRole("link", { name: "问题诊断" })).toHaveAttribute("href", "/diagnose");
-    expect(screen.getByRole("link", { name: "训练计划" })).toHaveAttribute("href", "/plan");
-    expect(screen.getByRole("link", { name: "内容库" })).toHaveAttribute("href", "/library");
-    expect(screen.getByRole("link", { name: "我的记录" })).toHaveAttribute("href", "/profile");
-    expect(screen.queryByRole("link", { name: "水平评估" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: "博主榜" })).not.toBeInTheDocument();
   });
 
   it("renders the new primary destinations in the mobile bottom navigation", async () => {

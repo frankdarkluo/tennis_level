@@ -20,11 +20,6 @@ export const consumerSecondaryNavItems: ReadonlyArray<{ href: string; labelKey: 
   { href: "/plan", labelKey: "nav.plan" }
 ];
 
-export const consumerNavItems: ReadonlyArray<{
-  href: string;
-  labelKey: ConsumerPrimaryNavLabelKey | ConsumerSecondaryNavLabelKey;
-}> = [...consumerPrimaryNavItems, ...consumerSecondaryNavItems];
-
 export function shouldShowConsumerShell(pathname: string | null | undefined) {
   void pathname;
   return true;
