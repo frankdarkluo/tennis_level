@@ -43,7 +43,7 @@ export function LibraryFilters(props: LibraryFiltersProps) {
           <Input
             placeholder={t("library.searchPlaceholder")}
             value={props.keywordDraft}
-            className="min-h-10 rounded-full px-4 text-sm"
+            className="min-h-10 flex-[1_1_0%] rounded-full px-4 text-sm"
             onChange={(e) => props.setKeywordDraft(e.target.value)}
             onKeyDown={(event) => {
               if (event.key === "Enter") {
@@ -51,7 +51,11 @@ export function LibraryFilters(props: LibraryFiltersProps) {
               }
             }}
           />
-          <Button type="button" variant="secondary" className="min-h-10 rounded-full px-4" onClick={props.onSearch}>
+          <Button
+            type="button"
+            className="min-h-10 shrink-0 rounded-full bg-brand-500 px-5 text-sm font-semibold text-white hover:bg-brand-600"
+            onClick={props.onSearch}
+          >
             {t("library.searchAction")}
           </Button>
         </div>

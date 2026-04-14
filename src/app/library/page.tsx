@@ -286,6 +286,16 @@ function LibraryPageContent() {
     () => filtered.slice(0, visibleCount),
     [filtered, visibleCount]
   );
+  const xiaohongshuColumns = useMemo(() => {
+    const leftColumn: typeof visibleItems = [];
+    const rightColumn: typeof visibleItems = [];
+
+    visibleItems.forEach((item, index) => {
+      (index % 2 === 0 ? leftColumn : rightColumn).push(item);
+    });
+
+    return [leftColumn, rightColumn] as const;
+  }, [visibleItems]);
   const hasMore = visibleItems.length < filtered.length;
   const isMobilePreview = searchParams.get("mobilePreview") === "1";
   const useCompactMobileLibraryLayout = shouldUseCompactMobileLibraryLayout({
@@ -355,6 +365,20 @@ function LibraryPageContent() {
     setBookmarkPendingId(null);
   };
 
+  function renderLibraryCard(item: (typeof visibleItems)[number]) {
+    return (
+      <ContentCard
+        key={item.id}
+        item={item}
+        source="library"
+        bookmarked={bookmarkedIds.includes(item.id)}
+        bookmarkLoading={bookmarkPendingId === item.id}
+        onToggleBookmark={() => void handleToggleBookmark(item.id)}
+        layoutVariant={useXiaohongshuMobileMasonry && item.platform === "Xiaohongshu" ? "xhs-mobile-note" : "default"}
+      />
+    );
+  }
+
   if (gateState === "checking") {
     return (
       <PageContainer>
@@ -382,17 +406,9 @@ function LibraryPageContent() {
       <div className={cn("space-y-5", useCompactMobileLibraryLayout && "space-y-3")}>
         {useCompactMobileLibraryLayout ? (
           <div data-testid="library-mobile-header" className="-mx-4 px-4 pt-1">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-700/75">Library</p>
-                <h1 className="mt-1 text-[1.75rem] font-black leading-none text-slate-900">{t("library.title")}</h1>
-              </div>
-              <Link
-                href="/profile"
-                className="inline-flex min-h-9 shrink-0 items-center rounded-full border border-[var(--line)] bg-white px-3 text-xs font-semibold text-slate-600"
-              >
-                {t("nav.profile")}
-              </Link>
+            <div className="min-w-0">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-700/75">Library</p>
+              <h1 className="mt-1 text-[1.75rem] font-black leading-none text-slate-900">{t("library.title")}</h1>
             </div>
           </div>
         ) : (
@@ -420,31 +436,31 @@ function LibraryPageContent() {
 
         {filtered.length > 0 ? (
           <div className="space-y-6">
-            <div
-              data-testid="library-results"
-              data-layout={useXiaohongshuMobileMasonry ? "xhs-mobile-masonry" : "default"}
-              className={cn(
-                useXiaohongshuMobileMasonry
-                  ? "columns-2 [column-gap:10px]"
-                  : "grid items-stretch gap-3 md:grid-cols-2 md:gap-4"
-              )}
-            >
-              {visibleItems.map((item) => (
-                <div
-                  key={item.id}
-                  className={cn(useXiaohongshuMobileMasonry ? "mb-3 inline-block w-full break-inside-avoid align-top" : "h-full")}
-                >
-                  <ContentCard
-                    item={item}
-                    source="library"
-                    bookmarked={bookmarkedIds.includes(item.id)}
-                    bookmarkLoading={bookmarkPendingId === item.id}
-                    onToggleBookmark={() => void handleToggleBookmark(item.id)}
-                    layoutVariant={useXiaohongshuMobileMasonry && item.platform === "Xiaohongshu" ? "xhs-mobile-note" : "default"}
-                  />
-                </div>
-              ))}
-            </div>
+            {useXiaohongshuMobileMasonry ? (
+              <div
+                data-testid="library-results"
+                data-layout="xhs-mobile-masonry"
+                className="grid grid-cols-2 items-start gap-[10px]"
+              >
+                {xiaohongshuColumns.map((column, columnIndex) => (
+                  <div key={columnIndex} className="flex flex-col gap-3">
+                    {column.map((item) => renderLibraryCard(item))}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div
+                data-testid="library-results"
+                data-layout="default"
+                className="grid items-stretch gap-3 md:grid-cols-2 md:gap-4"
+              >
+                {visibleItems.map((item) => (
+                  <div key={item.id} className="h-full">
+                    {renderLibraryCard(item)}
+                  </div>
+                ))}
+              </div>
+            )}
 
             {hasMore ? (
               <div className="flex justify-center">

@@ -72,8 +72,9 @@ function ViewsIcon() {
   );
 }
 
-const STANDARD_META_BADGE_CLASS = "bg-slate-100 px-1.0 py-0.5 text-[7px] font-semibold leading-[1.05] text-slate-700";
-const WRAPPING_META_BADGE_CLASS = `${STANDARD_META_BADGE_CLASS} max-w-full whitespace-normal break-words text-center`;
+const STANDARD_META_BADGE_CLASS = "bg-slate-100 px-1.0 py-0.5 text-[2px] font-semibold leading-[1] text-slate-700";
+const NOTE_META_BADGE_CLASS = "bg-slate-100 px-[3px] py-[3px] text-[2px] font-semibold leading-[1] text-slate-700";
+const WRAPPING_NOTE_META_BADGE_CLASS = `${NOTE_META_BADGE_CLASS} max-w-full whitespace-normal break-words text-center`;
 
 export function ContentCard({
   item,
@@ -102,6 +103,12 @@ export function ContentCard({
     surface: isXhsMobileNote ? "library-xhs-note" : "library-card",
     platform: item.platform
   });
+  const titleClassName = isXhsMobileNote
+    ? "line-clamp-2 text-[12px] font-semibold leading-[1.25] text-slate-900"
+    : "line-clamp-2 text-[0.96rem] font-bold leading-[1.35] text-slate-900 sm:text-[1rem]";
+  const creatorClassName = isXhsMobileNote
+    ? "line-clamp-1 text-[12px] leading-4 text-slate-500"
+    : "text-sm leading-6 text-slate-600";
 
   return (
     <Card
@@ -157,15 +164,15 @@ export function ContentCard({
             </span>
           ) : null}
         </div>
-        <div className={cn("flex flex-1 flex-col px-5 pt-5 pb-0", isXhsMobileNote && "px-0.5 pt-0.5 pb-1.5")}>
-          <div className={cn("space-y-2.5", isXhsMobileNote && "space-y-2")}>
+        <div className={cn("flex flex-1 flex-col px-2 pt-1 pb-0", isXhsMobileNote && "px-0 pr-0.0 pt-0 pb-1")}>
+          <div className={cn("space-y-2.0", isXhsMobileNote && "space-y-1")}>
             {isXhsMobileNote ? (
-              <div className="flex flex-wrap items-start gap-2">
+              <div className="flex flex-wrap items-start gap-1">
                 {noteMetaChips.map((chip) => (
                   <Badge
                     key={chip}
                     data-testid="content-card-meta-chip"
-                    className={WRAPPING_META_BADGE_CLASS}
+                    className={WRAPPING_NOTE_META_BADGE_CLASS}
                   >
                     {chip}
                   </Badge>
@@ -183,11 +190,8 @@ export function ContentCard({
                 </Badge>
               </div>
             )}
-            <div className="space-y-1">
-              <h3 className={cn(
-                "line-clamp-2 text-[0.96rem] font-bold leading-[1.35] text-slate-900 sm:text-[1rem]",
-                isXhsMobileNote && "text-[0.65rem] font-semibold leading-[1.25] sm:text-[0.84rem]"
-              )}>
+            <div className={cn("space-y-1", isXhsMobileNote && "space-y-0.5")}>
+              <h3 className={titleClassName}>
                 {primaryTitle}
               </h3>
               {!isXhsMobileNote && secondaryTitle ? (
@@ -200,12 +204,12 @@ export function ContentCard({
                   </p>
                 </div>
               ) : null}
-              <p className={cn("text-sm leading-6 text-slate-600", isXhsMobileNote && "line-clamp-1 text-[7px] leading-4.5 text-slate-500")}>
+              <p className={creatorClassName}>
                 {creatorName}
               </p>
             </div>
           </div>
-          <div className={cn("relative mt-0.5 pr-10", isXhsMobileNote && "mt-1 pr-0")}>
+          <div className={cn("relative mt-0.5 pr-10", isXhsMobileNote && "mt-0 pr-0")}>
             {!isXhsMobileNote && focusLine && focusLine !== primaryTitle ? (
               <p className="min-w-0 text-sm leading-6 text-slate-600">
                 {t("content.targetPrefix")} {focusLine}
@@ -238,8 +242,8 @@ export function ContentCard({
                 data-testid="content-card-note-bookmark"
                 type="button"
                 className={bookmarked
-                  ? "pointer-events-auto absolute bottom-0 right-0 z-20 inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-brand-700"
-                  : "pointer-events-auto absolute bottom-0 right-0 z-20 inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-500"}
+                  ? "pointer-events-auto absolute bottom-[-3px] right-[-8px] z-20 inline-flex h-[30px] w-[30px] items-center justify-center text-brand-700"
+                  : "pointer-events-auto absolute bottom-[-3px] right-[-8px] z-20 inline-flex h-[30px] w-[30px] items-center justify-center text-slate-500"}
                 onClick={(event) => {
                   event.stopPropagation();
                   onToggleBookmark();
@@ -248,7 +252,7 @@ export function ContentCard({
                 aria-pressed={bookmarked}
                 aria-label={bookmarked ? t("content.bookmark.remove") : t("content.bookmark.add")}
               >
-                <BookmarkIcon filled={bookmarked} className="h-[1.1rem] w-[1.1rem]" />
+                <BookmarkIcon filled={bookmarked} className="h-[1.05rem] w-[1.05rem]" />
               </button>
             ) : null}
             {onToggleBookmark && !isXhsMobileNote ? (

@@ -341,7 +341,7 @@ export default function AssessmentPage() {
   if (view === "intro") {
     return (
       <PageContainer>
-        <Card className="mx-auto max-w-3xl space-y-5">
+        <Card className="mx-auto max-w-3xl space-y-5 px-5 py-5 sm:px-6 sm:py-6">
           <div className="space-y-3">
             <h1 className="text-3xl font-black text-slate-900">{t("assessment.title")}</h1>
             <p className="text-slate-600">{t("assessment.subtitle")}</p>
@@ -349,7 +349,7 @@ export default function AssessmentPage() {
               <p className="text-sm text-brand-700">{t("assessment.resumeDraft")}</p>
             ) : null}
           </div>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap justify-center gap-3">
             <Button onClick={startAssessment}>{t("assessment.start")}</Button>
           </div>
         </Card>

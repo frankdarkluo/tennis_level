@@ -16,19 +16,17 @@ type AuthContextValue = {
 const AuthContext = createContext<AuthContextValue | null>(null);
 const FALLBACK_PUBLIC_AUTH_ORIGIN = "https://tennis-decider-staging.vercel.app";
 
+function isLocalAuthOrigin(origin: string) {
+  return /^https?:\/\/(?:localhost|127\.0\.0\.1|0\.0\.0\.0)(?::\d+)?$/i.test(origin);
+}
+
 function getMagicLinkRedirectUrl() {
   const configuredOrigin = process.env.NEXT_PUBLIC_AUTH_REDIRECT_ORIGIN?.trim().replace(/\/$/, "");
-  if (configuredOrigin) {
+  if (configuredOrigin && !isLocalAuthOrigin(configuredOrigin)) {
     return `${configuredOrigin}/auth/callback`;
   }
 
-  if (typeof window === "undefined") {
-    return `${FALLBACK_PUBLIC_AUTH_ORIGIN}/auth/callback`;
-  }
-
-  const currentOrigin = window.location.origin.replace(/\/$/, "");
-  const resolvedOrigin = window.location.protocol === "https:" ? currentOrigin : FALLBACK_PUBLIC_AUTH_ORIGIN;
-  return `${resolvedOrigin}/auth/callback`;
+  return `${FALLBACK_PUBLIC_AUTH_ORIGIN}/auth/callback`;
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {

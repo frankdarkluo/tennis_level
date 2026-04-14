@@ -258,20 +258,22 @@ export default function ProfilePage() {
   if (!user) {
     return (
       <PageContainer>
-        <Card className="mx-auto max-w-2xl space-y-4 text-center">
+        <div className="mx-auto max-w-2xl space-y-4">
           <PageBreadcrumbs items={[{ href: "/", label: t("profile.backHome") }]} />
-          <div>
-            <p className="text-sm font-semibold text-brand-700">{t("profile.title")}</p>
-            <h1 className="mt-2 text-2xl font-black text-slate-900">{t("profile.loginTitle")}</h1>
-            <p className="mt-3 text-sm leading-6 text-slate-600">
-              {t("profile.loginSubtitle")}
-            </p>
-          </div>
-          <div className="flex flex-wrap justify-center gap-2">
-            <Button onClick={() => openLoginModal(t("profile.loginTitle"), "profile")}>{t("profile.loginButton")}</Button>
-            <Link href="/"><Button variant="secondary">{t("plan.backHome")}</Button></Link>
-          </div>
-        </Card>
+          <Card className="space-y-4 px-5 py-5 text-center sm:px-6 sm:py-6">
+            <div>
+              <p className="text-sm font-semibold text-brand-700">{t("profile.title")}</p>
+              <h1 className="mt-2 text-2xl font-black text-slate-900">{t("profile.loginTitle")}</h1>
+              <p className="mt-3 text-sm leading-6 text-slate-600">
+                {t("profile.loginSubtitle")}
+              </p>
+            </div>
+            <div className="flex flex-wrap justify-center gap-2">
+              <Button onClick={() => openLoginModal(t("profile.loginTitle"), "profile")}>{t("profile.loginButton")}</Button>
+              <Link href="/"><Button variant="secondary">{t("plan.backHome")}</Button></Link>
+            </div>
+          </Card>
+        </div>
       </PageContainer>
     );
   }
