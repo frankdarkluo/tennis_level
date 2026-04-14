@@ -42,6 +42,8 @@ const translations = {
   "diagnose.placeholder": "例如：反手总下网，来球一快更明显 / 网前截击老冒高，双打一紧张就更明显",
   "diagnose.quickTags": "示例",
   "diagnose.button.start": "开始诊断",
+  "nav.home": "首页",
+  "nav.assessment": "水平评估",
   "nav.diagnose": "问题诊断",
   "nav.plan": "训练计划",
   "nav.library": "内容库",
@@ -195,6 +197,19 @@ describe("consumer shell PR1", () => {
     expect(screen.getByRole("link", { name: "我的记录" })).toHaveAttribute("href", "/profile");
     expect(screen.queryByRole("link", { name: "水平评估" })).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "博主榜" })).not.toBeInTheDocument();
+  });
+
+  it("renders the new primary destinations in the mobile bottom navigation", async () => {
+    const { BottomNav } = await import("@/components/layout/BottomNav");
+
+    render(React.createElement(BottomNav));
+
+    expect(screen.getByRole("link", { name: "首页" })).toHaveAttribute("href", "/");
+    expect(screen.getByRole("link", { name: "水平评估" })).toHaveAttribute("href", "/assessment");
+    expect(screen.getByRole("link", { name: "内容库" })).toHaveAttribute("href", "/library");
+    expect(screen.getByRole("link", { name: "我的记录" })).toHaveAttribute("href", "/profile");
+    expect(screen.queryByRole("link", { name: "问题诊断" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "训练计划" })).not.toBeInTheDocument();
   });
 
   it("keeps study-only entry points out of the consumer mobile shell", async () => {
