@@ -215,7 +215,7 @@ describe("consumer shell PR1", () => {
 
     render(React.createElement("div", null, React.createElement(Header), React.createElement(BottomNav)));
 
-    expect(screen.getAllByRole("link", { name: "问题诊断" }).length).toBeGreaterThan(0);
-    expect(screen.getAllByRole("link", { name: "训练计划" }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("link", { name: "首页" }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("link", { name: "水平评估" }).length).toBeGreaterThan(0);
   });
 });
