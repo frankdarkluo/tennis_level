@@ -128,20 +128,6 @@ vi.mock("@/lib/study/client", () => ({
   persistStudyArtifact: vi.fn(async () => undefined)
 }));
 
-vi.mock("@/lib/appMode", async () => {
-  const actual = await vi.importActual<typeof import("@/lib/appMode")>("@/lib/appMode");
-
-  return {
-    ...actual,
-    consumerNavItems: [
-      { href: "/diagnose", labelKey: "nav.diagnose" },
-      { href: "/plan", labelKey: "nav.plan" },
-      { href: "/library", labelKey: "nav.library" },
-      { href: "/profile", labelKey: "nav.profile" }
-    ]
-  };
-});
-
 vi.mock("@/lib/appShell/localRouteState", async () => {
   const actual = await vi.importActual<typeof import("@/lib/appShell/localRouteState")>("@/lib/appShell/localRouteState");
 
