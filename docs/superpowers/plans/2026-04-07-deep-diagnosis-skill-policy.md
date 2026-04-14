@@ -37,7 +37,7 @@
   Single source of truth for allowed families, required slots, stop rules, and safe fallback rules by category.
 - `src/lib/scenarioReconstruction/inferSkillCategory.ts`
   Conservative category inference with confidence + reasons, including conflict resolution.
-- `docs/scenario-reconstruction-skill-policy.md`
+- `docs/engineering/scenario-reconstruction-skill-policy.md`
   Short repo-facing design note explaining why universal follow-up templates fail, what the new policy layer is, and how to extend it safely.
 
 ### Tests to modify
@@ -766,13 +766,13 @@ git commit -m "test: protect deep diagnosis route policy constraints"
 ### Task 5: Add the repo-facing design note and final focused verification
 
 **Files:**
-- Create: `docs/scenario-reconstruction-skill-policy.md`
+- Create: `docs/engineering/scenario-reconstruction-skill-policy.md`
 - Test: `src/__tests__/deep-diagnose-orchestrator.test.tsx`
 - Test: `src/__tests__/bilingual-rendering.test.tsx`
 
 - [ ] **Step 1: Write the doc and any final narrow tests**
 
-Create `docs/scenario-reconstruction-skill-policy.md`:
+Create `docs/engineering/scenario-reconstruction-skill-policy.md`:
 
 ```md
 # Scenario Reconstruction Skill Policy
@@ -824,7 +824,7 @@ Expected:
 - [ ] **Step 3: Commit**
 
 ```bash
-git add docs/scenario-reconstruction-skill-policy.md src/__tests__/deep-diagnose-orchestrator.test.tsx src/__tests__/bilingual-rendering.test.tsx
+git add docs/engineering/scenario-reconstruction-skill-policy.md src/__tests__/deep-diagnose-orchestrator.test.tsx src/__tests__/bilingual-rendering.test.tsx
 git commit -m "docs: record deep diagnosis skill-policy constraints"
 ```
 

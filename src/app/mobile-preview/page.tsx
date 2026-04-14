@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Card } from "@/components/ui/Card";
 import { getMobilePreviewRouteOptions, normalizeMobilePreviewRoute } from "@/lib/mobilePreview/routes";
 
 type MobilePreviewPageProps = {
@@ -13,45 +12,39 @@ export default async function MobilePreviewPage({ searchParams }: MobilePreviewP
     : resolvedSearchParams.route;
   const currentRoute = normalizeMobilePreviewRoute(routeParam);
   const routeOptions = getMobilePreviewRouteOptions();
+  const frameSrc = `${currentRoute}?mobilePreview=1`;
 
   return (
-    <main className="min-h-screen bg-[var(--surface)] px-6 py-10">
-      <div className="mx-auto flex max-w-6xl flex-col items-center gap-6">
-        <div className="w-full max-w-[430px] rounded-[36px] border border-[var(--line)] bg-white p-4 shadow-soft">
-          <div className="pointer-events-none mx-auto mb-3 h-1.5 w-24 rounded-full bg-slate-300" />
-          <div className="rounded-[28px] border border-[var(--line)] bg-white p-3 shadow-inner">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                    Mobile Preview
-                  </p>
-                  <p className="mt-1 text-sm text-slate-600">{currentRoute}</p>
-                </div>
-                <span className="rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white">430px</span>
-              </div>
-              <div className="grid grid-cols-4 gap-2">
-                {routeOptions.map((option) => (
-                  <Link
-                    key={option.value}
-                    href={`/mobile-preview?route=${encodeURIComponent(option.value)}`}
-                    className={option.value === currentRoute
-                      ? "rounded-xl bg-brand-500 px-3 py-2 text-center text-sm font-semibold text-white"
-                      : "rounded-xl border border-[var(--line)] px-3 py-2 text-center text-sm font-semibold text-slate-700"}
-                  >
-                    {option.label}
-                  </Link>
-                ))}
-              </div>
-              <Card className="overflow-hidden rounded-[28px] border border-[var(--line)] bg-white p-0">
-                <div className="h-[calc(100vh-220px)] min-h-[780px] w-full bg-white">
-                  <iframe
-                    title="Mobile preview frame"
-                    src={currentRoute}
-                    className="h-full w-full border-0"
-                  />
-                </div>
-              </Card>
+    <main className="min-h-screen bg-[var(--surface)] px-2 py-4 sm:px-4 sm:py-6">
+      <div className="mx-auto flex max-w-6xl flex-col items-center gap-3">
+        <div className="flex w-full max-w-[490px] gap-2 overflow-x-auto pb-1 [scrollbar-width:none]">
+          {routeOptions.map((option) => (
+            <Link
+              key={option.value}
+              href={`/mobile-preview?route=${encodeURIComponent(option.value)}`}
+              className={option.value === currentRoute
+                ? "min-w-fit rounded-full bg-brand-500 px-4 py-2 text-sm font-semibold text-white"
+                : "min-w-fit rounded-full border border-[var(--line)] bg-white px-4 py-2 text-sm font-semibold text-slate-700"}
+            >
+              {option.label}
+            </Link>
+          ))}
+        </div>
+        <div
+          data-testid="mobile-preview-shell"
+          className="w-full max-w-[490px] overflow-hidden rounded-[30px] border border-[var(--line)]/60 bg-white shadow-soft"
+        >
+          <div className="pointer-events-none mx-auto mt-3 h-1.5 w-24 rounded-full bg-slate-300" />
+          <div
+            data-testid="mobile-preview-frame-shell"
+            className="mt-3 overflow-hidden rounded-[28px] border-t border-[var(--line)]/40 bg-white"
+          >
+            <div className="h-[calc(100vh-84px)] min-h-[820px] w-full bg-white">
+              <iframe
+                title="Mobile preview frame"
+                src={frameSrc}
+                className="h-full w-full border-0 [scrollbar-width:none]"
+              />
             </div>
           </div>
         </div>

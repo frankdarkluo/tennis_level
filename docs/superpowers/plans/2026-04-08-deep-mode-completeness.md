@@ -482,7 +482,7 @@ git commit -m "feat: make deep mode handoff state honest"
 ### Task 6: Update docs and run final verification
 
 **Files:**
-- Modify: `docs/scenario-reconstruction-skill-policy.md`
+- Modify: `docs/engineering/scenario-reconstruction-skill-policy.md`
 - Modify: `docs/superpowers/specs/2026-04-08-deep-mode-completeness-design.md` (only if implementation clarifies wording)
 - Test: `src/__tests__/scenario-runtime.test.ts`
 - Test: `src/__tests__/scenario-selector.test.ts`
@@ -492,7 +492,7 @@ git commit -m "feat: make deep mode handoff state honest"
 
 - [ ] **Step 1: Update the short design note**
 
-Revise `docs/scenario-reconstruction-skill-policy.md` so it now explains:
+Revise `docs/engineering/scenario-reconstruction-skill-policy.md` so it now explains:
 - Deep Mode optimizes for completeness rather than early handoff
 - required vs optional category-specific grounding
 - skipped vs cannot-answer provenance
@@ -532,7 +532,7 @@ Expected: only Deep Mode completeness, tests, and docs changes.
 - [ ] **Step 5: Create the final implementation commit**
 
 ```bash
-git add docs/scenario-reconstruction-skill-policy.md docs/superpowers/plans/2026-04-08-deep-mode-completeness.md docs/superpowers/specs/2026-04-08-deep-mode-completeness-design.md src/types/scenario.ts src/lib/scenarioReconstruction/answer.ts src/lib/scenarioReconstruction/runtime.ts src/lib/scenarioReconstruction/skillPolicy.ts src/lib/scenarioReconstruction/selector.ts src/lib/scenarioReconstruction/inferSkillCategory.ts src/data/scenarioReconstruction/questionBank.ts src/lib/scenarioReconstruction/bilingual.ts src/components/diagnose/DeepScenarioModule.tsx src/components/diagnose/scenario/ScenarioQuestionCard.tsx src/components/diagnose/scenario/ScenarioSummaryCard.tsx src/__tests__/scenario-runtime.test.ts src/__tests__/scenario-selector.test.ts src/__tests__/scenario-routes.test.ts src/__tests__/deep-scenario-module.test.tsx src/__tests__/deep-diagnose-orchestrator.test.tsx vitest.setup.ts
+git add docs/engineering/scenario-reconstruction-skill-policy.md docs/superpowers/plans/2026-04-08-deep-mode-completeness.md docs/superpowers/specs/2026-04-08-deep-mode-completeness-design.md src/types/scenario.ts src/lib/scenarioReconstruction/answer.ts src/lib/scenarioReconstruction/runtime.ts src/lib/scenarioReconstruction/skillPolicy.ts src/lib/scenarioReconstruction/selector.ts src/lib/scenarioReconstruction/inferSkillCategory.ts src/data/scenarioReconstruction/questionBank.ts src/lib/scenarioReconstruction/bilingual.ts src/components/diagnose/DeepScenarioModule.tsx src/components/diagnose/scenario/ScenarioQuestionCard.tsx src/components/diagnose/scenario/ScenarioSummaryCard.tsx src/__tests__/scenario-runtime.test.ts src/__tests__/scenario-selector.test.ts src/__tests__/scenario-routes.test.ts src/__tests__/deep-scenario-module.test.tsx src/__tests__/deep-diagnose-orchestrator.test.tsx vitest.setup.ts
 git commit -m "feat: deepen scenario reconstruction completeness"
 ```
 

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { creators } from "@/data/creators";
 import {
   getContentFocusLine,
@@ -18,7 +18,7 @@ import {
 } from "@/lib/assessmentStorage";
 import { logEvent } from "@/lib/eventLogger";
 import { useI18n } from "@/lib/i18n/config";
-import { shouldUseMobileXiaohongshuMasonry } from "@/lib/library/layout";
+import { shouldUseCompactMobileLibraryLayout, shouldUseMobileXiaohongshuMasonry } from "@/lib/library/layout";
 import { buildLibraryItems, sortLibraryItems } from "@/lib/library/order";
 import { addBookmark, getBookmarkedContentIds, getLatestAssessmentResult, removeBookmark } from "@/lib/userData";
 import { getThumbnail } from "@/lib/thumbnail";
@@ -51,6 +51,7 @@ function inferQueryLanguage(query: string) {
 
 function LibraryPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, configured, loading } = useAuth();
   const { openLoginModal } = useAuthModal();
   const { t } = useI18n();
@@ -286,10 +287,15 @@ function LibraryPageContent() {
     [filtered, visibleCount]
   );
   const hasMore = visibleItems.length < filtered.length;
-  const useCompactMobileLibraryLayout = viewportWidth !== null && viewportWidth <= 480;
+  const isMobilePreview = searchParams.get("mobilePreview") === "1";
+  const useCompactMobileLibraryLayout = shouldUseCompactMobileLibraryLayout({
+    viewportWidth,
+    forceMobilePreview: isMobilePreview
+  });
   const useXiaohongshuMobileMasonry = shouldUseMobileXiaohongshuMasonry({
     selectedPlatform,
-    viewportWidth
+    viewportWidth,
+    forceMobilePreview: isMobilePreview
   });
 
   useEffect(() => {

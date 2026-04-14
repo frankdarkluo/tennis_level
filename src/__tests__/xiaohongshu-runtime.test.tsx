@@ -112,10 +112,30 @@ describe("xiaohongshu runtime presentation", () => {
     }
 
     mockLanguage.current = "zh";
-    render(<ContentCard item={gaiao} layoutVariant="xhs-mobile-note" />);
+    render(<ContentCard item={gaiao} layoutVariant="xhs-mobile-note" onToggleBookmark={vi.fn()} />);
 
-    expect(screen.getByTestId("content-card-platform-badge")).toHaveTextContent("小红书");
-    expect(screen.getAllByTestId("content-card-meta-chip")).toHaveLength(2);
+    expect(screen.queryByTestId("content-card-platform-badge")).not.toBeInTheDocument();
+    const metaChips = screen.getAllByTestId("content-card-meta-chip");
+    expect(metaChips).toHaveLength(2);
+    expect(metaChips[0]).toHaveClass("text-[9px]");
+    expect(metaChips[0]).toHaveClass("whitespace-normal");
+    expect(metaChips[0]).toHaveClass("break-words");
+    expect(screen.getByTestId("content-card-note-bookmark")).toBeInTheDocument();
+    expect(screen.getByRole("img")).toHaveClass("object-[center_38%]");
+  });
+
+  it("applies the shared crop policy to standard library cards too", () => {
+    const bilibili = contents.find((item) => item.id === "content_gaiao_01");
+
+    expect(bilibili).toBeTruthy();
+    if (!bilibili) {
+      throw new Error("Missing content_gaiao_01");
+    }
+
+    mockLanguage.current = "zh";
+    render(<ContentCard item={bilibili} />);
+
+    expect(screen.getByRole("img")).toHaveClass("object-[center_45%]");
   });
 });
 

@@ -301,6 +301,7 @@ export function CreatorDetailModal({ creator, open, onClose }: { creator: Creato
                     <VideoThumbnail
                       thumbnail={getThumbnail(item)}
                       title={item.title}
+                      platform={item.platform}
                       duration={item.duration}
                     />
                     <div className="min-w-0 flex-1">

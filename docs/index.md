@@ -19,37 +19,41 @@ TennisLevel is currently being wrapped up as a study-ready training decision rou
 - `PR9` long-tail diagnosis coverage is landed
 - diagnose recommendation thumbnail handling is stabilized
 - hidden `/video-diagnose` is closed at route and API level
+- Xiaohongshu / RedNote connector scaffold, QA workflow, runtime seed content, and mobile preview shell are landed on `app-development`
 
 ## Primary entry points
-- [[roadmap/current]]
-- [[product/requirements]]
-- [[product/boundaries]]
-- [[product/definition-of-done]]
-- [[research/study-mode]]
-- [[weekly/project-progress-summary]]
-- [[progress/2026-04-10]]
-- [[progress/2026-04-11]]
+- [[roadmap/index]]
+- [[product/index]]
+- [[research/index]]
+- [[engineering/index]]
+- [[progress/index]]
+- [[weekly/index]]
+- [[skills/index]]
+- [[prompts/index]]
+- [[templates/index]]
+- [[superpowers/index]]
 
 ## Navigation
-- Product identity: `product/`
-- Roadmap and planning: `roadmap/`
-- Research and study: `research/`
-- Engineering and feature specs: `engineering/`
-- Progress logs: `progress/`
-- Weekly reviews: `weekly/`
-- Prompt files: `prompts/`
-- Reusable templates: `templates/`
-- Workflow guides: `skills/`
-- AI planning artifacts: `superpowers/`
+- Product identity: [[product/index]]
+- Roadmap and planning: [[roadmap/index]]
+- Research and study: [[research/index]]
+- Engineering and feature specs: [[engineering/index]]
+- Progress logs: [[progress/index]]
+- Weekly reviews: [[weekly/index]]
+- Prompt files: [[prompts/index]]
+- Reusable templates: [[templates/index]]
+- Workflow guides: [[skills/index]]
+- AI planning artifacts: [[superpowers/index]]
 
 ## Useful hubs
 - [[roadmap/current]]
-- [[research/study-mode]]
-- [[weekly/project-progress-summary]]
+- [[research/index]]
+- [[weekly/index]]
 - [[roadmap/content-expansion]]
 - [[roadmap/app-development/codex_implementation_plan]]
 
 ## Recent progress
+- [[progress/2026-04-13]]
 - [[progress/2026-04-11]]
 - [[progress/2026-04-10]]
 - [[progress/2026-04-09]]

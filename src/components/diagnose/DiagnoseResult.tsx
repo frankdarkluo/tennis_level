@@ -134,7 +134,7 @@ function RecommendationCard({
   return (
     <div className="rounded-xl border border-[var(--line)] p-4 text-sm">
       <div className="flex gap-3">
-        <VideoThumbnail thumbnail={thumbnail} title={primaryTitle} duration={item.duration} />
+        <VideoThumbnail thumbnail={thumbnail} title={primaryTitle} platform={item.platform} duration={item.duration} />
         <div className="min-w-0 flex-1">
           <div className="mb-2 flex flex-wrap gap-2">
             <Badge className="bg-slate-100 px-4 py-1.5 text-sm font-semibold leading-none text-slate-700">

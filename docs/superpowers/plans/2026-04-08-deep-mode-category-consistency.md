@@ -30,7 +30,7 @@
 - `src/__tests__/deep-diagnose-orchestrator.test.tsx`
 - `src/__tests__/diagnosis-regression-realphrases.test.ts`
 - `src/__tests__/deep-scenario-module.test.tsx`
-- `docs/scenario-reconstruction-skill-policy.md`
+- `docs/engineering/scenario-reconstruction-skill-policy.md`
 
 ## Dependency order
 
@@ -130,7 +130,7 @@
 ### Task 6: Final verification and integration
 
 **Files:**
-- Modify: `docs/scenario-reconstruction-skill-policy.md`
+- Modify: `docs/engineering/scenario-reconstruction-skill-policy.md`
 - Modify: `docs/superpowers/specs/2026-04-08-deep-mode-category-consistency-design.md` if wording needs implementation clarification
 
 - [ ] Update docs to describe the new handoff contract and downstream category gating.

@@ -25,8 +25,8 @@ describe("MobilePreviewPage", () => {
     const ui = await MobilePreviewPage({ searchParams: Promise.resolve({}) });
     render(ui);
 
-    expect(screen.getByText("/library")).toBeInTheDocument();
-    expect(screen.getByTitle("Mobile preview frame")).toHaveAttribute("src", "/library");
+    expect(screen.getByRole("link", { name: "Library" })).toBeInTheDocument();
+    expect(screen.getByTitle("Mobile preview frame")).toHaveAttribute("src", "/library?mobilePreview=1");
   });
 
   it("renders route tabs and a validated iframe src", async () => {
@@ -38,16 +38,16 @@ describe("MobilePreviewPage", () => {
       "href",
       "/mobile-preview?route=%2Fplan"
     );
-    expect(screen.getByTitle("Mobile preview frame")).toHaveAttribute("src", "/plan");
+    expect(screen.getByTitle("Mobile preview frame")).toHaveAttribute("src", "/plan?mobilePreview=1");
   });
 
-  it("renders a large-phone shell and route controls", async () => {
+  it("renders a wider shell with minimal framing", async () => {
     const MobilePreviewPage = await loadMobilePreviewPage();
     const ui = await MobilePreviewPage({ searchParams: Promise.resolve({ route: "/diagnose" }) });
     render(ui);
 
-    expect(screen.getByText("Mobile Preview")).toBeInTheDocument();
-    expect(screen.getByText("/diagnose")).toBeInTheDocument();
-    expect(screen.getByTitle("Mobile preview frame")).toHaveAttribute("src", "/diagnose");
+    expect(screen.getByTitle("Mobile preview frame")).toHaveAttribute("src", "/diagnose?mobilePreview=1");
+    expect(screen.getByTestId("mobile-preview-shell")).toHaveClass("max-w-[490px]");
+    expect(screen.getByTestId("mobile-preview-frame-shell")).toHaveClass("rounded-[28px]");
   });
 });

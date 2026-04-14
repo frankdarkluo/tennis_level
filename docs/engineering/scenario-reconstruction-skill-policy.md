@@ -1,3 +1,14 @@
+---
+aliases:
+  - Scenario Reconstruction Skill Policy
+tags:
+  - type/reference
+  - area/diagnose
+  - area/scenario-reconstruction
+  - area/engineering
+  - status/reference
+---
+
 # Scenario Reconstruction Skill Policy
 
 ## Why the universal follow-up template was insufficient

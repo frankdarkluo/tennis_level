@@ -278,6 +278,7 @@ export function DayPlanCard({
         <VideoThumbnail
           thumbnail={thumbnail}
           title={primaryTitle ?? featuredContent.title}
+          platform={featuredContent.platform}
           duration={featuredContent.duration}
         />
         <div className="min-w-0 flex-1">

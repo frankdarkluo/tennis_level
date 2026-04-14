@@ -60,6 +60,9 @@ vi.mock("next/navigation", () => ({
     push: mockPush,
     replace: mockReplace,
     prefetch: mockPrefetch
+  }),
+  useSearchParams: () => ({
+    get: vi.fn(() => null)
   })
 }));
 

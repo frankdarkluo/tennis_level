@@ -26,7 +26,8 @@ vi.mock("next/navigation", () => ({
     push: vi.fn(),
     replace: vi.fn(),
     prefetch: vi.fn()
-  })
+  }),
+  useSearchParams: () => new URLSearchParams("mobilePreview=1")
 }));
 
 vi.mock("@/components/auth/AuthProvider", () => ({
@@ -158,5 +159,22 @@ describe("library mobile layout", () => {
     fireEvent.click(screen.getByRole("button", { name: "set-xhs-platform" }));
 
     expect(screen.getByTestId("library-results")).toHaveAttribute("data-layout", "xhs-mobile-masonry");
+  });
+
+  it("keeps Xiaohongshu masonry enabled inside mobile preview even when the preview shell is wider than 480px", async () => {
+    Object.defineProperty(window, "innerWidth", { value: 490, writable: true, configurable: true });
+    window.dispatchEvent(new Event("resize"));
+
+    const LibraryPage = await loadLibraryPage();
+
+    render(React.createElement(LibraryPage));
+
+    expect(await screen.findByText("找内容")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "set-xhs-platform" }));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("library-results")).toHaveAttribute("data-layout", "xhs-mobile-masonry");
+    });
   });
 });

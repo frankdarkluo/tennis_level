@@ -43,7 +43,7 @@
 - Modify if needed: `src/lib/diagnosis.ts`
 
 **Docs**
-- Modify: `docs/scenario-reconstruction-skill-policy.md`
+- Modify: `docs/engineering/scenario-reconstruction-skill-policy.md`
 - Create: `docs/superpowers/specs/2026-04-08-deep-mode-handoff-closure-design.md` only if the implementation reveals a material design delta from the approved specs
 
 **Tests**
@@ -356,7 +356,7 @@ Expected: PASS.
 ## Task 6: Full Focused Verification
 
 **Files:**
-- Modify if needed: `docs/scenario-reconstruction-skill-policy.md`
+- Modify if needed: `docs/engineering/scenario-reconstruction-skill-policy.md`
 
 - [ ] **Step 1: Update the design note**
 

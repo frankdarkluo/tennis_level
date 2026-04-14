@@ -17,6 +17,7 @@ import {
   getSubtitleAvailability,
   getSubtitleAvailabilityTranslationKey
 } from "@/lib/content/display";
+import { getThumbnailFraming } from "@/lib/content/thumbnailFraming";
 import { getPreferredOutboundUrl } from "@/lib/content/outbound";
 import { logEvent } from "@/lib/eventLogger";
 import { useI18n } from "@/lib/i18n/config";
@@ -71,6 +72,9 @@ function ViewsIcon() {
   );
 }
 
+const STANDARD_META_BADGE_CLASS = "bg-slate-100 px-1.0 py-0.5 text-[9px] font-semibold leading-[1.05] text-slate-700";
+const WRAPPING_META_BADGE_CLASS = `${STANDARD_META_BADGE_CLASS} max-w-full whitespace-normal break-words text-center`;
+
 export function ContentCard({
   item,
   source = "library",
@@ -92,9 +96,12 @@ export function ContentCard({
   const creatorName = creator ? getCreatorPrimaryName(creator, language) : t("content.unknownCreator");
   const [showWhy, setShowWhy] = useState(false);
   const subtitleLabel = t(getSubtitleAvailabilityTranslationKey(subtitleAvailability));
-  const mediaRatioClass = item.platform === "Xiaohongshu" ? "aspect-[3/4]" : "aspect-[16/9]";
   const isXhsMobileNote = layoutVariant === "xhs-mobile-note";
   const noteMetaChips = [item.levels.join("/"), subtitleLabel];
+  const thumbnailFraming = getThumbnailFraming({
+    surface: isXhsMobileNote ? "library-xhs-note" : "library-card",
+    platform: item.platform
+  });
 
   return (
     <Card
@@ -135,56 +142,30 @@ export function ContentCard({
         }}
       />
       <div className="relative z-10 flex h-full flex-col pointer-events-none">
-        <div data-testid="content-card-media" className={`relative ${mediaRatioClass} shrink-0 overflow-hidden bg-slate-100`}>
+        <div data-testid="content-card-media" className={thumbnailFraming.mediaClassName}>
           <VideoThumbnail
             thumbnail={thumbnail}
             title={primaryTitle}
+            platform={item.platform}
             duration={item.duration}
-            className="relative h-full w-full overflow-hidden bg-slate-100"
-            imageClassName="absolute inset-0 h-full w-full object-cover object-center transition duration-300 group-hover:scale-[1.02]"
+            framing={thumbnailFraming}
           />
-          {isXhsMobileNote ? (
-            <>
-              <Badge
-                data-testid="content-card-platform-badge"
-                className="absolute left-2 top-2 z-20 bg-white/92 px-2.5 py-1 text-[11px] font-semibold leading-none text-slate-700 backdrop-blur"
-              >
-                {getPlatformDisplayName(item.platform, language)}
-              </Badge>
-              {onToggleBookmark ? (
-                <button
-                  type="button"
-                  className={bookmarked
-                    ? "pointer-events-auto absolute right-2 top-2 z-20 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/92 text-brand-700 shadow-sm backdrop-blur"
-                    : "pointer-events-auto absolute right-2 top-2 z-20 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/92 text-slate-500 shadow-sm backdrop-blur"}
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    onToggleBookmark();
-                  }}
-                  disabled={bookmarkLoading}
-                  aria-pressed={bookmarked}
-                  aria-label={bookmarked ? t("content.bookmark.remove") : t("content.bookmark.add")}
-                >
-                  <BookmarkIcon filled={bookmarked} className="h-[1.2rem] w-[1.2rem]" />
-                </button>
-              ) : null}
-            </>
-          ) : viewCountLabel ? (
+          {!isXhsMobileNote && viewCountLabel ? (
             <span className="absolute bottom-2 left-2 inline-flex items-center gap-1.5 rounded bg-black/75 px-2 py-1 text-xs font-medium text-white">
               <ViewsIcon />
               {viewCountLabel}
             </span>
           ) : null}
         </div>
-        <div className={cn("flex flex-1 flex-col px-5 pt-5 pb-0", isXhsMobileNote && "px-3 pt-3 pb-3")}>
-          <div className="space-y-2.5">
+        <div className={cn("flex flex-1 flex-col px-5 pt-5 pb-0", isXhsMobileNote && "px-0.5 pt-0.5 pb-1.5")}>
+          <div className={cn("space-y-2.5", isXhsMobileNote && "space-y-2")}>
             {isXhsMobileNote ? (
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap items-start gap-2">
                 {noteMetaChips.map((chip) => (
                   <Badge
                     key={chip}
                     data-testid="content-card-meta-chip"
-                    className="bg-slate-100 px-2.5 py-1 text-[11px] font-semibold leading-none text-slate-600"
+                    className={WRAPPING_META_BADGE_CLASS}
                   >
                     {chip}
                   </Badge>
@@ -194,18 +175,18 @@ export function ContentCard({
               <div className="flex flex-wrap gap-2">
                 <Badge className="px-5 py-2 text-base font-semibold leading-none">{getPlatformDisplayName(item.platform, language)}</Badge>
                 <Badge className="bg-slate-100 px-5 py-2 text-base font-semibold leading-none text-slate-700">{item.levels.join("/")}</Badge>
-                <Badge className="bg-slate-100 px-4 py-2 text-sm font-semibold leading-none text-slate-700">
+                <Badge className={STANDARD_META_BADGE_CLASS}>
                   {contentLanguage === "zh" ? t("content.lang.zh") : t("content.lang.en")}
                 </Badge>
-                <Badge className="bg-slate-100 px-4 py-2 text-sm font-semibold leading-none text-slate-700">
+                <Badge className={STANDARD_META_BADGE_CLASS}>
                   {subtitleLabel}
                 </Badge>
               </div>
             )}
-            <div className={cn("space-y-1", isXhsMobileNote && "space-y-1.5")}>
+            <div className="space-y-1">
               <h3 className={cn(
                 "line-clamp-2 text-[0.96rem] font-bold leading-[1.35] text-slate-900 sm:text-[1rem]",
-                isXhsMobileNote && "text-[0.98rem] leading-[1.32] sm:text-[0.98rem]"
+                isXhsMobileNote && "text-[0.7rem] font-semibold leading-[1.25] sm:text-[0.84rem]"
               )}>
                 {primaryTitle}
               </h3>
@@ -219,7 +200,7 @@ export function ContentCard({
                   </p>
                 </div>
               ) : null}
-              <p className={cn("text-sm leading-6 text-slate-600", isXhsMobileNote && "line-clamp-1 text-[13px] leading-5")}>
+              <p className={cn("text-sm leading-6 text-slate-600", isXhsMobileNote && "line-clamp-1 text-[10px] leading-4.5 text-slate-500")}>
                 {creatorName}
               </p>
             </div>
@@ -251,6 +232,24 @@ export function ContentCard({
             ) : null}
             {!isXhsMobileNote && showWhy ? (
               <RecommendationSummary item={item} className="mt-2" />
+            ) : null}
+            {onToggleBookmark && isXhsMobileNote ? (
+              <button
+                data-testid="content-card-note-bookmark"
+                type="button"
+                className={bookmarked
+                  ? "pointer-events-auto absolute bottom-0 right-0 z-20 inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-brand-700"
+                  : "pointer-events-auto absolute bottom-0 right-0 z-20 inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-500"}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onToggleBookmark();
+                }}
+                disabled={bookmarkLoading}
+                aria-pressed={bookmarked}
+                aria-label={bookmarked ? t("content.bookmark.remove") : t("content.bookmark.add")}
+              >
+                <BookmarkIcon filled={bookmarked} className="h-[1.1rem] w-[1.1rem]" />
+              </button>
             ) : null}
             {onToggleBookmark && !isXhsMobileNote ? (
               <button

@@ -1,13 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import { getThumbnailFraming, type ThumbnailFraming } from "@/lib/content/thumbnailFraming";
+import type { ContentPlatform } from "@/types/content";
 
 type VideoThumbnailProps = {
   thumbnail: string | null;
   title: string;
+  platform: ContentPlatform;
   duration?: string;
-  className?: string;
-  imageClassName?: string;
+  framing?: ThumbnailFraming;
 };
 
 function shouldDisableNoReferrer(thumbnail: string) {
@@ -42,21 +44,22 @@ function ThumbnailFallback() {
 export function VideoThumbnail({
   thumbnail,
   title,
+  platform,
   duration,
-  className = "relative h-16 w-28 shrink-0 overflow-hidden rounded-lg bg-slate-100",
-  imageClassName = "h-full w-full object-cover"
+  framing
 }: VideoThumbnailProps) {
+  const resolvedFraming = framing ?? getThumbnailFraming({ surface: "inline-compact", platform });
   const normalizedThumbnail = thumbnail?.trim() || null;
   const [thumbnailFailed, setThumbnailFailed] = useState(false);
   const showThumbnail = Boolean(normalizedThumbnail) && !thumbnailFailed;
 
   return (
-    <div className={className}>
+    <div className={resolvedFraming.thumbnailClassName}>
       {showThumbnail ? (
         <img
           src={normalizedThumbnail ?? undefined}
           alt={title}
-          className={imageClassName}
+          className={resolvedFraming.imageClassName}
           loading="lazy"
           referrerPolicy={shouldDisableNoReferrer(normalizedThumbnail ?? "") ? undefined : "no-referrer"}
           onError={() => setThumbnailFailed(true)}

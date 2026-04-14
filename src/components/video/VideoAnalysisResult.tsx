@@ -49,7 +49,7 @@ function RecommendationCard({
   return (
     <div className="rounded-xl border border-[var(--line)] p-4">
       <div className="flex gap-3">
-        <VideoThumbnail thumbnail={thumbnail} title={primaryTitle} duration={item.duration} />
+        <VideoThumbnail thumbnail={thumbnail} title={primaryTitle} platform={item.platform} duration={item.duration} />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <PlatformBadge platform={item.platform} />
