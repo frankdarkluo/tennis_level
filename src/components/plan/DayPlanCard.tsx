@@ -333,7 +333,7 @@ export function DayPlanCard({
       <div className="flex items-center justify-between gap-3">
         <div className="flex flex-col">
           <p className="text-sm font-semibold text-slate-900">{t("plan.day.label", { day: day.day })}</p>
-          <p className="mt-1 text-sm font-medium text-slate-700">{compactFocus(day.focus)}</p>
+          <p className="mt-1 text-sm font-medium text-slate-700">{compactFocus(day.focus, language === "en" ? 52 : 24)}</p>
         </div>
         <Button
           variant="ghost"

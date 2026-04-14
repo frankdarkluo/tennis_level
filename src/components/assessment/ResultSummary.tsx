@@ -9,7 +9,7 @@ export function ResultSummary({ result }: { result: AssessmentResult }) {
 
   if (result.answeredCount === 0) {
     return (
-      <Card className="space-y-2">
+      <Card className="space-y-0.5 px-2 py-2 sm:px-6 sm:py-6">
         <h1 className="text-2xl font-black text-slate-900">{t("assessment.empty.title")}</h1>
         <p className="text-slate-600">{t("assessment.empty.subtitle")}</p>
       </Card>
@@ -21,7 +21,7 @@ export function ResultSummary({ result }: { result: AssessmentResult }) {
   const observationNeeded = Array.from(new Set(localizedResult.observationNeeded));
 
   return (
-    <Card className="space-y-5">
+    <Card className="space-y-0.5 px-2 py-2 sm:px-6 sm:py-6">
       <div className="space-y-3">
         <h1 className="text-2xl font-black text-slate-900">{t("assessment.result.headline")} {localizedResult.level}</h1>
         <div className="rounded-2xl bg-[var(--surface-soft)] p-4">
@@ -30,7 +30,7 @@ export function ResultSummary({ result }: { result: AssessmentResult }) {
         </div>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-2">
+      <div className="grid gap-0 md:grid-cols-2">
         <div className="rounded-2xl border border-rose-100 bg-rose-50/70 p-4">
           <p className="text-sm font-semibold text-rose-700">{t("assessment.result.weaknesses")}</p>
           <div className="mt-3 flex flex-wrap gap-2">

@@ -148,7 +148,7 @@ function EmptyState({
         <h2 className="text-lg font-bold text-slate-900">{title}</h2>
         <p className="mt-1 text-sm text-slate-600">{description}</p>
       </div>
-      <Link href={href}>
+      <Link href={href} className="pt-1">
         <Button variant="secondary">{actionLabel}</Button>
       </Link>
     </Card>
