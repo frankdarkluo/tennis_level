@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { consumerNavItems, shouldShowConsumerShell } from "@/lib/appMode";
+import { consumerPrimaryNavItems, shouldShowConsumerShell } from "@/lib/appMode";
 import { useI18n } from "@/lib/i18n/config";
 import { cn } from "@/lib/utils";
 
@@ -24,8 +24,8 @@ export function BottomNav() {
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--line)] bg-white/95 shadow-[0_-8px_24px_rgba(15,23,42,0.08)] backdrop-blur md:hidden">
-      <div className="mx-auto grid max-w-3xl grid-cols-4 px-2 py-2">
-        {consumerNavItems.map((item) => {
+      <div className="mx-auto grid max-w-3xl grid-cols-4 px-0 py-0">
+        {consumerPrimaryNavItems.map((item) => {
           const active = isActivePath(pathname, item.href);
 
           return (
@@ -34,7 +34,7 @@ export function BottomNav() {
               href={item.href}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "flex min-h-14 items-center justify-center rounded-2xl px-2 text-center text-xs font-semibold transition",
+                "flex min-h-12 items-center justify-center rounded-2xl px-2 text-center text-[15px] font-semibold transition",
                 active ? "bg-brand-50 text-brand-700" : "text-slate-500 hover:bg-slate-100 hover:text-slate-800"
               )}
             >
