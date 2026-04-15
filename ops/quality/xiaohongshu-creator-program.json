@@ -56,9 +56,9 @@
       "id": "dabaiyang",
       "displayName": "奔跑的大白羊",
       "aliases": ["奔跑的大白羊"],
-      "creatorProfileUrl": null,
+      "creatorProfileUrl": "https://www.xiaohongshu.com/user/profile/5676c499b8ce1a5b6e806853",
       "creatorProfileStatus": "pending_profile_verification",
-      "profileEvidenceNote": "Program scope is approved, but no profile URL is stored in the repo yet. Keep this creator QA-only until identity evidence is added.",
+      "profileEvidenceNote": "Program scope is approved, but profile identity is pending internal verification before collection.",
       "candidateTarget": 50,
       "runtimePromotionTarget": {
         "min": 15,
