@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 320" fill="none">
+  <rect width="640" height="320" rx="24" fill="#F5F3FF"/>
+  <circle cx="296" cy="148" r="50" fill="#DDD6FE"/>
+  <path d="M296 106V182" stroke="#5B21B6" stroke-width="10" stroke-linecap="round"/>
+  <path d="M296 138H346" stroke="#5B21B6" stroke-width="10" stroke-linecap="round"/>
+  <path d="M346 138L388 96" stroke="#5B21B6" stroke-width="10" stroke-linecap="round">
+    <animateTransform attributeName="transform" type="rotate" values="0 346 138;8 346 138;0 346 138" dur="1.2s" repeatCount="2"/>
+  </path>
+  <path d="M278 190L254 246M314 190L330 242" stroke="#5B21B6" stroke-width="10" stroke-linecap="round"/>
+  <circle cx="392" cy="92" r="12" fill="#0EA5E9"/>
+  <path d="M228 196C222 172 226 146 246 124" stroke="#A78BFA" stroke-width="8" stroke-linecap="round" stroke-dasharray="12 14">
+    <animate attributeName="opacity" values="0;1;0" dur="1.2s" repeatCount="2"/>
+  </path>
+</svg>

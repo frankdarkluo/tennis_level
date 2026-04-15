@@ -1,7 +1,8 @@
 import { PLAN_MICROCYCLE_ROLES } from "@/data/planBlueprints";
+import { resolvePlanDayContract, type PlanDayContractInput, type PlanLocale } from "@/lib/plan-core/dayContract";
 import type { DayPlan, GeneratedPlan } from "@/types/plan";
 
-export type PlanLocale = "zh" | "en";
+export type { PlanLocale };
 
 function getNextRoleLabel(day: number, locale: PlanLocale): string | null {
   const nextRole = PLAN_MICROCYCLE_ROLES.find((entry) => entry.day === Math.min(day + 1, 7));
@@ -38,13 +39,13 @@ function buildTransferCue(day: Pick<DayPlan, "focus">, locale: PlanLocale): stri
     : `把${day.focus}带进第一组可打的得分片段里。`;
 }
 
-export function withDeterministicDayContract(day: DayPlan, locale: PlanLocale): DayPlan {
-  return {
+export function withDeterministicDayContract(day: PlanDayContractInput, locale: PlanLocale): DayPlan {
+  return resolvePlanDayContract({
     ...day,
     failureCue: day.failureCue?.trim() || buildFailureCue(day, locale),
     progressionNote: day.progressionNote?.trim() || buildProgressionNote(day, locale),
     transferCue: day.transferCue?.trim() || buildTransferCue(day, locale)
-  };
+  }, locale);
 }
 
 export function withPlanDayContract(plan: GeneratedPlan, locale: PlanLocale): GeneratedPlan {

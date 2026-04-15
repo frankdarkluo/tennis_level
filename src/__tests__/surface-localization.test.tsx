@@ -223,9 +223,11 @@ describe("surface localization", () => {
       expect(screen.getByText("Latest assessment result")).toBeInTheDocument();
     });
 
+    expect(screen.getAllByText("Current active plan").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Latest diagnosis").length).toBeGreaterThan(0);
     expect(screen.getByText("Diagnosis history")).toBeInTheDocument();
     expect(screen.queryByText("Video diagnosis history")).not.toBeInTheDocument();
-    expect(screen.getByText("Bookmarks")).toBeInTheDocument();
+    expect(screen.getAllByText("Bookmarks").length).toBeGreaterThan(0);
     expect(screen.getByText("Saved practice plans")).toBeInTheDocument();
   });
 
@@ -251,11 +253,12 @@ describe("surface localization", () => {
     expect(screen.getByText("第 1 步 · 从这一步开始")).toBeInTheDocument();
     expect(screen.getByText("这一步目标")).toBeInTheDocument();
     expect(screen.queryByText("热身")).not.toBeInTheDocument();
-    expect(screen.getAllByText("练习").length).toBeGreaterThan(0);
+    expect(screen.getByText("怎么布置")).toBeInTheDocument();
+    expect(screen.getByText("训练量")).toBeInTheDocument();
+    expect(screen.getByText("关注点")).toBeInTheDocument();
     expect(screen.queryByText("带压力重复")).not.toBeInTheDocument();
     expect(screen.getByText("完成标准")).toBeInTheDocument();
-    expect(screen.getByText("强度 · 低")).toBeInTheDocument();
-    expect(screen.getByText("节奏 · 慢节奏")).toBeInTheDocument();
+    expect(screen.getByText("主视频")).toBeInTheDocument();
 
     cleanup();
     mockShellState.language = "en";
@@ -266,11 +269,12 @@ describe("surface localization", () => {
     expect(screen.getByText("Step 2")).toBeInTheDocument();
     expect(screen.getByText("Goal")).toBeInTheDocument();
     expect(screen.queryByText("Warm-up")).not.toBeInTheDocument();
-    expect(screen.getAllByText("Practice").length).toBeGreaterThan(0);
+    expect(screen.getByText("Setup")).toBeInTheDocument();
+    expect(screen.getByText("Dosage")).toBeInTheDocument();
+    expect(screen.getByText("Focus cues")).toBeInTheDocument();
     expect(screen.queryByText("Pressure reps")).not.toBeInTheDocument();
     expect(screen.getByText("Success criteria")).toBeInTheDocument();
-    expect(screen.getByText("Intensity · Low")).toBeInTheDocument();
-    expect(screen.getByText("Tempo · Slow")).toBeInTheDocument();
+    expect(screen.getByText("Primary video")).toBeInTheDocument();
   });
 
   it("renders English content cards in zh mode with English titles and polished Chinese subtitles", () => {
@@ -328,8 +332,10 @@ describe("surface localization", () => {
       expect(screen.getByText("最近评估结果")).toBeInTheDocument();
     });
 
+    expect(screen.getAllByText("当前训练计划").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("最近一次诊断").length).toBeGreaterThan(0);
     expect(screen.getByText("诊断历史")).toBeInTheDocument();
-    expect(screen.getByText("收藏")).toBeInTheDocument();
+    expect(screen.getAllByText("收藏").length).toBeGreaterThan(0);
     expect(screen.getByText("已保存的训练计划")).toBeInTheDocument();
     expect(screen.queryByText("当前研究会话")).not.toBeInTheDocument();
     expect(screen.queryByText("Snapshot")).not.toBeInTheDocument();

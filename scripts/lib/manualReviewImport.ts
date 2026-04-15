@@ -58,6 +58,7 @@ type ImportableManualReviewRecord = ManualReviewInputRecord & {
 
 const REVIEW_DECISIONS: ManualReviewDecision[] = [
   "verified",
+  "manual_confirmed",
   "needs_review",
   "suspect",
   "rejected",

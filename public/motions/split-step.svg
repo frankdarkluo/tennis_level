@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 320" fill="none">
+  <rect width="640" height="320" rx="24" fill="#F8FAFC"/>
+  <path d="M96 248H544" stroke="#CBD5E1" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="320" cy="156" r="56" fill="#E2E8F0"/>
+  <path d="M320 112V180M280 144H360" stroke="#0F172A" stroke-width="10" stroke-linecap="round"/>
+  <path d="M300 196L276 244M340 196L364 244" stroke="#0F172A" stroke-width="10" stroke-linecap="round"/>
+  <circle cx="286" cy="252" r="14" fill="#2563EB">
+    <animate attributeName="cx" values="300;286;300" dur="1.2s" repeatCount="2"/>
+  </circle>
+  <circle cx="354" cy="252" r="14" fill="#2563EB">
+    <animate attributeName="cx" values="340;354;340" dur="1.2s" repeatCount="2"/>
+  </circle>
+  <path d="M246 226C266 210 286 206 306 206" stroke="#38BDF8" stroke-width="8" stroke-linecap="round" stroke-dasharray="12 16">
+    <animate attributeName="opacity" values="0;1;0" dur="1.2s" repeatCount="2"/>
+  </path>
+  <path d="M334 206C354 206 374 210 394 226" stroke="#38BDF8" stroke-width="8" stroke-linecap="round" stroke-dasharray="12 16">
+    <animate attributeName="opacity" values="0;1;0" dur="1.2s" repeatCount="2"/>
+  </path>
+</svg>

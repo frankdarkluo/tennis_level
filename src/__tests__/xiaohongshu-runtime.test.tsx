@@ -118,8 +118,9 @@ describe("xiaohongshu runtime presentation", () => {
     const metaChips = screen.getAllByTestId("content-card-meta-chip");
     expect(metaChips).toHaveLength(2);
     expect(metaChips[0]).toHaveClass("text-[9px]");
-    expect(metaChips[0]).toHaveClass("whitespace-normal");
-    expect(metaChips[0]).toHaveClass("break-words");
+    expect(metaChips[0]).toHaveClass("whitespace-nowrap");
+    expect(metaChips[0]).not.toHaveClass("whitespace-normal");
+    expect(metaChips[0]).not.toHaveClass("break-words");
     expect(screen.getByTestId("content-card-note-bookmark")).toBeInTheDocument();
     expect(screen.getByRole("img")).toHaveClass("object-[center_38%]");
   });

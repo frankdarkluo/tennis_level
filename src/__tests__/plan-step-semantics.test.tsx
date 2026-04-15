@@ -120,7 +120,8 @@ describe("7-step plan semantics", () => {
           progressionNote: "下一步再把同一弧线带进接近比赛节奏",
           transferCue: "关键分先默念安全弧线，再开始抛球",
           intensity: "medium",
-          tempo: "controlled"
+          tempo: "controlled",
+          motionPrimitiveId: "serve-toss"
         }}
       />,
       "zh"
@@ -128,22 +129,18 @@ describe("7-step plan semantics", () => {
 
     expect(screen.getByText("这一步目标")).toBeInTheDocument();
     expect(screen.getByText("让二发先稳定过网而不是先追求速度")).toBeInTheDocument();
-    expect(screen.getByText("主练动作")).toBeInTheDocument();
-    expect(screen.getAllByText("二发安全弧线 20 球").length).toBeGreaterThan(0);
-    expect(screen.getByText("负荷 / 训练量")).toBeInTheDocument();
-    expect(screen.getByText("4 组 x 5 球")).toBeInTheDocument();
-    expect(screen.getByText("执行重点")).toBeInTheDocument();
+    expect(screen.getByText("怎么布置")).toBeInTheDocument();
+    expect(screen.getByText("抛球节奏 10 次")).toBeInTheDocument();
+    expect(screen.getByText("训练量")).toBeInTheDocument();
+    expect(screen.getByText("4 组 x 5 球 · 20 分钟")).toBeInTheDocument();
+    expect(screen.getByText("关注点")).toBeInTheDocument();
     expect(screen.getByText("先守住过网高度和抛球节奏，再慢慢加速。")).toBeInTheDocument();
-    expect(screen.getByText("练多久 · 20 分钟")).toBeInTheDocument();
-    expect(screen.getByText("练习")).toBeInTheDocument();
-    expect(screen.getAllByText("二发安全弧线 20 球").length).toBeGreaterThan(0);
-    expect(screen.getByText("连续 5 球过网才加速度")).toBeInTheDocument();
     expect(screen.getByText("完成标准")).toBeInTheDocument();
     expect(screen.getByText("20 球里至少 14 球有安全过网高度")).toBeInTheDocument();
-    expect(screen.getByText("常见失败信号")).toBeInTheDocument();
+    expect(screen.getByText("常见错误")).toBeInTheDocument();
     expect(screen.getByText("一旦只想加速，二发又会下网")).toBeInTheDocument();
-    expect(screen.getByText("迁移提示")).toBeInTheDocument();
-    expect(screen.getByText("关键分先默念安全弧线，再开始抛球")).toBeInTheDocument();
+    expect(screen.getByText("动作示意")).toBeInTheDocument();
+    expect(screen.getByText("抛球")).toBeInTheDocument();
   });
 
   it("keeps diagnosis-origin plans on a step-based handoff contract", () => {
@@ -171,7 +168,44 @@ describe("7-step plan semantics", () => {
     expect(plan.days).toHaveLength(7);
     expect(plan.summary).toContain("发球");
     expect(plan.summary).toContain("关键分与压力处理");
-    expect(plan.summary).not.toMatch(/本周|一周/);
+    expect(plan.summary).not.toMatch(/本周|这周|一周/);
+  });
+
+  it("normalizes general-improvement templates through the same anti-week copy policy", () => {
+    const zhPlan = getPlanTemplate("general-improvement", "3.0", "zh", []);
+    const enPlan = getPlanTemplate("general-improvement", "3.0", "en", []);
+
+    const zhUserVisibleCopy = [
+      zhPlan.title,
+      zhPlan.target,
+      zhPlan.summary ?? "",
+      ...zhPlan.days.flatMap((day) => [
+        day.focus,
+        day.goal,
+        day.failureCue,
+        day.progressionNote,
+        day.transferCue,
+        ...(day.successCriteria ?? []),
+        ...(day.details?.focusCues ?? [])
+      ])
+    ].join(" ");
+    const enUserVisibleCopy = [
+      enPlan.title,
+      enPlan.target,
+      enPlan.summary ?? "",
+      ...enPlan.days.flatMap((day) => [
+        day.focus,
+        day.goal,
+        day.failureCue,
+        day.progressionNote,
+        day.transferCue,
+        ...(day.successCriteria ?? []),
+        ...(day.details?.focusCues ?? [])
+      ])
+    ].join(" ");
+
+    expect(zhUserVisibleCopy).not.toMatch(/本周|这周|一周/);
+    expect(enUserVisibleCopy).not.toMatch(/\bweek\b|this week|next week|within one week/i);
   });
 
   it("keeps later PR4 steps scene-specific without calendar wording", () => {

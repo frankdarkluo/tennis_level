@@ -14,6 +14,10 @@ export const COVERAGE_HEALTH_RULE = {
   minDistinctVerifiedCreators: 2
 } as const;
 
+function isTrustedReviewedStatus(status: CatalogReviewStatus | undefined): boolean {
+  return status === "verified" || status === "manual_confirmed";
+}
+
 export type CoverageGapSeverity = {
   verifiedItemGap: number;
   verifiedCreatorGap: number;
@@ -194,7 +198,7 @@ export function buildCoverageRemediationReport(input: {
       const matchingItems = catalog.filter((item) => normalizeProblemTags(item.problemTags).includes(problemTag));
       const directItems = matchingItems.filter((item) => item.rightsStatus === "direct_source");
       const reviewedDirectItems = directItems.filter((item) => Boolean(item.qualityReview));
-      const verifiedDirectItems = directItems.filter((item) => item.qualityReview?.reviewStatus === "verified");
+      const verifiedDirectItems = directItems.filter((item) => isTrustedReviewedStatus(item.qualityReview?.reviewStatus));
       const verifiedCreators = new Set(verifiedDirectItems.map((item) => item.creatorId));
       const reviewableCandidates = directItems
         .filter((item) => isReviewableCandidate(item))

@@ -2,6 +2,7 @@
 
 import { DiagnosisSnapshot } from "@/types/diagnosis";
 import { EnrichedDiagnosisContext } from "@/types/enrichedDiagnosis";
+import type { GuidanceContext } from "@/lib/guidance-context/types";
 import { PlanContext, PlanLevel } from "@/types/plan";
 import { SavedPlanSource } from "@/types/userData";
 
@@ -15,6 +16,7 @@ export type LocalPlanDraft = {
   sourceType?: SavedPlanSource;
   primaryNextStep?: string;
   planContext?: PlanContext;
+  guidanceContext?: GuidanceContext;
   deepContext?: EnrichedDiagnosisContext;
   updatedAt?: string;
 };
@@ -74,6 +76,7 @@ export function writeLocalPlanDraft(draft: LocalPlanDraft) {
     sourceType: draft.sourceType,
     primaryNextStep: draft.primaryNextStep,
     planContext: draft.planContext,
+    guidanceContext: draft.guidanceContext,
     deepContext: draft.deepContext,
     updatedAt: draft.updatedAt ?? new Date().toISOString()
   };

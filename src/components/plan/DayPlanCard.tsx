@@ -3,9 +3,13 @@
 import { useState } from "react";
 import { RecommendationSummary } from "@/components/content/RecommendationSummary";
 import { VideoThumbnail } from "@/components/content/VideoThumbnail";
+import { MotionPrimitive } from "@/components/plan/MotionPrimitive";
 import { contents } from "@/data/contents";
 import { expandedContents } from "@/data/expandedContents";
-import { DayPlan } from "@/types/plan";
+import type { GuidanceContext } from "@/lib/guidance-context/types";
+import { resolvePlanDayContract } from "@/lib/plan-core/dayContract";
+import type { DayPlan } from "@/types/plan";
+import type { ContentItem } from "@/types/content";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
@@ -88,58 +92,17 @@ function compactPrompt(value: string, language: "zh" | "en") {
   return `${cleaned.slice(0, 52)}…`;
 }
 
+function splitSetupItems(value: string, language: "zh" | "en"): string[] {
+  const parts = language === "en" ? value.split(/\s+Then\s+/) : value.split("；");
+
+  return parts
+    .map((part) => part.trim())
+    .filter(Boolean);
+}
+
 const contentById = new Map([...contents, ...expandedContents].map((content) => [content.id, content]));
 
-function PrescriptionBlock({
-  label,
-  block
-}: {
-  label: string;
-  block: DayPlan["warmupBlock"];
-}) {
-  const normalizeHeading = (value: string) => value.replace(/[\s\-:：]/g, "").toLowerCase();
-  const shouldShowBlockTitle = block.title.trim().length > 0 && normalizeHeading(block.title) !== normalizeHeading(label);
-
-  return (
-    <div className="space-y-2 rounded-2xl border border-[var(--line)] bg-white/70 p-4">
-      <p className="text-sm font-semibold text-slate-900">{label}</p>
-      {shouldShowBlockTitle ? (
-        <p className="text-sm font-medium text-slate-700">{block.title}</p>
-      ) : null}
-      <ul className="list-disc space-y-1 pl-5 text-sm leading-6 text-slate-700">
-        {block.items.map((item, index) => (
-          <li key={`${label}-${block.title}-${index}`}>{item}</li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-function PrescriptionMetadata({
-  durationLabel,
-  intensityLabel,
-  tempoLabel
-}: {
-  durationLabel: string;
-  intensityLabel: string;
-  tempoLabel: string;
-}) {
-  return (
-    <div className="flex flex-wrap gap-2">
-      <Badge className="bg-slate-100 px-3 py-1.5 text-sm font-semibold leading-none text-slate-700">
-        {durationLabel}
-      </Badge>
-      <Badge className="bg-slate-100 px-3 py-1.5 text-sm font-semibold leading-none text-slate-700">
-        {intensityLabel}
-      </Badge>
-      <Badge className="bg-slate-100 px-3 py-1.5 text-sm font-semibold leading-none text-slate-700">
-        {tempoLabel}
-      </Badge>
-    </div>
-  );
-}
-
-function PrescriptionCue({
+function DetailBlock({
   label,
   value
 }: {
@@ -154,121 +117,124 @@ function PrescriptionCue({
   );
 }
 
-function PrescriptionPlan({
-  day,
+function DetailListBlock({
+  label,
+  items,
   language,
-  t,
-  showFull = false
+  compact = false
 }: {
-  day: DayPlan;
+  label: string;
+  items: string[];
   language: "zh" | "en";
-  t: ReturnType<typeof useI18n>["t"];
-  showFull?: boolean;
+  compact?: boolean;
 }) {
-  const practiceItems = [...day.mainBlock.items, ...day.pressureBlock.items]
-    .map((item) => item.trim())
-    .filter((item, index, source) => item.length > 0 && source.indexOf(item) === index);
-  const practiceLabel = t("plan.day.main");
-  const drillText = showFull ? (day.drill ?? day.drills[0] ?? day.focus).trim() : compactPrompt(day.drill ?? day.drills[0] ?? day.focus, language);
-  const loadText = showFull ? (day.load ?? day.duration).trim() : compactPrompt(day.load ?? day.duration, language);
-  const executionFocusText = showFull
-    ? (day.executionFocus ?? day.goal).trim()
-    : compactPrompt(day.executionFocus ?? day.goal, language);
+  const visibleItems = compact ? items.slice(0, 1).map((item) => compactPrompt(item, language)) : items;
 
   return (
-    <div className="space-y-4">
-      <div className="space-y-2">
-        <p className="text-sm font-semibold text-slate-900">{t("plan.day.goal")}</p>
-        <p className="text-sm leading-6 text-slate-700">{showFull ? day.goal.trim() : compactPrompt(day.goal, language)}</p>
-      </div>
-
-      <div className="grid gap-3 md:grid-cols-3">
-        <PrescriptionCue label={t("plan.day.drill")} value={drillText} />
-        <PrescriptionCue label={t("plan.day.load")} value={loadText} />
-        <PrescriptionCue label={t("plan.day.executionFocus")} value={executionFocusText} />
-      </div>
-
-      <PrescriptionMetadata
-        durationLabel={`${t("plan.day.duration")} · ${day.duration}`}
-        intensityLabel={`${t("plan.day.intensity")} · ${t(`plan.day.intensity.${day.intensity}`)}`}
-        tempoLabel={`${t("plan.day.tempo")} · ${t(`plan.day.tempo.${day.tempo}`)}`}
-      />
-
-      <div className="space-y-3">
-        <PrescriptionBlock
-          label={practiceLabel}
-          block={{
-            title: practiceLabel,
-            items: practiceItems.map((item) => (showFull ? item : compactPrompt(item, language)))
-          }}
-        />
-      </div>
-
-      <div className="space-y-2 rounded-2xl border border-[var(--line)] bg-white/70 p-4">
-        <p className="text-sm font-semibold text-slate-900">{t("plan.day.success")}</p>
-          <ul className="list-disc space-y-1 pl-5 text-sm leading-6 text-slate-700">
-          {day.successCriteria.map((criteria, index) => (
-            <li key={`success-${day.day}-${index}`}>{showFull ? criteria.trim() : compactPrompt(criteria, language)}</li>
-          ))}
-        </ul>
-      </div>
-
-      <PrescriptionCue
-        label={t("plan.day.failure")}
-        value={showFull ? day.failureCue.trim() : compactPrompt(day.failureCue, language)}
-      />
-
-      <PrescriptionCue
-        label={t("plan.day.transfer")}
-        value={showFull ? day.transferCue.trim() : compactPrompt(day.transferCue, language)}
-      />
+    <div className="space-y-2 rounded-2xl border border-[var(--line)] bg-white/70 p-4">
+      <p className="text-sm font-semibold text-slate-900">{label}</p>
+      <ul className="list-disc space-y-1 pl-5 text-sm leading-6 text-slate-700">
+        {visibleItems.map((item, index) => (
+          <li key={`${label}-${index}`}>{item}</li>
+        ))}
+      </ul>
     </div>
   );
 }
 
-export function DayPlanCard({
+function CompactSummary({
   day,
-  onViewDetails,
-  isToday = false
+  language,
+  t
 }: {
   day: DayPlan;
-  onViewDetails?: (dayNumber: number) => void;
-  isToday?: boolean;
+  language: "zh" | "en";
+  t: ReturnType<typeof useI18n>["t"];
 }) {
-  const { language, t } = useI18n();
-  const relatedContents = day.contentIds
-    .map((id) => contentById.get(id))
-    .filter((content) => Boolean(content));
-  const [expanded, setExpanded] = useState(isToday);
-  const displayExpanded = isToday || expanded;
-  const detailsId = `plan-day-${day.day}-details`;
-  const featuredContent = relatedContents[0] ?? null;
-  const thumbnail = featuredContent ? getThumbnail(featuredContent) : null;
-  const primaryTitle = featuredContent ? getContentPrimaryTitle(featuredContent, language) : null;
-  const secondaryTitle = featuredContent ? getContentSecondaryTitle(featuredContent, language) : null;
-  const focusLine = featuredContent ? getContentFocusLine(featuredContent, language) : null;
-  const contentLanguage = featuredContent ? getContentLanguageTag(featuredContent) : null;
-  const subtitleAvailability = featuredContent ? getSubtitleAvailability(featuredContent) : null;
+  const cue = day.details?.focusCues[0] ?? day.executionFocus ?? day.focus;
+
+  return (
+    <div className="grid gap-3 md:grid-cols-3">
+      <DetailBlock label={t("plan.day.goal")} value={compactPrompt(day.details?.goal ?? day.goal, language)} />
+      <DetailBlock
+        label={t("plan.day.dosage")}
+        value={compactPrompt(day.details?.dosage ?? day.load ?? day.duration, language)}
+      />
+      <DetailBlock label={t("plan.day.focusCues")} value={compactPrompt(cue, language)} />
+    </div>
+  );
+}
+
+function StepDetailSection({
+  day,
+  language,
+  t
+}: {
+  day: DayPlan;
+  language: "zh" | "en";
+  t: ReturnType<typeof useI18n>["t"];
+}) {
+  const details = day.details;
+  if (!details) {
+    return null;
+  }
+
+  return (
+    <div className="space-y-4">
+      <DetailBlock label={t("plan.day.goal")} value={details.goal} />
+
+      <div className="grid gap-3 md:grid-cols-2">
+        <DetailListBlock label={t("plan.day.setup")} items={splitSetupItems(details.setup, language)} language={language} />
+        <DetailBlock label={t("plan.day.dosage")} value={details.dosage} />
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-2">
+        <DetailListBlock label={t("plan.day.focusCues")} items={details.focusCues} language={language} />
+        <DetailListBlock label={t("plan.day.mistakes")} items={details.commonMistakes} language={language} />
+      </div>
+
+      <DetailListBlock label={t("plan.day.success")} items={details.successCriteria} language={language} />
+    </div>
+  );
+}
+
+function AttachmentCard({
+  content,
+  guidanceContext,
+  language,
+  t
+}: {
+  content: ContentItem;
+  guidanceContext?: GuidanceContext | null;
+  language: "zh" | "en";
+  t: ReturnType<typeof useI18n>["t"];
+}) {
+  const thumbnail = getThumbnail(content);
+  const primaryTitle = getContentPrimaryTitle(content, language) ?? content.title;
+  const secondaryTitle = getContentSecondaryTitle(content, language);
+  const focusLine = getContentFocusLine(content, language);
+  const contentLanguage = getContentLanguageTag(content);
+  const subtitleAvailability = getSubtitleAvailability(content);
   const subtitleLabel = subtitleAvailability ? t(getSubtitleAvailabilityTranslationKey(subtitleAvailability)) : null;
 
-  const featuredContentCard = featuredContent ? (
+  return (
     <a
-      href={featuredContent.url}
+      href={content.url}
       target="_blank"
       rel="noreferrer"
       className="block rounded-2xl border border-[var(--line)] bg-white p-3 transition hover:border-brand-200"
       onClick={(event) => {
         logEvent("content.outbound_clicked", {
-          contentId: featuredContent.id,
-          platform: featuredContent.platform,
+          contentId: content.id,
+          platform: content.platform,
           sourceContext: "plan"
         }, { page: "/plan" });
 
-        const outbound = getPreferredOutboundUrl(featuredContent, {
+        const outbound = getPreferredOutboundUrl(content, {
           userAgent: typeof navigator === "undefined" ? undefined : navigator.userAgent
         });
 
-        if (outbound.href !== featuredContent.url && typeof window !== "undefined") {
+        if (outbound.href !== content.url && typeof window !== "undefined") {
           event.preventDefault();
           window.location.assign(outbound.href);
         }
@@ -277,22 +243,22 @@ export function DayPlanCard({
       <div className="flex gap-3">
         <VideoThumbnail
           thumbnail={thumbnail}
-          title={primaryTitle ?? featuredContent.title}
-          platform={featuredContent.platform}
-          duration={featuredContent.duration}
+          title={primaryTitle}
+          platform={content.platform}
+          duration={content.duration}
         />
         <div className="min-w-0 flex-1">
-          {featuredContent ? (
-            <div className="mb-2 flex flex-wrap gap-2">
-              <Badge className="bg-slate-100 px-4 py-1.5 text-sm font-semibold leading-none text-slate-700">
-                {contentLanguage === "zh" ? t("content.lang.zh") : t("content.lang.en")}
-              </Badge>
-              <Badge className="bg-slate-100 px-4 py-1.5 text-sm font-semibold leading-none text-slate-700">
+          <div className="mb-2 flex flex-wrap gap-2">
+            <Badge className="bg-slate-100 px-4 py-1.5 text-sm font-semibold leading-[1.15] text-slate-700">
+              {contentLanguage === "zh" ? t("content.lang.zh") : t("content.lang.en")}
+            </Badge>
+            {subtitleLabel ? (
+              <Badge className="bg-slate-100 px-4 py-1.5 text-sm font-semibold leading-[1.15] text-slate-700">
                 {subtitleLabel}
               </Badge>
-            </div>
-          ) : null}
-          <p className="font-semibold text-slate-900">{primaryTitle ?? featuredContent.title}</p>
+            ) : null}
+          </div>
+          <p className="font-semibold text-slate-900">{primaryTitle}</p>
           {secondaryTitle ? (
             <div className="mt-1 space-y-0.5">
               <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-400">
@@ -304,12 +270,36 @@ export function DayPlanCard({
           {focusLine && focusLine !== primaryTitle ? (
             <p className="mt-1 text-sm text-slate-600">{t("content.targetPrefix")} {focusLine}</p>
           ) : null}
-          <RecommendationSummary item={featuredContent} className="mt-2" />
+          <RecommendationSummary item={content} guidanceContext={guidanceContext ?? undefined} className="mt-2" />
           <p className="mt-2 text-sm font-medium text-slate-500">{t("plan.day.open")} →</p>
         </div>
       </div>
     </a>
-  ) : null;
+  );
+}
+
+export function DayPlanCard({
+  day,
+  guidanceContext,
+  onViewDetails,
+  isToday = false,
+  defaultExpanded = false
+}: {
+  day: DayPlan;
+  guidanceContext?: GuidanceContext | null;
+  onViewDetails?: (dayNumber: number) => void;
+  isToday?: boolean;
+  defaultExpanded?: boolean;
+}) {
+  const { language, t } = useI18n();
+  const resolvedDay = resolvePlanDayContract(day, language);
+  const [expanded, setExpanded] = useState(isToday || defaultExpanded);
+  const displayExpanded = isToday || expanded;
+  const detailsId = `plan-day-${resolvedDay.day}-details`;
+  const primaryContentId = resolvedDay.attachments?.primaryContentId ?? null;
+  const backupContentId = resolvedDay.attachments?.backupContentId ?? null;
+  const primaryContent = primaryContentId ? contentById.get(primaryContentId) ?? null : null;
+  const backupContent = backupContentId ? contentById.get(backupContentId) ?? null : null;
 
   const toggleExpanded = () => {
     if (isToday) {
@@ -317,7 +307,7 @@ export function DayPlanCard({
     }
 
     if (!expanded) {
-      onViewDetails?.(day.day);
+      onViewDetails?.(resolvedDay.day);
     }
 
     setExpanded((prev) => !prev);
@@ -327,22 +317,34 @@ export function DayPlanCard({
     return (
       <Card className="space-y-4 border-brand-200 bg-brand-50/40">
         <div>
-          <p className="text-sm font-semibold text-brand-700">{t("plan.day.label", { day: day.day })} · {t("plan.day.today")}</p>
-          <h3 className="mt-1 text-xl font-bold text-slate-900">{day.focus}</h3>
+          <p className="text-sm font-semibold text-brand-700">
+            {t("plan.day.label", { day: resolvedDay.day })} · {t("plan.day.today")}
+          </p>
+          <h3 className="mt-1 text-xl font-bold text-slate-900">{resolvedDay.focus}</h3>
         </div>
 
-        <PrescriptionPlan day={day} language={language} t={t} showFull={true} />
+        <StepDetailSection day={resolvedDay} language={language} t={t} />
+        {resolvedDay.motionPrimitiveId ? (
+          <MotionPrimitive motionPrimitiveId={resolvedDay.motionPrimitiveId} />
+        ) : null}
 
         <div>
-          <p className="mb-2 text-sm font-semibold text-slate-900">{t("plan.day.watch")}</p>
-          {featuredContentCard ?? (
+          <p className="mb-2 text-sm font-semibold text-slate-900">{t("plan.day.primaryVideo")}</p>
+          {primaryContent ? (
+            <AttachmentCard
+              content={primaryContent}
+              guidanceContext={guidanceContext}
+              language={language}
+              t={t}
+            />
+          ) : (
             <p className="text-sm text-slate-600">{t("plan.day.fallback")}</p>
           )}
-          {day.linkedContentReason ? (
+          {resolvedDay.linkedContentReason ? (
             <div className="mt-3 rounded-2xl border border-[var(--line)] bg-white/70 p-4">
               <p className="text-sm font-semibold text-slate-900">{t("plan.day.linkedReason")}</p>
               <p className="mt-2 text-sm leading-6 text-slate-700">
-                {displayExpanded ? day.linkedContentReason : compactPrompt(day.linkedContentReason, language)}
+                {resolvedDay.linkedContentReason}
               </p>
             </div>
           ) : null}
@@ -355,8 +357,8 @@ export function DayPlanCard({
     <Card className="space-y-0">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="text-sm font-semibold text-slate-900">{t("plan.day.label", { day: day.day })}</p>
-          <p className="mt-1 text-sm font-medium text-slate-700">{compactFocus(day.focus)}</p>
+          <p className="text-sm font-semibold text-slate-900">{t("plan.day.label", { day: resolvedDay.day })}</p>
+          <p className="mt-1 text-sm font-medium text-slate-700">{compactFocus(resolvedDay.focus)}</p>
         </div>
         <Button
           variant="ghost"
@@ -371,23 +373,49 @@ export function DayPlanCard({
 
       {displayExpanded ? (
         <div id={detailsId} className="mt-4 space-y-3 border-t border-[var(--line)] pt-4">
-          <PrescriptionPlan day={day} language={language} t={t} showFull={displayExpanded} />
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-slate-700">{t("plan.day.watch")}</p>
-            {featuredContentCard ?? (
-              <p className="text-sm text-slate-600">{t("plan.day.fallback")}</p>
-            )}
-            {day.linkedContentReason ? (
-              <div className="rounded-2xl border border-[var(--line)] bg-white/70 p-4">
-                <p className="text-sm font-semibold text-slate-900">{t("plan.day.linkedReason")}</p>
-                <p className="mt-2 text-sm leading-6 text-slate-700">
-                  {displayExpanded ? day.linkedContentReason : compactPrompt(day.linkedContentReason, language)}
-                </p>
+          <StepDetailSection day={resolvedDay} language={language} t={t} />
+          {resolvedDay.motionPrimitiveId ? (
+            <MotionPrimitive motionPrimitiveId={resolvedDay.motionPrimitiveId} />
+          ) : null}
+          <div className="space-y-3">
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-slate-700">{t("plan.day.primaryVideo")}</p>
+              {primaryContent ? (
+                <AttachmentCard
+                  content={primaryContent}
+                  guidanceContext={guidanceContext}
+                  language={language}
+                  t={t}
+                />
+              ) : (
+                <p className="text-sm text-slate-600">{t("plan.day.fallback")}</p>
+              )}
+              {resolvedDay.linkedContentReason ? (
+                <div className="rounded-2xl border border-[var(--line)] bg-white/70 p-4">
+                  <p className="text-sm font-semibold text-slate-900">{t("plan.day.linkedReason")}</p>
+                  <p className="mt-2 text-sm leading-6 text-slate-700">{resolvedDay.linkedContentReason}</p>
+                </div>
+              ) : null}
+            </div>
+
+            {backupContent ? (
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-slate-700">{t("plan.day.backupVideo")}</p>
+                <AttachmentCard
+                  content={backupContent}
+                  guidanceContext={guidanceContext}
+                  language={language}
+                  t={t}
+                />
               </div>
             ) : null}
           </div>
         </div>
-      ) : null}
+      ) : (
+        <div className="mt-4 border-t border-[var(--line)] pt-4">
+          <CompactSummary day={resolvedDay} language={language} t={t} />
+        </div>
+      )}
     </Card>
   );
 }

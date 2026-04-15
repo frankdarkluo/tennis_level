@@ -1,4 +1,8 @@
 import { PLAN_MICROCYCLE_ROLES } from "@/data/planBlueprints";
+import {
+  inferGuidanceMechanismFamily,
+  inferGuidanceStrokeFamily
+} from "@/lib/guidance-context/build";
 import type { PlanLevel, PlanContext, PlanIntent, PlanMechanismFamily, PlanSkillFamily, PlanTemplate } from "@/types/plan";
 import type { ProblemTag } from "@/types/problemTag";
 
@@ -38,19 +42,35 @@ export function buildPlanIntent(input: {
   candidateContentIds?: string[];
   primaryNextStep?: string;
   planContext?: PlanContext | null;
+  guidanceContext?: PlanIntent["guidanceContext"];
   templateSeed?: PlanTemplate | null;
   deepContext?: PlanIntent["deepContext"];
 }): PlanIntent {
   const planContext = input.planContext ?? null;
+  const guidanceContext = input.guidanceContext ?? null;
   const microcycle = PLAN_MICROCYCLE_ROLES.map((entry) => entry.role);
+  const inferredStrokeFamily = guidanceContext?.strokeFamily ?? inferGuidanceStrokeFamily({
+    problemTag: input.problemTag,
+    deepContext: input.deepContext ?? null
+  });
+  const inferredMechanismFamily = guidanceContext?.mechanismFamily ?? inferGuidanceMechanismFamily({
+    problemTag: input.problemTag,
+    primaryNextStep: input.primaryNextStep,
+    planContext,
+    deepContext: input.deepContext ?? null
+  });
 
   return {
     source: input.source,
     locale: input.locale,
     levelBand: input.level,
     primaryProblemTag: input.problemTag,
-    skillFamily: inferSkillFamily(input.problemTag, planContext),
-    mechanismFamily: inferMechanismFamily(input.problemTag, planContext),
+    skillFamily: guidanceContext
+      ? inferSkillFamily(`${input.problemTag} ${inferredStrokeFamily}`, planContext)
+      : inferSkillFamily(input.problemTag, planContext),
+    mechanismFamily: guidanceContext
+      ? inferredMechanismFamily
+      : inferMechanismFamily(input.problemTag, planContext),
     primaryWeakness: planContext?.weakDimensions?.[0],
     secondaryWeakness: planContext?.weakDimensions?.[1] ?? planContext?.observationDimensions?.[0],
     playStyle: planContext?.playStyle,
@@ -58,6 +78,7 @@ export function buildPlanIntent(input: {
     primaryNextStep: input.primaryNextStep?.trim() || undefined,
     candidateContentIds: input.candidateContentIds ?? [],
     planContext,
+    guidanceContext,
     templateSeed: input.templateSeed ?? null,
     deepContext: input.deepContext ?? null,
     microcycle

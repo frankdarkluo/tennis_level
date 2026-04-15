@@ -1,6 +1,7 @@
 import { LevelBand, PlayContext, PlayStyle, ScoredDimension } from "@/types/assessment";
 import { EnvironmentValue } from "@/types/environment";
 import { EnrichedDiagnosisContext } from "@/types/enrichedDiagnosis";
+import type { GuidanceContext } from "@/lib/guidance-context/types";
 import { ProblemTag } from "@/types/problemTag";
 
 export type PlanLevel = "2.5" | "3.0" | "3.5" | "4.0" | "4.0+";
@@ -65,6 +66,32 @@ export type DayPlanBlock = {
   items: string[];
 };
 
+export type PlanStepDetails = {
+  goal: string;
+  setup: string;
+  dosage: string;
+  focusCues: string[];
+  commonMistakes: string[];
+  successCriteria: string[];
+};
+
+export type PlanStepAttachments = {
+  primaryContentId: string | null;
+  backupContentId: string | null;
+};
+
+export type MotionPrimitiveId =
+  | "split-step"
+  | "unit-turn"
+  | "shoulder-turn"
+  | "contact-point"
+  | "weight-transfer"
+  | "recovery-step"
+  | "serve-toss"
+  | "trophy-position"
+  | "pronation"
+  | "cross-step-shuffle";
+
 // Legacy internal naming is retained for compatibility with existing storage,
 // tests, and handoff contracts. User-facing semantics are step-based.
 export type DayPlan = {
@@ -87,6 +114,9 @@ export type DayPlan = {
   transferCue: string;
   intensity: PlanIntensity;
   tempo: PlanTempo;
+  details?: PlanStepDetails;
+  attachments?: PlanStepAttachments;
+  motionPrimitiveId?: MotionPrimitiveId | null;
 };
 
 export type PlanTemplateDay = {
@@ -124,6 +154,10 @@ export type PlanTemplateDay = {
   executionFocusEn?: string;
   linkedContentReason?: string;
   linkedContentReasonEn?: string;
+  details?: Partial<PlanStepDetails>;
+  detailsEn?: Partial<PlanStepDetails>;
+  attachments?: Partial<PlanStepAttachments>;
+  motionPrimitiveId?: MotionPrimitiveId | null;
 };
 
 export type PlanTemplate = {
@@ -145,6 +179,19 @@ export type GeneratedPlan = {
   target: string;
   summary?: string;
   days: DayPlan[];
+  resume?: {
+    href: string;
+    payload: {
+      problemTag: ProblemTag;
+      level: PlanLevel;
+      preferredContentIds: string[];
+      sourceType: "diagnosis" | "assessment" | "default";
+      primaryNextStep?: string;
+      planContext?: PlanContext;
+      guidanceContext?: GuidanceContext;
+      deepContext?: EnrichedDiagnosisContext;
+    };
+  };
 };
 
 export type PlanIntent = {
@@ -161,6 +208,7 @@ export type PlanIntent = {
   primaryNextStep?: string;
   candidateContentIds: string[];
   planContext: PlanContext | null;
+  guidanceContext: GuidanceContext | null;
   templateSeed?: PlanTemplate | null;
   deepContext?: EnrichedDiagnosisContext | null;
   microcycle: PlanBlueprintRole[];

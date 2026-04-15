@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import type { CatalogQualityReview } from "@/lib/content-catalog/schema";
 import type { ContentItem } from "@/types/content";
 import type { DiagnosisRule } from "@/types/diagnosis";
 import {
@@ -168,5 +169,90 @@ describe("quality metrics helpers", () => {
     expect(markdown).toContain("recommendation_direct_source_rate_output");
     expect(markdown).toContain("diagnosis_standard");
     expect(markdown).toContain("assessment_plan");
+  });
+
+  it("reports attached-flow hit, diversity, duplicate, and health metrics", () => {
+    const directPrimary = createContentItem({
+      id: "direct_primary",
+      creatorId: "creator_a",
+      platform: "Bilibili",
+      title: "Serve rhythm anchor",
+      problemTags: ["serve-rhythm"],
+      thumbnail: "/thumbs/direct_primary.jpg",
+      url: "https://www.bilibili.com/video/BV1directPrimary"
+    });
+    const duplicatePrimary = createContentItem({
+      id: "duplicate_primary",
+      creatorId: "creator_b",
+      platform: "Bilibili",
+      title: "Serve pressure routine",
+      problemTags: ["serve-rhythm"],
+      thumbnail: "/thumbs/duplicate_primary.jpg",
+      url: "https://www.bilibili.com/video/BV1duplicatePrimary"
+    });
+    const duplicateWrongTag = createContentItem({
+      id: "duplicate_wrong_tag",
+      creatorId: "creator_c",
+      platform: "Bilibili",
+      title: "Serve pressure routine",
+      problemTags: ["return-under-pressure"],
+      thumbnail: undefined,
+      url: "https://search.bilibili.com/all?keyword=serve+pressure"
+    });
+    const qualityReviews: CatalogQualityReview[] = [
+      {
+        contentId: "direct_primary",
+        reviewStatus: "verified",
+        thumbnailStatus: "ok",
+        manualQcScore: 2
+      },
+      {
+        contentId: "duplicate_primary",
+        reviewStatus: "verified",
+        thumbnailStatus: "ok",
+        manualQcScore: 1,
+        duplicateClusterId: "serve-pressure-cluster"
+      },
+      {
+        contentId: "duplicate_wrong_tag",
+        reviewStatus: "suspect",
+        thumbnailStatus: "missing",
+        manualQcScore: -1,
+        duplicateClusterId: "serve-pressure-cluster"
+      }
+    ];
+    const samples: RecommendationSample[] = [
+      {
+        id: "diagnosis_standard_attached",
+        lane: "diagnosis_standard",
+        source: "diagnosis",
+        description: "attached diagnose sample",
+        expectedProblemTag: "serve-rhythm",
+        items: [directPrimary, duplicatePrimary, duplicateWrongTag]
+      }
+    ];
+
+    const report = buildRecommendationQualityReport({
+      contents: [directPrimary, duplicatePrimary, duplicateWrongTag],
+      expandedContents: [],
+      samples,
+      qualityReviews
+    });
+
+    expect(report.attachedFlowSummary.sampleCount).toBe(1);
+    expect(report.attachedFlowSummary.exactPrimaryTagHitRateAt3).toBe(1);
+    expect(report.attachedFlowSummary.manualRelevanceAcceptRateAt3).toBeCloseTo(2 / 3, 5);
+    expect(report.attachedFlowSummary.creatorDiversityAt3).toBe(1);
+    expect(report.attachedFlowSummary.creatorDiversityCountAt3Average).toBe(3);
+    expect(report.attachedFlowSummary.duplicateClusterLeakageRateAt5).toBe(1);
+    expect(report.attachedFlowSummary.directSourceRateAt3).toBeCloseTo(2 / 3, 5);
+    expect(report.attachedFlowSummary.deadLinkRate).toBeCloseTo(1 / 3, 5);
+    expect(report.attachedFlowSummary.wrongTagSampledRate).toBeCloseTo(1 / 3, 5);
+    expect(report.attachedFlowSummary.thumbnailFailureRate).toBeCloseTo(1 / 3, 5);
+
+    const markdown = renderRecommendationQualityMarkdown(report);
+    expect(markdown).toContain("exact_primary_tag_hit_rate@3");
+    expect(markdown).toContain("duplicate_cluster_leakage_rate@5");
+    expect(markdown).toContain("manual_qc_or_verified_proxy");
   });
 });

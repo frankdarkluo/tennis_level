@@ -30,6 +30,19 @@ function readStoredLanguage(): LocaleValue {
   return stored === "en" ? "en" : "zh";
 }
 
+function readPreviewLanguageOverride(): LocaleValue | null {
+  if (!isBrowser()) {
+    return null;
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("mobilePreview") !== "1") {
+    return null;
+  }
+
+  return params.get("mobilePreviewLocale") === "en" ? "en" : "zh";
+}
+
 function writeStoredLanguage(language: LocaleValue) {
   if (!isBrowser()) {
     return;
@@ -41,14 +54,17 @@ function writeStoredLanguage(language: LocaleValue) {
 export function AppShellProvider({ children }: { children: ReactNode }) {
   const [appLanguage, setAppLanguage] = useState<LocaleValue>("zh");
   const [loading, setLoading] = useState(true);
+  const [previewLanguageOverride, setPreviewLanguageOverride] = useState<LocaleValue | null>(null);
 
   useEffect(() => {
-    setAppLanguage(readStoredLanguage());
+    const previewLanguage = readPreviewLanguageOverride();
+    setPreviewLanguageOverride(previewLanguage);
+    setAppLanguage(previewLanguage ?? readStoredLanguage());
     setLoading(false);
   }, []);
 
   const language = appLanguage;
-  const canChangeLanguage = true;
+  const canChangeLanguage = previewLanguageOverride === null;
   const environment = resolveAppEnvironment();
 
   useEffect(() => {
@@ -61,10 +77,14 @@ export function AppShellProvider({ children }: { children: ReactNode }) {
     loading,
     canChangeLanguage,
     setLanguage: (nextLanguage) => {
+      if (previewLanguageOverride) {
+        return;
+      }
+
       setAppLanguage(nextLanguage);
       writeStoredLanguage(nextLanguage);
     }
-  }), [canChangeLanguage, environment, language, loading]);
+  }), [canChangeLanguage, environment, language, loading, previewLanguageOverride]);
 
   return <AppShellContext.Provider value={value}>{children}</AppShellContext.Provider>;
 }

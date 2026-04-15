@@ -11,8 +11,11 @@
     "normalize:tags": "ts-node --project tsconfig.scripts.json scripts/normalize-content-tags.ts --check",
     "normalize:tags:apply": "ts-node --project tsconfig.scripts.json scripts/normalize-content-tags.ts --apply",
     "normalize:tags:report": "ts-node --project tsconfig.scripts.json scripts/normalize-content-tags.ts --include-expanded",
+    "validate:attached-recommendations": "vitest run src/__tests__/attached-recommendations.test.ts",
     "validate:data": "ts-node --project tsconfig.scripts.json scripts/validate-data.ts",
     "validate:data:strict": "ts-node --project tsconfig.scripts.json scripts/validate-data.ts --strict-warnings",
+    "validate:plan-copy": "vitest run src/__tests__/plan-step-semantics.test.tsx src/__tests__/plan-context.test.ts",
+    "validate:profile-resume": "vitest run src/__tests__/profile-boundary-cleanup.test.tsx src/__tests__/plan-context.test.ts",
     "validate:study-docs": "ts-node --project tsconfig.scripts.json scripts/validate-study-docs.ts",
     "validate:study-remote": "ts-node --project tsconfig.scripts.json scripts/verify-study-remote.ts",
     "generate:translation-backlog": "ts-node --project tsconfig.scripts.json scripts/generate-content-translation-backlog.ts"

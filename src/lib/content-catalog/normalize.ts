@@ -81,7 +81,7 @@ function getQualityReviewAdjustment(review?: CatalogQualityReview): number {
 
   let adjustment = 0;
 
-  if (review.reviewStatus === "verified") {
+  if (review.reviewStatus === "verified" || review.reviewStatus === "manual_confirmed") {
     adjustment += 4;
   } else if (review.reviewStatus === "needs_review") {
     adjustment -= 4;

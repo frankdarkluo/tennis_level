@@ -72,9 +72,9 @@ function ViewsIcon() {
   );
 }
 
-const STANDARD_META_BADGE_CLASS = "bg-slate-100 px-1.0 py-0.5 text-[2px] font-semibold leading-[1] text-slate-700";
-const NOTE_META_BADGE_CLASS = "bg-slate-100 px-[3px] py-[3px] text-[2px] font-semibold leading-[1] text-slate-700";
-const WRAPPING_NOTE_META_BADGE_CLASS = `${NOTE_META_BADGE_CLASS} max-w-full whitespace-normal break-words text-center`;
+const STANDARD_META_BADGE_CLASS = "bg-slate-100 px-2.5 py-1 text-[11px] font-semibold leading-[1.2] text-slate-700";
+const NOTE_META_BADGE_CLASS = "bg-slate-100 px-2 py-1 text-[9px] font-semibold leading-[1.2] text-slate-700";
+const WRAPPING_NOTE_META_BADGE_CLASS = `${NOTE_META_BADGE_CLASS} whitespace-nowrap text-left`;
 
 export function ContentCard({
   item,
@@ -180,8 +180,8 @@ export function ContentCard({
               </div>
             ) : (
               <div className="flex flex-wrap gap-2">
-                <Badge className="px-5 py-2 text-base font-semibold leading-none">{getPlatformDisplayName(item.platform, language)}</Badge>
-                <Badge className="bg-slate-100 px-5 py-2 text-base font-semibold leading-none text-slate-700">{item.levels.join("/")}</Badge>
+                <Badge className="px-5 py-2 text-base font-semibold leading-[1.15]">{getPlatformDisplayName(item.platform, language)}</Badge>
+                <Badge className="bg-slate-100 px-5 py-2 text-base font-semibold leading-[1.15] text-slate-700">{item.levels.join("/")}</Badge>
                 <Badge className={STANDARD_META_BADGE_CLASS}>
                   {contentLanguage === "zh" ? t("content.lang.zh") : t("content.lang.en")}
                 </Badge>

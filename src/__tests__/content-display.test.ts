@@ -483,7 +483,7 @@ describe("content display helpers", () => {
       goal: "Settle your rhythm and contact before adding pace",
       warmupBlock: {
         title: "Warm-up",
-        items: ["10 shadow swings", "10 split-step reps"]
+        items: ["10 shadow swings", "10 split step reps"]
       },
       mainBlock: {
         title: "Main work",

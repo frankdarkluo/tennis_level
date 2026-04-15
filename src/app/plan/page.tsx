@@ -4,10 +4,12 @@ import Link from "next/link";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { parseEnrichedDiagnosisContext } from "@/lib/diagnose/enrichedContext";
+import { parseGuidanceContext } from "@/lib/guidance-context/build";
 import { readLocalPlanDraft, writeLocalPlanDraft } from "@/lib/appShell/localRouteState";
 import { logEvent } from "@/lib/eventLogger";
 import {
   buildPlanHref,
+  buildPlanResume,
   getAssessmentPlanFocusLine,
   getPlanTemplate,
   normalizePlanDraftSnapshot,
@@ -54,7 +56,9 @@ function PlanPageContent() {
   const preferredContentIdsParam = params.get("contentIds");
   const primaryNextStepParam = params.get("primaryNextStep");
   const planContextParam = params.get("planContext");
+  const guidanceContextParam = params.get("guidanceContext");
   const deepContextParam = params.get("deepContext");
+  const mobilePreviewPreset = params.get("mobilePreviewPreset");
 
   const [problemTag, setProblemTag] = useState(defaultProblemTag);
   const [level, setLevel] = useState<PlanLevel>(defaultLevel);
@@ -74,14 +78,24 @@ function PlanPageContent() {
     () => parsePlanContext(planContextParam) ?? restoredDraft?.planContext ?? null,
     [planContextParam, restoredDraft?.planContext]
   );
+  const guidanceContext = useMemo(
+    () => parseGuidanceContext(guidanceContextParam) ?? restoredDraft?.guidanceContext ?? null,
+    [guidanceContextParam, restoredDraft?.guidanceContext]
+  );
   const deepContext = useMemo(
     () => parseEnrichedDiagnosisContext(deepContextParam) ?? restoredDraft?.deepContext ?? null,
     [deepContextParam, restoredDraft?.deepContext]
   );
 
   const plan = useMemo(
-    () => getPlanTemplate(problemTag, level, language, preferredContentIds, { primaryNextStep, planContext, deepContext, environment }),
-    [deepContext, environment, language, problemTag, level, preferredContentIds, primaryNextStep, planContext]
+    () => getPlanTemplate(problemTag, level, language, preferredContentIds, {
+      primaryNextStep,
+      planContext,
+      guidanceContext,
+      deepContext,
+      environment
+    }),
+    [deepContext, environment, guidanceContext, language, problemTag, level, preferredContentIds, primaryNextStep, planContext]
   );
   const assessmentFocusLine = useMemo(
     () => getAssessmentPlanFocusLine(planContext, language),
@@ -103,6 +117,8 @@ function PlanPageContent() {
   const summaryHeadline = primaryNextStep || plan.target;
   const summaryRationale = plan.summary && plan.summary !== summaryHeadline ? plan.summary : undefined;
   const sourceLabel = primaryNextStep ? `${sourceLabelBase}::${primaryNextStep}` : sourceLabelBase;
+  const forceExpandedPlanPreview = mobilePreviewPreset === "plan-expanded";
+  const forceCollapsedPlanPreview = mobilePreviewPreset === "plan-collapsed";
   const planHref = useMemo(
     () => buildPlanHref({
       problemTag: plan.problemTag,
@@ -111,9 +127,10 @@ function PlanPageContent() {
       sourceType,
       primaryNextStep,
       planContext: planContext ?? undefined,
+      guidanceContext: guidanceContext ?? undefined,
       deepContext: deepContext ?? undefined
     }),
-    [deepContext, plan.level, plan.problemTag, preferredContentIds, primaryNextStep, planContext, sourceType]
+    [deepContext, guidanceContext, plan.level, plan.problemTag, preferredContentIds, primaryNextStep, planContext, sourceType]
   );
   const regenerate = () => {
     setLevel((prev) => (prev === "2.5" ? "3.0" : prev === "3.0" ? "3.5" : prev === "3.5" ? "4.0" : prev === "4.0" ? "4.0+" : "2.5"));
@@ -161,10 +178,11 @@ function PlanPageContent() {
       sourceType,
       primaryNextStep,
       planContext: planContext ?? undefined,
+      guidanceContext: guidanceContext ?? undefined,
       deepContext: deepContext ?? undefined,
       updatedAt: new Date().toISOString()
     });
-  }, [deepContext, hasSource, plan.level, plan.problemTag, preferredContentIds, primaryNextStep, planContext, sourceType]);
+  }, [deepContext, guidanceContext, hasSource, plan.level, plan.problemTag, preferredContentIds, primaryNextStep, planContext, sourceType]);
 
   const handleSavePlan = async () => {
     if (!user?.id || !configured) {
@@ -175,7 +193,19 @@ function PlanPageContent() {
     setSaveStatus("saving");
     setSaveMessage("");
 
-    const saveResult = await saveGeneratedPlan(user.id, plan, sourceType, sourceLabel);
+    const saveResult = await saveGeneratedPlan(user.id, {
+      ...plan,
+      resume: buildPlanResume({
+        problemTag: plan.problemTag,
+        level: plan.level,
+        preferredContentIds,
+        sourceType,
+        primaryNextStep,
+        planContext: planContext ?? undefined,
+        guidanceContext: guidanceContext ?? undefined,
+        deepContext: deepContext ?? undefined
+      })
+    }, sourceType, sourceLabel);
 
     if (saveResult.error) {
       setSaveStatus("error");
@@ -243,7 +273,9 @@ function PlanPageContent() {
         {todayPlan ? (
           <DayPlanCard
             day={todayPlan}
-            isToday
+            guidanceContext={guidanceContext}
+            isToday={!forceCollapsedPlanPreview}
+            defaultExpanded={forceExpandedPlanPreview}
             onViewDetails={(dayNumber) => logEvent("plan.day_expanded", { dayIndex: dayNumber }, { page: "/plan" })}
           />
         ) : null}
@@ -256,6 +288,8 @@ function PlanPageContent() {
                 <DayPlanCard
                   key={day.day}
                   day={day}
+                  guidanceContext={guidanceContext}
+                  defaultExpanded={forceExpandedPlanPreview}
                   onViewDetails={(dayNumber) => logEvent("plan.day_expanded", { dayIndex: dayNumber }, { page: "/plan" })}
                 />
               ))}

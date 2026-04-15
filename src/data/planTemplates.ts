@@ -1,4 +1,4 @@
-import { PlanTemplate, PlanTemplateDay } from "@/types/plan";
+import { MotionPrimitiveId, PlanTemplate, PlanTemplateDay } from "@/types/plan";
 
 const block = (title: string, items: string[]) => ({ title, items });
 
@@ -1297,7 +1297,97 @@ const missingDiagnosisPlanTemplates: PlanTemplate[] = [
   }
 ];
 
-export const planTemplates: PlanTemplate[] = [
+const PLAN_TEMPLATE_MOTION_MAP: Partial<Record<string, Partial<Record<PlanTemplate["level"], Partial<Record<number, MotionPrimitiveId>>>>>> = {
+  "backhand-into-net": {
+    "3.0": {
+      1: "unit-turn",
+      2: "contact-point"
+    }
+  },
+  "forehand-no-power": {
+    "3.0": {
+      1: "weight-transfer",
+      2: "contact-point",
+      4: "unit-turn"
+    },
+    "3.5": {
+      1: "weight-transfer",
+      2: "contact-point"
+    }
+  },
+  "return-under-pressure": {
+    "3.5": {
+      1: "split-step",
+      5: "recovery-step"
+    },
+    "4.0": {
+      1: "split-step",
+      5: "recovery-step"
+    }
+  },
+  "second-serve-reliability": {
+    "3.0": {
+      1: "serve-toss",
+      2: "trophy-position",
+      4: "pronation"
+    }
+  },
+  "serve-toss-consistency": {
+    "3.0": {
+      1: "serve-toss",
+      2: "trophy-position"
+    }
+  },
+  "movement-slow": {
+    "3.0": {
+      1: "split-step",
+      2: "cross-step-shuffle",
+      5: "recovery-step"
+    }
+  },
+  "late-contact": {
+    "3.0": {
+      1: "shoulder-turn",
+      2: "contact-point"
+    }
+  },
+  "doubles-positioning": {
+    "3.0": {
+      5: "cross-step-shuffle"
+    }
+  },
+  "overhead-timing": {
+    "3.0": {
+      2: "shoulder-turn",
+      3: "contact-point"
+    }
+  },
+  "general-improvement": {
+    "3.0": {
+      3: "split-step",
+      4: "serve-toss"
+    }
+  }
+};
+
+function attachMotionPrimitives(templates: PlanTemplate[]): PlanTemplate[] {
+  return templates.map((template) => {
+    const dayMap = PLAN_TEMPLATE_MOTION_MAP[template.problemTag]?.[template.level];
+    if (!dayMap) {
+      return template;
+    }
+
+    return {
+      ...template,
+      days: template.days.map((day) => ({
+        ...day,
+        motionPrimitiveId: dayMap[day.day] ?? day.motionPrimitiveId ?? null
+      }))
+    };
+  });
+}
+
+const basePlanTemplates: PlanTemplate[] = [
   ...missingDiagnosisPlanTemplates,
   {
     problemTag: "serve-timing",
@@ -2926,3 +3016,5 @@ export const planTemplates: PlanTemplate[] = [
     environment: ["testing", "production"]
   }
 ];
+
+export const planTemplates: PlanTemplate[] = attachMotionPrimitives(basePlanTemplates);

@@ -20,6 +20,8 @@ import {
   buildEnrichedSceneRecap,
   buildEnrichedSpecificityReasons
 } from "@/lib/diagnose/enrichedContext";
+import { buildDiagnosisGuidanceContext } from "@/lib/guidance-context/build";
+import { canonicalizeTennisText } from "@/lib/i18n/tennisGlossary";
 import { getPreferredOutboundUrl } from "@/lib/content/outbound";
 import { logEvent } from "@/lib/eventLogger";
 import { useI18n } from "@/lib/i18n/config";
@@ -115,12 +117,14 @@ function RecommendationCard({
   item,
   source,
   layer,
-  problemTag
+  problemTag,
+  guidanceContext
 }: {
   item: DiagnosisResultType["recommendedContents"][number];
   source: "diagnosis_featured" | "diagnosis_more";
   layer: 2 | 3;
   problemTag: string;
+  guidanceContext?: DiagnosisResultType["guidanceContext"];
 }) {
   const { language, t } = useI18n();
   const thumbnail = getThumbnail(item);
@@ -156,7 +160,7 @@ function RecommendationCard({
           {targetLabel && targetLabel !== primaryTitle ? (
             <p className="mt-1 text-sm text-slate-600">{t("content.targetPrefix")} {targetLabel}</p>
           ) : null}
-          <RecommendationSummary item={item} className="mt-2" />
+          <RecommendationSummary item={item} guidanceContext={guidanceContext ?? undefined} className="mt-2" />
         </div>
       </div>
       <div className="mt-3">
@@ -203,14 +207,24 @@ export function DiagnoseResult({
 }) {
   const { language, t } = useI18n();
   const locale: "zh" | "en" = language === "en" ? "en" : "zh";
+  const normalizeGlossary = (value: string | null | undefined) => value ? canonicalizeTennisText(value, locale) : value;
   const primaryFix = result.fixes[0] ?? result.summary;
   const primaryNextStep = result.primaryNextStep ?? primaryFix;
   const normalizedPlanLevel = normalizePlanLevel(result.level);
   const deepContext = result.enrichedContext ?? null;
+  const guidanceContext = result.guidanceContext ?? buildDiagnosisGuidanceContext({
+    problemTag: result.problemTag,
+    level: normalizedPlanLevel,
+    locale,
+    primaryNextStep,
+    diagnosisInput: result.input,
+    deepContext
+  });
   const candidateIds = buildDiagnosisPlanCandidateIds({
     problemTag: result.problemTag,
     level: normalizedPlanLevel,
     diagnosisInput: result.input,
+    guidanceContext,
     recommendedContentIds: result.recommendedContents.map((item) => item.id)
   });
   const planContextSourceInput = deepContext?.sourceInput ?? result.input;
@@ -226,6 +240,7 @@ export function DiagnoseResult({
     sourceType: "diagnosis",
     primaryNextStep,
     planContext,
+    guidanceContext,
     deepContext: deepContext ?? undefined
   });
   const canGeneratePlan = Boolean(result.input.trim());
@@ -289,11 +304,11 @@ export function DiagnoseResult({
     <Card className="space-y-4">
       <div className="space-y-3">
         <p className="text-sm font-semibold text-brand-700">{t("diagnose.result.badge")}</p>
-        <h2 className="text-2xl font-black text-slate-900">{result.title}</h2>
-        <p className="text-sm leading-6 text-slate-600">{result.summary}</p>
+        <h2 className="text-2xl font-black text-slate-900">{normalizeGlossary(result.title)}</h2>
+        <p className="text-sm leading-6 text-slate-600">{normalizeGlossary(result.summary)}</p>
         <div className="rounded-2xl bg-[var(--surface-soft)] p-4">
           <p className="text-sm font-semibold text-slate-700">{t("diagnose.result.today")}</p>
-          <p className="mt-2 text-base font-medium text-slate-900">{primaryNextStep}</p>
+          <p className="mt-2 text-base font-medium text-slate-900">{normalizeGlossary(primaryNextStep)}</p>
         </div>
         {!isNarrowingMode ? (
           <div className="flex flex-wrap gap-2">
@@ -317,7 +332,7 @@ export function DiagnoseResult({
             {result.categoryConflict?.reason ? (
               <p className="mt-2 text-sm leading-6 text-slate-600">
                 {language === "en" ? "Why: " : "原因："}
-                {result.categoryConflict.reason}
+                {normalizeGlossary(result.categoryConflict.reason)}
               </p>
             ) : null}
           </div>
@@ -328,7 +343,7 @@ export function DiagnoseResult({
               {language === "en" ? "Before recommendations, clarify these first:" : "在推荐之前，请先补充这两点："}
             </p>
             {refusalSummary ? (
-              <p className="mt-2 text-sm leading-6 text-slate-700">{refusalSummary}</p>
+              <p className="mt-2 text-sm leading-6 text-slate-700">{normalizeGlossary(refusalSummary)}</p>
             ) : null}
             {narrowingSuggestions.length > 0 ? (
               <div className="mt-3 space-y-2">
@@ -344,11 +359,11 @@ export function DiagnoseResult({
                       <p className="text-xs font-semibold uppercase tracking-[0.08em] text-amber-700">{severityLabel}</p>
                       <p className="mt-1 text-sm text-slate-600">
                         {language === "en" ? "Reason: " : "原因："}
-                        {item.reason}
+                        {normalizeGlossary(item.reason)}
                       </p>
                       <p className="mt-1 text-sm font-medium text-slate-900">
                         {language === "en" ? "Next action: " : "下一步："}
-                        {item.nextAction}
+                        {normalizeGlossary(item.nextAction)}
                       </p>
                     </div>
                   );
@@ -357,7 +372,7 @@ export function DiagnoseResult({
             ) : narrowingPrompts.length > 0 ? (
               <ul className="mt-2 list-disc space-y-1 pl-5">
                 {narrowingPrompts.map((prompt) => (
-                  <li key={prompt}>{prompt}</li>
+                  <li key={prompt}>{normalizeGlossary(prompt)}</li>
                 ))}
               </ul>
             ) : null}
@@ -390,7 +405,7 @@ export function DiagnoseResult({
         {!isNarrowingMode && result.causes.length > 0 ? (
           <div className="rounded-xl border border-[var(--line)] bg-white/80 p-3 text-sm text-slate-700">
             <p className="font-semibold text-slate-900">{t("diagnose.result.why")}</p>
-            <p className="mt-2 leading-6">{result.causes[0]}</p>
+            <p className="mt-2 leading-6">{normalizeGlossary(result.causes[0])}</p>
           </div>
         ) : null}
         {canExpandLayerTwo ? (
@@ -461,7 +476,7 @@ export function DiagnoseResult({
               <p className="mb-2 text-sm font-semibold text-slate-900">
                 {language === "en" ? "Expanded reasoning" : "展开说明"}
               </p>
-              <p className="text-sm leading-6 text-slate-700">{detailedSummary}</p>
+              <p className="text-sm leading-6 text-slate-700">{normalizeGlossary(detailedSummary)}</p>
             </div>
           ) : null}
 
@@ -469,7 +484,7 @@ export function DiagnoseResult({
             <p className="mb-2 text-sm font-semibold text-slate-900">{t("diagnose.result.why")}</p>
             <ul className="list-disc space-y-1 pl-5 text-sm text-slate-700">
               {result.causes.slice(1).map((cause) => (
-                <li key={cause}>{cause}</li>
+                <li key={cause}>{normalizeGlossary(cause)}</li>
               ))}
             </ul>
           </div>
@@ -481,7 +496,7 @@ export function DiagnoseResult({
               </p>
               <ul className="list-disc space-y-1 pl-5 text-sm text-slate-700">
                 {result.drills.map((drill) => (
-                  <li key={drill}>{drill}</li>
+                  <li key={drill}>{normalizeGlossary(drill)}</li>
                 ))}
               </ul>
             </div>
@@ -490,7 +505,13 @@ export function DiagnoseResult({
           {featuredContent ? (
             <div>
               <p className="mb-2 text-sm font-semibold text-slate-900">{t("diagnose.result.featured")}</p>
-              <RecommendationCard item={featuredContent} source="diagnosis_featured" layer={2} problemTag={result.problemTag} />
+              <RecommendationCard
+                item={featuredContent}
+                source="diagnosis_featured"
+                layer={2}
+                problemTag={result.problemTag}
+                guidanceContext={guidanceContext}
+              />
             </div>
           ) : null}
 
@@ -498,7 +519,14 @@ export function DiagnoseResult({
             <div className="space-y-2">
               <p className="text-sm font-semibold text-slate-900">{t("diagnose.result.more")}</p>
               {moreContents.map((item) => (
-                <RecommendationCard key={item.id} item={item} source="diagnosis_more" layer={3} problemTag={result.problemTag} />
+                <RecommendationCard
+                  key={item.id}
+                  item={item}
+                  source="diagnosis_more"
+                  layer={3}
+                  problemTag={result.problemTag}
+                  guidanceContext={guidanceContext}
+                />
               ))}
             </div>
           ) : null}
@@ -511,13 +539,13 @@ export function DiagnoseResult({
                   {locale === "en" ? "Scene-backed diagnosis" : "场景证据诊断"}
                 </p>
               </div>
-              {deepEvidenceSummary ? <p className="text-sm leading-6 text-slate-700">{deepEvidenceSummary}</p> : null}
+              {deepEvidenceSummary ? <p className="text-sm leading-6 text-slate-700">{normalizeGlossary(deepEvidenceSummary)}</p> : null}
               {deepSceneRecap ? (
                 <div className="rounded-xl bg-white/80 p-3">
                   <p className="text-sm font-semibold text-slate-900">
                     {locale === "en" ? "Scene recap" : "一句话场景回顾"}
                   </p>
-                  <p className="mt-2 text-sm leading-6 text-slate-700">{deepSceneRecap}</p>
+                  <p className="mt-2 text-sm leading-6 text-slate-700">{normalizeGlossary(deepSceneRecap)}</p>
                 </div>
               ) : null}
               {specificityReasons.length > 0 ? (
@@ -527,7 +555,7 @@ export function DiagnoseResult({
                   </p>
                   <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-700">
                     {specificityReasons.map((reason) => (
-                      <li key={reason}>{reason}</li>
+                      <li key={reason}>{normalizeGlossary(reason)}</li>
                     ))}
                   </ul>
                 </div>

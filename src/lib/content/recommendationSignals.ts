@@ -3,6 +3,9 @@ import {
   getContentFocusLine,
   getContentPrimaryTitle
 } from "@/lib/content/display";
+import type { GuidanceContext } from "@/lib/guidance-context/types";
+import { canonicalizeTennisText } from "@/lib/i18n/tennisGlossary";
+import { buildAttachedRecommendationNarrative } from "@/lib/recommendations/attached/recommend";
 import type { ContentItem } from "@/types/content";
 
 export type ContentTeachingIntent = "teaching" | "match_example" | "commentary" | "general";
@@ -128,19 +131,49 @@ export function getRecommendationTrustSignals(input: RecommendationSignalInput):
   return signals;
 }
 
-export function buildRecommendationDetails(item: ContentItem, language: "zh" | "en"): {
+function buildGuidanceAwareWhySelected(
+  item: ContentItem,
+  language: "zh" | "en",
+  guidanceContext?: GuidanceContext
+): string {
+  const baseWhy = getContentCoachNote(item, language)?.trim() || item.reason.trim();
+  if (!guidanceContext) {
+    return baseWhy || getContentPrimaryTitle(item, language);
+  }
+
+  const narrative = buildAttachedRecommendationNarrative({
+    item,
+    guidanceContext,
+    locale: language
+  });
+
+  return narrative.whySelected || baseWhy || getContentPrimaryTitle(item, language);
+}
+
+export function buildRecommendationDetails(
+  item: ContentItem,
+  language: "zh" | "en",
+  guidanceContext?: GuidanceContext
+): {
   whySelected: string;
   technicalPoint: string | null;
   trustSignals: RecommendationTrustSignal[];
 } {
   const primaryTitle = getContentPrimaryTitle(item, language);
   const focusLine = getContentFocusLine(item, language)?.trim() || null;
-  const coachNote = getContentCoachNote(item, language)?.trim() || null;
-  const whySelected = coachNote || item.reason.trim() || focusLine || primaryTitle;
+  const whySelected = buildGuidanceAwareWhySelected(item, language, guidanceContext) || focusLine || primaryTitle;
 
   return {
-    whySelected,
-    technicalPoint: focusLine && focusLine !== primaryTitle ? focusLine : null,
+    whySelected: canonicalizeTennisText(whySelected, language),
+    technicalPoint: focusLine && focusLine !== primaryTitle
+      ? canonicalizeTennisText(focusLine, language)
+      : guidanceContext
+        ? canonicalizeTennisText(buildAttachedRecommendationNarrative({
+          item,
+          guidanceContext,
+          locale: language
+        }).technicalPoint ?? "", language) || null
+        : null,
     trustSignals: getRecommendationTrustSignals({
       title: item.title,
       sourceTitle: item.sourceTitle,

@@ -17,7 +17,7 @@ const { expandedContents } = require("../src/data/expandedContents") as typeof i
 const { planFewShotFixtures } = require("../src/data/planFewShotFixtures") as typeof import("../src/data/planFewShotFixtures");
 const { ASSESSMENT_DIMENSION_PLAN_HINTS } = require("../src/lib/plan-core/problemTagSupport") as typeof import("../src/lib/plan-core/problemTagSupport");
 const { diagnoseProblem } = require("../src/lib/diagnosis") as typeof import("../src/lib/diagnosis");
-const { buildAssessmentPlanContext } = require("../src/lib/plans") as typeof import("../src/lib/plans");
+const { buildAssessmentPlanContext, buildDiagnosisPlanCandidateIds } = require("../src/lib/plans") as typeof import("../src/lib/plans");
 const { retrieveCatalogRecommendations } = require("../src/lib/content-catalog/retrieve") as typeof import("../src/lib/content-catalog/retrieve");
 
 const OUTPUT_DIR = resolve(process.cwd(), "ops/quality");
@@ -183,12 +183,47 @@ function createAssessmentPlanSamples(): RecommendationSample[] {
   });
 }
 
+function createDiagnosisPlanSamples(): RecommendationSample[] {
+  return planFewShotFixtures.map((fixture) => {
+    const diagnosis = diagnoseProblem(fixture.deepContext?.sourceInput || fixture.diagnosisInput, {
+      level: fixture.level,
+      locale: fixture.locale,
+      effortMode: fixture.deepContext ? "deep" : "standard",
+      environment: "production",
+      deepHandoff: fixture.deepContext
+    });
+    const candidateIds = buildDiagnosisPlanCandidateIds({
+      problemTag: diagnosis.problemTag,
+      level: fixture.level,
+      recommendedContentIds: diagnosis.recommendedContents.map((item) => item.id),
+      diagnosisInput: fixture.diagnosisInput,
+      guidanceContext: diagnosis.guidanceContext,
+      maxCandidates: 3
+    });
+    const items = candidateIds
+      .map((id) => contentById.get(id))
+      .filter((item): item is ContentItem => Boolean(item));
+
+    return {
+      id: `diagnosis_plan:${fixture.id}`,
+      lane: "diagnosis_plan",
+      source: "plan",
+      description: `Diagnosis-conditioned plan sample for ${fixture.problemTag}`,
+      expectedProblemTag: fixture.problemTag,
+      matchedProblemTag: diagnosis.problemTag,
+      matchedRuleId: diagnosis.matchedRuleId,
+      items
+    };
+  });
+}
+
 export function createRecommendationQualityArtifacts() {
   const generatedAt = new Date().toISOString();
   const samples = [
     ...createDiagnosisRuleSeededSamples(),
     ...createDiagnosisStandardSamples(),
     ...createDiagnosisDeepSamples(),
+    ...createDiagnosisPlanSamples(),
     ...createAssessmentPlanSamples()
   ];
   const report = buildRecommendationQualityReport({
@@ -201,6 +236,7 @@ export function createRecommendationQualityArtifacts() {
     diagnosisRuleSeeded: samples.filter((sample) => sample.lane === "diagnosis_rule_seeded").length,
     diagnosisStandard: samples.filter((sample) => sample.lane === "diagnosis_standard").length,
     diagnosisDeep: samples.filter((sample) => sample.lane === "diagnosis_deep").length,
+    diagnosisPlan: samples.filter((sample) => sample.lane === "diagnosis_plan").length,
     assessmentPlan: samples.filter((sample) => sample.lane === "assessment_plan").length
   };
   const problemTagMismatches = report.samples.filter(
@@ -210,7 +246,7 @@ export function createRecommendationQualityArtifacts() {
     generatedAt,
     methodology: {
       verificationBasis: report.verificationBasis,
-      note: "This output-layer metric is expected to run high because default retrieval already restricts to direct_source. Pair it with problem-tag direct coverage.",
+      note: "This output-layer metric is expected to run high because default retrieval already restricts to direct_source. Pair it with problem-tag direct coverage and the attached-flow metrics section below.",
       sampleCounts
     },
     mismatchedProblemTagSamples: problemTagMismatches,
@@ -224,7 +260,8 @@ export function createRecommendationQualityArtifacts() {
     "",
     "- This is an output-layer metric only and is structurally biased upward by the current direct_source-only default retrieval boundary.",
     "- Review this together with `problem-tag-coverage.latest.md` so weak-tag inventory gaps remain visible.",
-    `- Sample counts: diagnosis_rule_seeded=${sampleCounts.diagnosisRuleSeeded}, diagnosis_standard=${sampleCounts.diagnosisStandard}, diagnosis_deep=${sampleCounts.diagnosisDeep}, assessment_plan=${sampleCounts.assessmentPlan}.`
+    "- `manual_relevance_accept_rate@3` currently uses a `manual_qc_or_verified_proxy` basis until richer explicit relevance labels are added to QA.",
+    `- Sample counts: diagnosis_rule_seeded=${sampleCounts.diagnosisRuleSeeded}, diagnosis_standard=${sampleCounts.diagnosisStandard}, diagnosis_deep=${sampleCounts.diagnosisDeep}, diagnosis_plan=${sampleCounts.diagnosisPlan}, assessment_plan=${sampleCounts.assessmentPlan}.`
   ];
 
   if (problemTagMismatches.length > 0) {

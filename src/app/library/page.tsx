@@ -49,6 +49,10 @@ function inferQueryLanguage(query: string) {
   return "unknown";
 }
 
+function normalizeLibraryPlatformParam(value: string | null): LibraryPlatformFilter {
+  return value === "Bilibili" || value === "YouTube" || value === "Xiaohongshu" ? value : "all";
+}
+
 function LibraryPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -81,6 +85,11 @@ function LibraryPageContent() {
     () => buildLibraryItems(),
     []
   );
+  const platformParam = searchParams.get("platform");
+
+  useEffect(() => {
+    setSelectedPlatform(normalizeLibraryPlatformParam(platformParam));
+  }, [platformParam]);
 
   useEffect(() => {
     if (loading) {

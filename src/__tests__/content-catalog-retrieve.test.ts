@@ -245,14 +245,18 @@ describe("content catalog retrieval", () => {
     expect(results.map((item) => item.id)).toEqual(["direct_a", "direct_c"]);
   });
 
-  it("lets diagnosis and plan call the same shared retrieval boundary", async () => {
+  it("keeps diagnosis on catalog retrieval while plan attachment ranking goes through the shared attached recommender", async () => {
     vi.resetModules();
     const retrieveModule = await import("@/lib/content-catalog/retrieve");
+    const attachedModule = await import("@/lib/recommendations/attached/recommend");
     const retrieveCatalogRecommendationsMock = vi
       .spyOn(retrieveModule, "retrieveCatalogRecommendations")
       .mockReturnValue([]);
     const retrieveCatalogContentsByIdsMock = vi
       .spyOn(retrieveModule, "retrieveCatalogContentsByIds")
+      .mockReturnValue([]);
+    const recommendAttachedVideosMock = vi
+      .spyOn(attachedModule, "recommendAttachedVideos")
       .mockReturnValue([]);
 
     const diagnosis = await import("@/lib/diagnosis");
@@ -267,6 +271,7 @@ describe("content catalog retrieval", () => {
     });
 
     expect(retrieveCatalogContentsByIdsMock).toHaveBeenCalledTimes(1);
-    expect(retrieveCatalogRecommendationsMock).toHaveBeenCalledTimes(1);
+    expect(retrieveCatalogRecommendationsMock).toHaveBeenCalledTimes(0);
+    expect(recommendAttachedVideosMock).toHaveBeenCalledTimes(1);
   });
 });

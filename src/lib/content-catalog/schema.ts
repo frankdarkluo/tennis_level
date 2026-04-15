@@ -5,7 +5,7 @@ import type { ProblemTag } from "@/types/problemTag";
 
 export type CatalogRightsStatus = "direct_source" | "search_link" | "unknown";
 export type CatalogIngestionMethod = "curated" | "expanded";
-export type CatalogReviewStatus = "verified" | "needs_review" | "suspect" | "rejected";
+export type CatalogReviewStatus = "verified" | "manual_confirmed" | "needs_review" | "suspect" | "rejected";
 export type CatalogThumbnailStatus = "ok" | "fallback" | "missing" | "broken" | "unknown";
 
 export type CatalogQualityReview = {

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 320" fill="none">
+  <rect width="640" height="320" rx="24" fill="#FFF7ED"/>
+  <circle cx="320" cy="148" r="56" fill="#FDE68A"/>
+  <path d="M320 102V176M320 140H380" stroke="#7C2D12" stroke-width="10" stroke-linecap="round">
+    <animateTransform attributeName="transform" type="rotate" values="0 320 148;-36 320 148;0 320 148" dur="1.4s" repeatCount="2"/>
+  </path>
+  <path d="M302 188L284 244M338 188L356 244" stroke="#7C2D12" stroke-width="10" stroke-linecap="round"/>
+  <path d="M252 112C222 128 210 148 214 172" stroke="#F97316" stroke-width="8" stroke-linecap="round" stroke-dasharray="14 16"/>
+  <path d="M214 172L234 162" stroke="#F97316" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="420" cy="148" r="14" fill="#DC2626">
+    <animate attributeName="cx" values="432;404;432" dur="1.4s" repeatCount="2"/>
+  </circle>
+</svg>

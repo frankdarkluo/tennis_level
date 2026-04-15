@@ -14,9 +14,12 @@ import {
 } from "@/lib/diagnose/problemTagSupport";
 import { retrieveCatalogContentsByIds, retrieveCatalogRecommendations } from "@/lib/content-catalog/retrieve";
 import { filterByEnvironment } from "@/lib/environment";
+import { buildDiagnosisGuidanceContext } from "@/lib/guidance-context/build";
+import { recommendAttachedVideos } from "@/lib/recommendations/attached/recommend";
 import { AssessmentResult } from "@/types/assessment";
 import { ContentItem } from "@/types/content";
 import { AppEnvironment } from "@/types/environment";
+import { EnrichedDiagnosisContext } from "@/types/enrichedDiagnosis";
 import { ProblemTag } from "@/types/problemTag";
 import {
   DiagnosisAlias,
@@ -85,6 +88,7 @@ const DEFAULT_DRILLS_EN = [
 
 const DEFAULT_CONTENT_IDS = ["content_cn_c_01", "content_cn_f_02", "content_gaiao_01"];
 const ALL_DIAGNOSIS_CONTENTS = [...contents, ...expandedContents];
+const EXPANDED_CONTENT_ID_SET = new Set(expandedContents.map((item) => item.id));
 
 const SUMMARY_CHAR_BUDGET: Record<"zh" | "en", number> = {
   zh: 86,
@@ -987,7 +991,7 @@ function getDiagnosisSignalBoost(signalBundle: DiagnosisSignalBundle): Diagnosis
   }
 
   if (slotSignals.has("slot_context_movement") || slotSignals.has("slot_condition_mobility_limit")) {
-    contentIds.push("content_cn_c_02", "content_fr_02", "content_cn_a_03");
+    contentIds.push("content_fr_02", "content_cn_c_02", "content_cn_a_03");
     problemTags.push("movement-slow", "late-contact", "mobility-limit");
     skills.push("movement", "footwork");
   }
@@ -1036,6 +1040,13 @@ function getDiagnosisContentSearchText(item: ContentItem): string {
     .filter(Boolean)
     .join(" ")
     .toLowerCase();
+}
+
+function splitDiagnosisContentPools(contentPool: ContentItem[]) {
+  return {
+    curatedContentPool: contentPool.filter((item) => !EXPANDED_CONTENT_ID_SET.has(item.id)),
+    expandedContentPool: contentPool.filter((item) => EXPANDED_CONTENT_ID_SET.has(item.id))
+  };
 }
 
 type RankedDiagnosisContentCandidate = {
@@ -1104,25 +1115,33 @@ function getDiagnosisRecommendedContents(input: {
   rule: DiagnosisRule;
   signalBundle: DiagnosisSignalBundle;
   seedContentIds: string[];
+  preferredSeedContentIds?: string[];
   matchedKeywords: string[];
   matchedSynonyms: string[];
   contentPool: ContentItem[];
   maxRecommendations: number;
   level?: string;
+  guidanceContext: NonNullable<DiagnosisResult["guidanceContext"]>;
 }): ContentItem[] {
   const {
     rule,
     signalBundle,
     seedContentIds,
+    preferredSeedContentIds,
     matchedKeywords,
     matchedSynonyms,
     contentPool,
     maxRecommendations,
-    level
+    level,
+    guidanceContext
   } = input;
+  const { curatedContentPool, expandedContentPool } = splitDiagnosisContentPools(contentPool);
 
   const boost = getDiagnosisSignalBoost(signalBundle);
-  const seedIds = buildUniqueSignalList([...seedContentIds, ...boost.contentIds]);
+  const primarySeedIds = buildUniqueSignalList(seedContentIds);
+  const preferredSeedIds = buildUniqueSignalList((preferredSeedContentIds ?? []).filter((id) => !primarySeedIds.includes(id)));
+  const supportSeedIds = buildUniqueSignalList(boost.contentIds.filter((id) => !primarySeedIds.includes(id)));
+  const seedIds = buildUniqueSignalList([...primarySeedIds, ...preferredSeedIds, ...supportSeedIds]);
   const seedItems = seedIds
     .map((id) => contentPool.find((item) => item.id === id))
     .filter((item): item is ContentItem => Boolean(item));
@@ -1141,21 +1160,30 @@ function getDiagnosisRecommendedContents(input: {
     ...matchedSynonyms,
     ...signalBundle.aliases,
     ...signalBundle.modifiers,
-    ...signalBundle.layeredSignals.triggers
+    ...signalBundle.layeredSignals.triggers,
+    guidanceContext.trainingFocus,
+    guidanceContext.planIntent.replace(/_/g, " "),
+    guidanceContext.strokeFamily,
+    guidanceContext.mechanismFamily
   ])
     .map((term) => normalizeDiagnosisInput(term))
     .filter((term) => term.length >= 3);
-  return retrieveCatalogRecommendations({
+
+  return recommendAttachedVideos({
     source: "diagnosis",
-    contentPool,
-    problemTags: seedProblemTags,
-    skillCategories: buildUniqueSignalList([...seedSkills, ...boost.skills]),
-    lexicalTerms,
-    level,
-    requiredIds: seedIds,
+    guidanceContext,
+    contentPool: curatedContentPool,
+    expandedContentPool,
+    maxResults: maxRecommendations,
+    requiredIds: primarySeedIds,
     preferredIds: seedIds,
-    maxResults: maxRecommendations
-  });
+    supportIds: supportSeedIds,
+    lexicalTerms: buildUniqueSignalList([
+      ...lexicalTerms,
+      ...seedProblemTags,
+      ...seedSkills
+    ])
+  }).map((entry) => entry.item);
 }
 
 function prioritizeContentsByLevel(
@@ -2234,19 +2262,7 @@ export function diagnoseProblem(input: string, options: DiagnoseOptions = {}): D
   );
   const evidenceLevel = getDiagnosisEvidenceLevel(score);
   const allowRecommendations = shouldExposeDiagnosisRecommendations(evidenceLevel);
-
-  const recommendedContents = allowRecommendations
-    ? getDiagnosisRecommendedContents({
-      rule,
-      signalBundle,
-      seedContentIds: modifierAwareContentIds,
-      matchedKeywords,
-      matchedSynonyms,
-      contentPool: eligibleContentPool,
-      maxRecommendations,
-      level
-    })
-    : [];
+  const summary = buildDiagnosisSummary(modifierAwareCauses, modifierAwareFixes, false, locale, rule.problemTag, signalBundle);
   const needsNarrowing = evidenceLevel === "low";
   const narrowingSuggestions = needsNarrowing ? buildNarrowingSuggestions(signalBundle, locale) : [];
   const narrowingPrompts = buildNarrowingPrompts(narrowingSuggestions);
@@ -2255,13 +2271,6 @@ export function diagnoseProblem(input: string, options: DiagnoseOptions = {}): D
     score,
     signalBundle
   });
-  const fallbackMode = recommendedContents.length === 0
-    ? assessmentResult
-      ? "assessment"
-      : "no-assessment"
-    : null;
-  const finalRecommendedContents = allowRecommendations ? recommendedContents : [];
-  const summary = buildDiagnosisSummary(modifierAwareCauses, modifierAwareFixes, false, locale, rule.problemTag, signalBundle);
   const primaryNextStep = resolvePrimaryNextStep({
     needsNarrowing,
     narrowingPrompts,
@@ -2270,6 +2279,40 @@ export function diagnoseProblem(input: string, options: DiagnoseOptions = {}): D
     summary,
     locale
   });
+  const guidanceDeepContext = deepHandoff
+    ? {
+      ...deepHandoff,
+      problemTag: rule.problemTag
+    } satisfies EnrichedDiagnosisContext
+    : null;
+  const guidanceContext = buildDiagnosisGuidanceContext({
+    problemTag: rule.problemTag,
+    level,
+    locale,
+    primaryNextStep,
+    diagnosisInput: input,
+    deepContext: guidanceDeepContext
+  });
+  const recommendedContents = allowRecommendations
+    ? getDiagnosisRecommendedContents({
+      rule,
+      signalBundle,
+      seedContentIds: rule.recommendedContentIds,
+      preferredSeedContentIds: modifierAwareContentIds,
+      matchedKeywords,
+      matchedSynonyms,
+      contentPool: eligibleContentPool,
+      maxRecommendations,
+      level,
+      guidanceContext
+    })
+    : [];
+  const fallbackMode = recommendedContents.length === 0
+    ? assessmentResult
+      ? "assessment"
+      : "no-assessment"
+    : null;
+  const finalRecommendedContents = allowRecommendations ? recommendedContents : [];
   const effortPayload = applyEffortModePayload({
     effortMode,
     needsNarrowing,
@@ -2322,6 +2365,7 @@ export function diagnoseProblem(input: string, options: DiagnoseOptions = {}): D
     fallbackUsed: recommendedContents.length === 0,
     fallbackMode,
     level,
+    guidanceContext,
     categoryConsistency: categoryGate ? "consistent" : "ungated",
     categoryConflict: null
   };

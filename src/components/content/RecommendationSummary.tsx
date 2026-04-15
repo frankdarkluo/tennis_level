@@ -1,6 +1,7 @@
 "use client";
 
 import { Badge } from "@/components/ui/Badge";
+import type { GuidanceContext } from "@/lib/guidance-context/types";
 import { buildRecommendationDetails, RecommendationTrustSignal } from "@/lib/content/recommendationSignals";
 import { I18nKey, useI18n } from "@/lib/i18n/config";
 import { ContentItem } from "@/types/content";
@@ -15,14 +16,16 @@ const TRUST_SIGNAL_KEYS = {
 
 export function RecommendationSummary({
   item,
+  guidanceContext,
   className = ""
 }: {
   item: ContentItem;
+  guidanceContext?: GuidanceContext;
   className?: string;
 }) {
   const { language, t } = useI18n();
   const locale: "zh" | "en" = language === "en" ? "en" : "zh";
-  const details = buildRecommendationDetails(item, locale);
+  const details = buildRecommendationDetails(item, locale, guidanceContext);
 
   return (
     <div className={`space-y-2 text-xs leading-5 text-slate-500 ${className}`.trim()}>

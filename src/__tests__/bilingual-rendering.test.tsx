@@ -55,6 +55,12 @@ const translationMap = {
   "plan.day.watch": "Watch this",
   "plan.day.open": "Open video",
   "plan.day.goal": "Goal",
+  "plan.day.setup": "Setup",
+  "plan.day.dosage": "Dosage",
+  "plan.day.focusCues": "Focus cues",
+  "plan.day.mistakes": "Common mistakes",
+  "plan.day.primaryVideo": "Primary video",
+  "plan.day.backupVideo": "Backup video",
   "plan.day.drill": "Drill",
   "plan.day.load": "Load / volume",
   "plan.day.executionFocus": "Execution focus",
@@ -278,7 +284,7 @@ describe("bilingual rendering", () => {
         day={{
           day: 2,
           focus: "Stabilize the toss",
-          contentIds: ["content_gaiao_02"],
+          contentIds: ["content_gaiao_02", "content_rb_02", "content_rb_03"],
           drills: ["30 toss reps"],
           drill: "30 toss reps",
           load: "3 sets x 10 reps",
@@ -303,34 +309,25 @@ describe("bilingual rendering", () => {
 
     expect(screen.getByText("Goal")).toBeInTheDocument();
     expect(screen.getByText("Build a steadier serve rhythm")).toBeInTheDocument();
-    expect(screen.getByText("Drill")).toBeInTheDocument();
-    expect(screen.getAllByText("30 toss reps").length).toBeGreaterThan(0);
-    expect(screen.getByText("Load / volume")).toBeInTheDocument();
-    expect(screen.getByText("3 sets x 10 reps")).toBeInTheDocument();
-    expect(screen.getByText("Execution focus")).toBeInTheDocument();
+    expect(screen.getByText("Setup")).toBeInTheDocument();
+    expect(screen.getByText("30 toss reps")).toBeInTheDocument();
+    expect(screen.getByText("Dosage")).toBeInTheDocument();
+    expect(screen.getByText("3 sets x 10 reps · 20 min")).toBeInTheDocument();
+    expect(screen.getByText("Focus cues")).toBeInTheDocument();
     expect(screen.getByText("Keep the toss shape and timing the same on every rep.")).toBeInTheDocument();
-    expect(screen.getByText("How long · 20 min")).toBeInTheDocument();
-    expect(screen.getByText("Intensity · Medium")).toBeInTheDocument();
-    expect(screen.getByText("Tempo · Controlled")).toBeInTheDocument();
-    expect(screen.queryByText("Warm-up")).not.toBeInTheDocument();
-    expect(screen.getByText("Practice")).toBeInTheDocument();
-    expect(screen.queryByText("Pressure reps")).not.toBeInTheDocument();
-    expect(screen.getByText("20 first serves")).toBeInTheDocument();
-    expect(screen.getByText("Land 6 in a row before moving on")).toBeInTheDocument();
     expect(screen.getByText("Success criteria")).toBeInTheDocument();
     expect(screen.getByText("Finish with stable mechanics")).toBeInTheDocument();
-    expect(screen.getByText("Common failure cue")).toBeInTheDocument();
+    expect(screen.getByText("Common mistakes")).toBeInTheDocument();
     expect(screen.getByText("If the toss drifts, reset before adding pace")).toBeInTheDocument();
-    expect(screen.getByText("Transfer cue")).toBeInTheDocument();
-    expect(screen.getByText("Use the same toss cue on the first serve of each point")).toBeInTheDocument();
-    expect(screen.getByText("Watch this")).toBeInTheDocument();
-    expect(screen.getByText("ZH")).toBeInTheDocument();
-    expect(screen.getByText("No subtitles")).toBeInTheDocument();
-    expect(screen.getByText("Original title")).toBeInTheDocument();
+    expect(screen.getByText("Primary video")).toBeInTheDocument();
+    expect(screen.getByText("Backup video")).toBeInTheDocument();
+    expect(screen.getAllByText("ZH").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("No subtitles").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Original title").length).toBeGreaterThan(0);
     expect(screen.getByText(/网球发球/)).toBeInTheDocument();
-    expect(screen.getByText("Focus: For players who rush the serve and lose trust in the second serve.")).toBeInTheDocument();
-    expect(screen.getByText("Direct source")).toBeInTheDocument();
-    expect(screen.getByText("Teaching video")).toBeInTheDocument();
+    expect(screen.queryByText("Match execution in doubles: stabilize first, then press")).not.toBeInTheDocument();
+    expect(screen.getAllByText("Direct source").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Teaching video").length).toBeGreaterThan(0);
     expect(screen.getByText("Why watch this today")).toBeInTheDocument();
     expect(screen.getByText("Use this content today because it reinforces the exact pattern this step is trying to stabilize.")).toBeInTheDocument();
   });
@@ -342,7 +339,7 @@ describe("bilingual rendering", () => {
         day={{
           day: 1,
           focus: "固定高压准备点",
-          contentIds: ["content_gaiao_02"],
+          contentIds: ["content_gaiao_02", "content_rb_02"],
           drills: ["原地高压引拍 15 次", "高压落点控制 12 球"],
           drill: "高压落点控制 12 球",
           load: "3 组 x 4 球",
@@ -364,7 +361,7 @@ describe("bilingual rendering", () => {
     );
 
     const goalLabel = screen.getByText("Goal");
-    const watchLabel = screen.getByText("Watch this");
+    const watchLabel = screen.getByText("Primary video");
     const featuredTitle = screen.getByText("Serve fundamentals: build rhythm before power");
 
     expect(goalLabel).toBeInTheDocument();
@@ -372,6 +369,7 @@ describe("bilingual rendering", () => {
     expect(featuredTitle).toBeInTheDocument();
     expect(goalLabel.compareDocumentPosition(watchLabel)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
     expect(watchLabel.compareDocumentPosition(featuredTitle)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(screen.queryByText("Backup video")).not.toBeInTheDocument();
   });
 
   it("renders diagnose recommendation cards with language cues and original-title label", () => {

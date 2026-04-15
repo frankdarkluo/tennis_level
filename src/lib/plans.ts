@@ -11,6 +11,13 @@ import {
   parseEnrichedDiagnosisContext
 } from "@/lib/diagnose/enrichedContext";
 import { filterByEnvironment, resolveAppEnvironment } from "@/lib/environment";
+import {
+  buildDiagnosisGuidanceContext,
+  encodeGuidanceContext,
+  parseGuidanceContext
+} from "@/lib/guidance-context/build";
+import type { GuidanceContext } from "@/lib/guidance-context/types";
+import { recommendAttachedVideos } from "@/lib/recommendations/attached/recommend";
 import { withDeterministicDayContract } from "@/lib/plan-core/baseSkeleton";
 import { assemblePlanFromIntent } from "@/lib/plan-core/assemble";
 import { buildPlanIntent } from "@/lib/plan-core/intent";
@@ -23,6 +30,7 @@ import {
   normalizePlanProblemTags
 } from "@/lib/plan-core/problemTagSupport";
 import { applySceneOverlay } from "@/lib/plan-core/sceneOverlay";
+import { normalizeGeneratedPlanCopy } from "@/lib/plan-core/copyPolicy";
 import { PlayerProfileVector, ScoredDimension } from "@/types/assessment";
 import { ContentItem } from "@/types/content";
 import { AppEnvironment } from "@/types/environment";
@@ -156,6 +164,10 @@ type PlanDayInput = Pick<DayPlan, "day" | "focus" | "contentIds" | "drills" | "d
     | "executionFocusEn"
     | "linkedContentReason"
     | "linkedContentReasonEn"
+    | "details"
+    | "detailsEn"
+    | "attachments"
+    | "motionPrimitiveId"
   >>;
 
 function createBlock(title: string, items: string[]): DayPlanBlock {
@@ -171,83 +183,8 @@ function cloneBlock(block: DayPlanBlock | undefined, fallbackTitle: string, fall
   };
 }
 
-function normalizeStepText(value: string, locale: PlanLocale): string {
-  const normalized = value.trim();
-
-  if (!normalized) {
-    return normalized;
-  }
-
-  if (locale === "en") {
-    return [
-      [/\b7-day\b/gi, "7-step"],
-      [/\bseven days\b/gi, "7 steps"],
-      [/\bDay (\d+)\b/g, "Step $1"],
-      [/\btoday['’]s\b/gi, "this step's"],
-      [/\btomorrow['’]s\b/gi, "next step's"],
-      [/\bnext week['’]s\b/gi, "the next training block's"],
-      [/\bthis week['’]s\b/gi, "this plan's"],
-      [/\btoday\b/gi, "this step"],
-      [/\btomorrow\b/gi, "the next step"],
-      [/\bthis week\b/gi, "this plan"],
-      [/\bnext week\b/gi, "the next training block"],
-      [/\bover the week\b/gi, "across the full sequence"],
-      [/\bfor the week\b/gi, "for the full sequence"],
-      [/\bwithin one week\b/gi, "across the 7-step sequence"]
-    ].reduce((current, [pattern, replacement]) => current.replace(pattern as RegExp, replacement as string), normalized);
-  }
-
-  return [
-    [/7天/g, "7 步"],
-    [/第\s*(\d+)\s*天/g, "第 $1 步"],
-    [/今天的/g, "这一步的"],
-    [/明天的/g, "下一步的"],
-    [/今天/g, "这一步"],
-    [/明天/g, "下一步"],
-    [/本周计划/g, "这套 7 步计划"],
-    [/本周的/g, "这套计划的"],
-    [/本周/g, "这套计划"],
-    [/下一周/g, "下一轮训练"],
-    [/下周/g, "下一轮训练"],
-    [/一周内/g, "按这 7 步"]
-  ].reduce((current, [pattern, replacement]) => current.replace(pattern as RegExp, replacement as string), normalized);
-}
-
-function normalizeStepBlock(block: DayPlanBlock, locale: PlanLocale): DayPlanBlock {
-  return {
-    title: normalizeStepText(block.title, locale),
-    items: block.items.map((item) => normalizeStepText(item, locale))
-  };
-}
-
-function normalizeStepDay(day: DayPlan, locale: PlanLocale): DayPlan {
-  return {
-    ...day,
-    focus: normalizeStepText(day.focus, locale),
-    drills: day.drills.map((drill) => normalizeStepText(drill, locale)),
-    drill: day.drill ? normalizeStepText(day.drill, locale) : day.drill,
-    load: day.load ? normalizeStepText(day.load, locale) : day.load,
-    executionFocus: day.executionFocus ? normalizeStepText(day.executionFocus, locale) : day.executionFocus,
-    linkedContentReason: day.linkedContentReason ? normalizeStepText(day.linkedContentReason, locale) : day.linkedContentReason,
-    goal: normalizeStepText(day.goal, locale),
-    warmupBlock: normalizeStepBlock(day.warmupBlock, locale),
-    mainBlock: normalizeStepBlock(day.mainBlock, locale),
-    pressureBlock: normalizeStepBlock(day.pressureBlock, locale),
-    successCriteria: day.successCriteria.map((criteria) => normalizeStepText(criteria, locale)),
-    failureCue: normalizeStepText(day.failureCue, locale),
-    progressionNote: normalizeStepText(day.progressionNote, locale),
-    transferCue: normalizeStepText(day.transferCue, locale)
-  };
-}
-
 function normalizeGeneratedPlanStepSemantics(plan: GeneratedPlan, locale: PlanLocale): GeneratedPlan {
-  return {
-    ...plan,
-    title: normalizeStepText(plan.title, locale),
-    target: normalizeStepText(plan.target, locale),
-    summary: plan.summary ? normalizeStepText(plan.summary, locale) : plan.summary,
-    days: plan.days.map((day) => normalizeStepDay(day, locale))
-  };
+  return normalizeGeneratedPlanCopy(plan, locale);
 }
 
 function buildDayPlan(day: PlanDayInput, locale: PlanLocale): DayPlan {
@@ -297,7 +234,10 @@ function buildDayPlan(day: PlanDayInput, locale: PlanLocale): DayPlan {
       ? day.transferCueEn ?? `Carry ${focus.toLowerCase()} into the first playable point pattern.`
       : day.transferCue ?? `把${focus}带进第一组可打的得分片段里。`,
     intensity: day.intensity ?? (day.day <= 2 ? "low" : day.day <= 5 ? "medium" : "medium_high"),
-    tempo: day.tempo ?? (day.day <= 2 ? "slow" : day.day <= 5 ? "controlled" : "match_70")
+    tempo: day.tempo ?? (day.day <= 2 ? "slow" : day.day <= 5 ? "controlled" : "match_70"),
+    details: isEn ? day.detailsEn ?? day.details : day.details ?? day.detailsEn,
+    attachments: day.attachments,
+    motionPrimitiveId: day.motionPrimitiveId
   }, locale);
 }
 
@@ -1440,11 +1380,27 @@ export function buildDiagnosisPlanCandidateIds(input: {
   level: PlanLevel;
   recommendedContentIds?: string[];
   diagnosisInput?: string;
+  guidanceContext?: GuidanceContext | null;
   maxCandidates?: number;
 }): string[] {
   const normalizedProblemTag = normalizePlanProblemTag(input.problemTag);
-  const lookupProblemTags = getPlanLookupProblemTags(input.problemTag);
-  const contextHint = buildDiagnosisContextHint(input.diagnosisInput);
+  const effectiveGuidanceContext = input.guidanceContext ?? buildDiagnosisGuidanceContext({
+    problemTag: input.problemTag,
+    level: input.level,
+    diagnosisInput: input.diagnosisInput
+  });
+  const lookupProblemTags = input.guidanceContext
+    ? [input.guidanceContext.primaryProblemTag, ...input.guidanceContext.secondaryProblemTags]
+    : getPlanLookupProblemTags(input.problemTag);
+  const guidanceTerms = input.guidanceContext
+    ? [
+        input.guidanceContext.trainingFocus,
+        input.guidanceContext.planIntent.replace(/_/g, " "),
+        input.guidanceContext.strokeFamily,
+        input.guidanceContext.mechanismFamily
+      ]
+    : [];
+  const contextHint = buildDiagnosisContextHint([input.diagnosisInput ?? "", ...guidanceTerms].join(" "));
   const explicitContentIds = uniqueStrings([
     ...(input.recommendedContentIds ?? []),
     ...getRecommendedRuleContentIds(input.problemTag),
@@ -1469,21 +1425,20 @@ export function buildDiagnosisPlanCandidateIds(input: {
     ...templateSeedItems.flatMap((item) => item.skills),
     ...contextHint.skills
   ]);
-  const diversifiedRankedCandidateIds = retrieveCatalogRecommendations({
+  const diversifiedRankedCandidateIds = recommendAttachedVideos({
     source: "plan",
+    guidanceContext: effectiveGuidanceContext,
     contentPool: contents,
     expandedContentPool: expandedContents,
-    problemTags: normalizePlanProblemTags([
-      normalizedProblemTag,
-      ...seedProblemTags,
-      ...contextHint.problemTags
-    ]),
-    skillCategories: uniqueStrings([...seedSkills, ...contextHint.skills]),
-    lexicalTerms: contextHint.terms,
-    level: input.level,
     preferredIds: uniqueStrings([...explicitContentIds, ...templateSeedContentIds]),
+    lexicalTerms: uniqueStrings([
+      ...contextHint.terms,
+      ...seedProblemTags,
+      ...seedSkills,
+      normalizedProblemTag
+    ]),
     maxResults: input.maxCandidates ?? MAX_PLAN_CANDIDATES
-  }).map((item) => item.id);
+  }).map((entry) => entry.item.id);
 
   const orderedIds = uniqueStrings([
     ...explicitContentIds.filter((id) => isDirectPlanContentId(id)),
@@ -1991,9 +1946,12 @@ export type PlanDraftSnapshot = {
   sourceType: SavedPlanSource;
   primaryNextStep?: string;
   planContext?: PlanContext;
+  guidanceContext?: GuidanceContext;
   deepContext?: EnrichedDiagnosisContext;
   updatedAt: string;
 };
+
+export type PlanResumePayload = Omit<PlanDraftSnapshot, "updatedAt">;
 
 type RawPlanDraftSnapshot = Partial<Omit<PlanDraftSnapshot, "problemTag"> & {
   problemTag?: string | null;
@@ -2166,6 +2124,17 @@ export function normalizePlanDraftSnapshot(
   const normalizedPlanContext = normalizedDeepContext
     ? buildPlanContextFromEnrichedContext(normalizedDeepContext) ?? normalizePlanContext(draft.planContext) ?? undefined
     : normalizePlanContext(draft.planContext) ?? undefined;
+  const normalizedGuidanceContext = normalizedDeepContext
+    ? buildDiagnosisGuidanceContext({
+        problemTag,
+        level: draft.level,
+        locale: draft.guidanceContext?.languagePreference,
+        primaryNextStep,
+        diagnosisInput: normalizedDeepContext.sourceInput,
+        planContext: normalizedPlanContext,
+        deepContext: normalizedDeepContext
+      })
+    : parseGuidanceContext(encodeGuidanceContext(draft.guidanceContext)) ?? undefined;
 
   return {
     problemTag,
@@ -2174,6 +2143,7 @@ export function normalizePlanDraftSnapshot(
     sourceType: normalizePlanDraftSourceType(draft.sourceType),
     ...(primaryNextStep ? { primaryNextStep } : {}),
     ...(normalizedPlanContext ? { planContext: normalizedPlanContext } : {}),
+    ...(normalizedGuidanceContext ? { guidanceContext: normalizedGuidanceContext } : {}),
     ...(normalizedDeepContext ? { deepContext: normalizedDeepContext } : {}),
     updatedAt: typeof draft.updatedAt === "string" && draft.updatedAt.trim().length > 0
       ? draft.updatedAt
@@ -2188,12 +2158,24 @@ export function buildPlanHref(input: {
   sourceType?: SavedPlanSource;
   primaryNextStep?: string;
   planContext?: PlanContext;
+  guidanceContext?: GuidanceContext;
   deepContext?: EnrichedDiagnosisContext;
 }): string {
   const params = new URLSearchParams();
   const resolvedPlanContext = input.deepContext
     ? buildPlanContextFromEnrichedContext(input.deepContext) ?? input.planContext
     : input.planContext;
+  const resolvedGuidanceContext = input.deepContext
+    ? buildDiagnosisGuidanceContext({
+        problemTag: input.problemTag ?? input.deepContext.problemTag,
+        level: input.level,
+        locale: input.guidanceContext?.languagePreference,
+        primaryNextStep: input.primaryNextStep,
+        diagnosisInput: input.deepContext.sourceInput,
+        planContext: resolvedPlanContext ?? null,
+        deepContext: input.deepContext
+      })
+    : input.guidanceContext;
 
   if (input.problemTag) {
     params.set("problemTag", input.problemTag);
@@ -2222,6 +2204,11 @@ export function buildPlanHref(input: {
     params.set("planContext", planContext);
   }
 
+  const guidanceContext = encodeGuidanceContext(resolvedGuidanceContext);
+  if (guidanceContext) {
+    params.set("guidanceContext", guidanceContext);
+  }
+
   const deepContext = encodeEnrichedDiagnosisContext(input.deepContext);
   if (deepContext) {
     params.set("deepContext", deepContext);
@@ -2229,6 +2216,35 @@ export function buildPlanHref(input: {
 
   const query = params.toString();
   return query ? `/plan?${query}` : "/plan";
+}
+
+export function buildPlanResume(input: PlanResumePayload): GeneratedPlan["resume"] {
+  const payload: PlanResumePayload = {
+    problemTag: normalizePlanProblemTag(input.problemTag),
+    level: normalizePlanDraftLevel(input.level),
+    preferredContentIds: uniqueStrings((input.preferredContentIds ?? []).map((value) => value.trim())),
+    sourceType: normalizePlanDraftSourceType(input.sourceType),
+    ...(normalizePrimaryNextStep(input.primaryNextStep) ? { primaryNextStep: normalizePrimaryNextStep(input.primaryNextStep) } : {}),
+    ...(normalizePlanContext(input.planContext) ? { planContext: normalizePlanContext(input.planContext) ?? undefined } : {}),
+    ...(input.guidanceContext ? { guidanceContext: input.guidanceContext } : {}),
+    ...(input.deepContext ? { deepContext: input.deepContext } : {})
+  };
+
+  return {
+    href: buildPlanHref(payload),
+    payload
+  };
+}
+
+export function resolveSavedPlanHref(input: {
+  plan_data: GeneratedPlan;
+  source_type: SavedPlanSource;
+}): string {
+  return input.plan_data.resume?.href ?? buildPlanHref({
+    problemTag: input.plan_data.problemTag,
+    level: input.plan_data.level,
+    sourceType: input.source_type
+  });
 }
 
 function buildDeepServeDayOverlay(
@@ -2459,6 +2475,7 @@ export function getPlanTemplate(
   options: {
     primaryNextStep?: string;
     planContext?: PlanContext | null;
+    guidanceContext?: GuidanceContext | null;
     deepContext?: EnrichedDiagnosisContext | null;
     environment?: AppEnvironment;
   } = {}
@@ -2471,6 +2488,17 @@ export function getPlanTemplate(
   const effectivePlanContext = options.deepContext
     ? buildPlanContextFromEnrichedContext(options.deepContext) ?? options.planContext
     : options.planContext;
+  const effectiveGuidanceContext = options.deepContext
+    ? buildDiagnosisGuidanceContext({
+        problemTag: normalizedProblemTag,
+        level,
+        locale,
+        primaryNextStep: options.primaryNextStep,
+        diagnosisInput: options.deepContext.sourceInput,
+        planContext: effectivePlanContext ?? null,
+        deepContext: options.deepContext
+      })
+    : options.guidanceContext ?? null;
   const templateSeed = findPlanTemplate(normalizedProblemTag, level, options.environment ?? resolveAppEnvironment());
   const candidateContentIds = preferredContentIds.length > 0
     ? preferredContentIds
@@ -2478,6 +2506,7 @@ export function getPlanTemplate(
       problemTag: normalizedProblemTag,
       level,
       diagnosisInput: options.primaryNextStep,
+      guidanceContext: effectiveGuidanceContext,
       maxCandidates: MAX_PLAN_CANDIDATES
     });
   const source = effectivePlanContext?.source ?? (options.primaryNextStep ? "diagnosis" : "direct");
@@ -2489,6 +2518,7 @@ export function getPlanTemplate(
       candidateContentIds,
       primaryNextStep: options.primaryNextStep,
       planContext: effectivePlanContext,
+      guidanceContext: effectiveGuidanceContext,
       templateSeed,
       deepContext: options.deepContext
     }));

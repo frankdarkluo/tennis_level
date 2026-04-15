@@ -1,6 +1,7 @@
 import { AssessmentResult } from "@/types/assessment";
 import { ContentItem } from "@/types/content";
 import { AppEnvironment, EnvironmentValue } from "@/types/environment";
+import type { GuidanceContext } from "@/lib/guidance-context/types";
 import { DeepDiagnosisHandoff, EnrichedDiagnosisContext } from "@/types/enrichedDiagnosis";
 import { ProblemTag } from "@/types/problemTag";
 
@@ -145,6 +146,7 @@ export type DiagnosisResult = {
   fallbackMode: "assessment" | "no-assessment" | null;
   level?: string;
   enrichedContext?: EnrichedDiagnosisContext | null;
+  guidanceContext?: GuidanceContext | null;
   categoryConsistency?: DiagnosisCategoryConsistency;
   categoryConflict?: DiagnosisCategoryConflict | null;
 };
@@ -176,6 +178,7 @@ export type DiagnosisSnapshot = {
   fallbackMode: "assessment" | "no-assessment" | null;
   level?: string;
   enrichedContext?: EnrichedDiagnosisContext | null;
+  guidanceContext?: GuidanceContext | null;
   categoryConsistency?: DiagnosisCategoryConsistency;
   categoryConflict?: DiagnosisCategoryConflict | null;
 };

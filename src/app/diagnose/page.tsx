@@ -39,6 +39,7 @@ import { useAppShell } from "@/components/app/AppShellProvider";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
+import { buildDiagnosisGuidanceContext } from "@/lib/guidance-context/build";
 import type { ScenarioQuestion, ScenarioState } from "@/types/scenario";
 
 function toConfidenceBucket(score: number) {
@@ -77,6 +78,7 @@ function createDiagnosisSnapshot(result: DiagnosisResult, locale: "zh" | "en"): 
     fallbackMode: result.fallbackMode,
     level: result.level,
     enrichedContext: result.enrichedContext ?? null,
+    guidanceContext: result.guidanceContext ?? null,
     categoryConsistency: result.categoryConsistency,
     categoryConflict: result.categoryConflict ?? null
   };
@@ -116,6 +118,7 @@ function replayDiagnosisFromSnapshot(
     fallbackMode: snapshot.fallbackMode,
     level: snapshot.level ?? fallbackLevel,
     enrichedContext: snapshot.enrichedContext ?? null,
+    guidanceContext: snapshot.guidanceContext ?? null,
     categoryConsistency: snapshot.categoryConsistency,
     categoryConflict: snapshot.categoryConflict ?? null
   };
@@ -237,6 +240,14 @@ function DiagnosePageContent() {
           })
         : null
     };
+    finalResult.guidanceContext = buildDiagnosisGuidanceContext({
+      problemTag: finalResult.problemTag,
+      level: finalResult.level,
+      locale: language,
+      primaryNextStep: finalResult.primaryNextStep,
+      diagnosisInput: trimmedDiagnosisInput,
+      deepContext: finalResult.enrichedContext ?? null
+    });
 
     if (!isCurrentDiagnosisRun(runToken)) {
       return;

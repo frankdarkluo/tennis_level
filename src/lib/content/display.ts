@@ -5,6 +5,7 @@ import {
   CREATOR_TAG_LABELS_ZH
 } from "@/lib/content/localization";
 import { CREATOR_FEATURED_VIDEO_CHINESE_SUBTITLE_OVERRIDES } from "@/lib/content/chineseSubtitleOverrides";
+import { canonicalizeTennisText } from "@/lib/i18n/tennisGlossary";
 import { ContentItem, ContentPlatform, ContentSubtitleAvailability } from "@/types/content";
 import { Creator, CreatorFeaturedVideo, CreatorPlatformName } from "@/types/creator";
 
@@ -21,19 +22,19 @@ function normalizeText(value: string) {
 }
 
 function normalizeChineseSentence(value: string) {
-  return normalizeText(value)
+  return canonicalizeTennisText(normalizeText(value)
     .replace(/^适合作为/, "")
     .replace(/^适合/, "")
     .replace(/^针对[:：]\s*/, "")
     .replace(/。/g, "")
-    .trim();
+    .trim(), "zh");
 }
 
 function normalizeEnglishSentence(value: string) {
-  return normalizeText(value)
+  return canonicalizeTennisText(normalizeText(value)
     .replace(/^Focus:\s*/i, "")
     .replace(/\.$/, "")
-    .trim();
+    .trim(), "en");
 }
 
 function getContentEnglishOverride(id?: string) {
@@ -1309,7 +1310,7 @@ export function getContentCoachNote(
     return null;
   }
 
-  return note;
+  return canonicalizeTennisText(note, locale);
 }
 
 export function formatCompactViewCount(value: number | undefined, locale: Locale = "zh") {
