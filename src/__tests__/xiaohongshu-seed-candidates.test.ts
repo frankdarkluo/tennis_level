@@ -79,7 +79,7 @@ describe("xiaohongshu seed candidates", () => {
     expect(artifact.summary.byCreator).toContainEqual({
       creatorProgramId: "dabaiyang",
       creatorName: "奔跑的大白羊",
-      creatorProfileUrl: null,
+      creatorProfileUrl: "https://www.xiaohongshu.com/user/profile/5676c499b8ce1a5b6e806853",
       creatorProfileStatus: "pending_profile_verification",
       candidateTarget: 50,
       savedCount: 0,
