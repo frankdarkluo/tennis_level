@@ -15,8 +15,11 @@ Generated QA outputs live here.
 - `content-remote-check.latest.json`
 - `content-remote-check.latest.csv`
 - `content-quality-review-import.latest.json`
+- `xiaohongshu-creator-program.json`
+- `xiaohongshu-seed-review-input.json`
 - `xiaohongshu-seed-candidates.json`
 - `xiaohongshu-seed-reviewed.json`
+- `xiaohongshu-seed-promotion.latest.json`
 
 Interpretation rules:
 
@@ -24,8 +27,11 @@ Interpretation rules:
 - `problem-tag-coverage` is the companion inventory-layer metric and should be reviewed first when deciding where search-link debt or weak-tag backlog is still risky.
 - `content-remote-check` is the QA-only remote verification artifact for direct-source links and thumbnails. Review it before importing anything into the overlay.
 - Current reports are based on catalog/connector `direct_source` inference. Remote verification is intentionally a later slice.
-- `xiaohongshu-seed-candidates` is a QA-only handoff file for small Xiaohongshu seed preparation. It is not part of retrieval and must not be promoted into `contents.ts` without a later reviewed slice.
+- `xiaohongshu-creator-program` is the approved creator scope and target registry. It can include pending creators that are not collectible yet.
+- `xiaohongshu-seed-review-input` is the QA-only manual-review input file for the reviewed subset.
+- `xiaohongshu-seed-candidates` is a QA-only handoff file for Xiaohongshu candidate preparation. It is not part of retrieval and must not be promoted into `contents.ts` without a later reviewed slice.
 - `xiaohongshu-seed-reviewed` records human-approved Xiaohongshu candidate decisions after manual review. It is still QA-only and does not bypass the later catalog-promotion step.
+- `xiaohongshu-seed-promotion.latest` is the promotion-preview artifact generated from reviewed seeds. It is the batch handoff for any future runtime promotion work.
 
 Manual review workflow:
 
@@ -46,13 +52,24 @@ Manual review workflow:
 9. Re-run remediation reporting to measure whether weak-tag coverage improved.
    `npx ts-node --project tsconfig.scripts.json scripts/report-problem-tag-remediation.ts`
 
-Xiaohongshu seed-candidate workflow:
+Xiaohongshu creator-program / seed workflow:
 
-1. Regenerate the QA-only Xiaohongshu candidate handoff.
-   `npx ts-node --project tsconfig.scripts.json scripts/prepare-xiaohongshu-seed-candidates.ts`
-2. Open the saved `rawUrl`, `canonicalUrl`, and `creatorProfileUrl` for the candidates you want to review manually.
-3. Copy approved candidates into a local manual-review input file, keeping Xiaohongshu as a separate platform-specific record.
-4. Only after manual confirmation should a later slice propose any `contents.ts` promotion.
+1. Review or update the creator-program registry.
+   `ops/quality/xiaohongshu-creator-program.json`
+2. Regenerate the QA-only Xiaohongshu candidate handoff.
+   `npm run prepare:xiaohongshu-seed-candidates`
+3. Open the saved `rawUrl`, `canonicalUrl`, and `creatorProfileUrl` for the candidates you want to review manually.
+4. Record the reviewed subset in:
+   `ops/quality/xiaohongshu-seed-review-input.json`
+5. Generate the reviewed artifact from that review input.
+   `npm run prepare:xiaohongshu-seed-reviewed`
+6. Generate the promotion preview for the reviewed subset.
+   `npm run prepare:xiaohongshu-seed-promotion`
+7. Only after manual confirmation should a later slice propose any `contents.ts` promotion.
+
+Stable validation command:
+
+- `npm run validate:xiaohongshu-qa`
 
 Current Xiaohongshu review boundary:
 
@@ -60,18 +77,46 @@ Current Xiaohongshu review boundary:
 - Reviewed Xiaohongshu seed candidates do not have catalog `contentId` values yet, because this slice intentionally keeps them out of `contents.ts`.
 - Because of that, reviewed Xiaohongshu seed decisions are currently recorded in `xiaohongshu-seed-reviewed.json` first.
 - A later promotion slice can only import them into `contentQualityReviews` after creating platform-specific catalog records.
+- The current bootstrap reviewed subset references existing promoted Xiaohongshu runtime items only to preserve review history; it does not create any new runtime rows in this slice.
 
 Xiaohongshu candidate rules:
 
-- Candidate scope is capped at `5` high-confidence note candidates per approved creator; `5` is a ceiling, not a quota.
+- Creator-program target scope is `350` teaching-only candidates total:
+  - `盖奥网球`: `100`
+  - `灵熙`: `100`
+  - `冠军教练-莫拉特格鲁`: `100`
+  - `奔跑的大白羊`: `50`
+- Candidate artifact save scope is still capped at `5` high-confidence note candidates per creator for the current curated QA handoff; `5` is a save ceiling, not a program quota.
 - Candidates are QA-only and must stay outside retrieval, ranking, and UI behavior.
 - Saved candidates must keep:
   - `rawUrl`
   - `canonicalUrl` when obtainable
   - `creatorProfileUrl`
+- Each saved candidate must also keep:
+  - `creatorProgramId`
+  - `teachingType`
+  - language / subtitle hints
+  - optional duplicate-cluster hints
+- Only these teaching-only Xiaohongshu candidate types are allowed:
+  - `technique_explanation`
+  - `drill`
+  - `footwork`
+  - `tactic`
+  - `serve`
+  - `return`
+  - `doubles`
+  - `warmup`
+  - `mental_execution`
+- Excluded surfaces remain:
+  - lifestyle content
+  - match clips without teaching value
+  - pure inspiration content
+  - unclear creator ownership
+  - ambiguous note sources
 - The current candidate-prep slice is profile-title-driven:
   - the note title must exactly match a title already confirmed on the creator's Xiaohongshu profile page
   - this is especially important for `灵熙🎾`, where reposted or stolen clips are common
+- Program entries with `pending_profile_verification` are valid scope entries but cannot accept candidate rows until a profile URL is verified.
 
 Coverage-remediation rules:
 

@@ -1,5 +1,12 @@
 import { xiaohongshuConnector } from "../../src/lib/platform-connectors/xiaohongshu";
 import { isProblemTag, type ProblemTag } from "../../src/types/problemTag";
+import {
+  canCollectXiaohongshuSeedCandidates,
+  findXiaohongshuCreatorProgramEntry,
+  loadXiaohongshuCreatorProgram,
+  type XiaohongshuCreatorProgramEntry,
+  type XiaohongshuTeachingType
+} from "./xiaohongshuCreatorProgram";
 
 export type XiaohongshuSeedCandidateInput = {
   creatorName: string;
@@ -15,11 +22,16 @@ export type XiaohongshuSeedCandidateInput = {
   surfaceDateText?: string | null;
   surfaceLikeText?: string | null;
   crossPlatformNotes?: string | null;
+  teachingType: XiaohongshuTeachingType;
+  languageHint?: "zh" | "en" | "mixed" | null;
+  subtitleLanguageHint?: "zh" | "zh_en" | "none" | "unknown" | null;
+  duplicateClusterHint?: string | null;
   priority?: number;
 };
 
 export type XiaohongshuSeedCandidate = {
   candidateId: string;
+  creatorProgramId: string;
   creatorName: string;
   platform: "xiaohongshu";
   creatorProfileUrl: string;
@@ -28,6 +40,10 @@ export type XiaohongshuSeedCandidate = {
   postId: string | null;
   title: string;
   thumbnailUrl: string | null;
+  teachingType: XiaohongshuTeachingType;
+  languageHint: "zh" | "en" | "mixed" | "unknown";
+  subtitleLanguageHint: "zh" | "zh_en" | "none" | "unknown";
+  duplicateClusterHint: string | null;
   evidence: {
     creatorEvidence: string[];
     contentEvidence: string[];
@@ -45,14 +61,21 @@ export type XiaohongshuSeedCandidateArtifact = {
     scope: "qa_only_seed_candidates";
     candidateSource: "profile_title_confirmed_search_result_cards";
     perCreatorLimit: number;
+    creatorProgramVersion: 1;
+    creatorProgramScopeTarget: number;
   };
   summary: {
     candidateCount: number;
     creatorCount: number;
+    creatorTargetCount: number;
     byCreator: Array<{
+      creatorProgramId: string;
       creatorName: string;
-      creatorProfileUrl: string;
+      creatorProfileUrl: string | null;
+      creatorProfileStatus: XiaohongshuCreatorProgramEntry["creatorProfileStatus"];
+      candidateTarget: number;
       savedCount: number;
+      collectible: boolean;
     }>;
   };
   candidates: XiaohongshuSeedCandidate[];
@@ -74,13 +97,23 @@ function buildContentEvidence(input: XiaohongshuSeedCandidateInput): string[] {
     `profile title confirmed on creator page: ${input.profileConfirmedTitle.trim()}`,
     `search query used to locate note: ${input.discoveryQuery.trim()}`,
     input.surfaceDateText ? `search-result card date text: ${input.surfaceDateText.trim()}` : "",
-    input.surfaceLikeText ? `search-result card likes text: ${input.surfaceLikeText.trim()}` : ""
+    input.surfaceLikeText ? `search-result card likes text: ${input.surfaceLikeText.trim()}` : "",
+    `teaching type: ${input.teachingType}`,
+    input.languageHint ? `language hint: ${input.languageHint}` : "",
+    input.subtitleLanguageHint ? `subtitle hint: ${input.subtitleLanguageHint}` : "",
+    input.duplicateClusterHint ? `duplicate cluster hint: ${input.duplicateClusterHint.trim()}` : ""
   ]);
 }
 
-function buildCreatorEvidence(input: XiaohongshuSeedCandidateInput, creatorProfileUrl: string): string[] {
+function buildCreatorEvidence(
+  input: XiaohongshuSeedCandidateInput,
+  programEntry: XiaohongshuCreatorProgramEntry,
+  creatorProfileUrl: string
+): string[] {
   return uniqueStrings([
+    `creator program id: ${programEntry.id}`,
     `canonical creator profile: ${creatorProfileUrl}`,
+    `profile evidence note: ${programEntry.profileEvidenceNote}`,
     input.creatorShortProfileUrl ? `creator share link: ${input.creatorShortProfileUrl.trim()}` : ""
   ]);
 }
@@ -133,11 +166,18 @@ export function canonicalizeXiaohongshuCreatorProfileUrl(url: string): string | 
   return `https://www.xiaohongshu.com/user/profile/${match[1]}`;
 }
 
-function normalizeCandidate(input: XiaohongshuSeedCandidateInput): XiaohongshuSeedCandidate & { priority: number } {
+function normalizeCandidate(
+  input: XiaohongshuSeedCandidateInput,
+  creatorProgram: XiaohongshuCreatorProgramEntry[]
+): XiaohongshuSeedCandidate & { priority: number } {
   const creatorName = normalizeString(input.creatorName);
   const title = normalizeString(input.title);
   const profileConfirmedTitle = normalizeString(input.profileConfirmedTitle);
   const creatorProfileUrl = canonicalizeXiaohongshuCreatorProfileUrl(input.creatorProfileUrl);
+  const programEntry = findXiaohongshuCreatorProgramEntry(creatorProgram, {
+    creatorName,
+    creatorProfileUrl: creatorProfileUrl ?? normalizeString(input.creatorProfileUrl)
+  });
   const rawUrl = canonicalizeRawEntryUrl(input.rawUrl);
   const resolvedCanonicalSource = normalizeString(input.resolvedCanonicalUrl) || rawUrl;
   const canonicalUrl = xiaohongshuConnector.canonicalizeUrl(resolvedCanonicalSource);
@@ -148,6 +188,22 @@ function normalizeCandidate(input: XiaohongshuSeedCandidateInput): XiaohongshuSe
 
   if (!creatorProfileUrl) {
     throw new Error(`creatorProfileUrl must be a Xiaohongshu user/profile URL, received "${input.creatorProfileUrl}"`);
+  }
+
+  if (!programEntry) {
+    throw new Error(`creator "${creatorName}" is not part of the active Xiaohongshu creator program`);
+  }
+
+  if (!canCollectXiaohongshuSeedCandidates(programEntry) || !programEntry.creatorProfileUrl) {
+    throw new Error(`creator "${programEntry.displayName}" is still pending profile verification and cannot accept seed candidates yet`);
+  }
+
+  if (creatorProfileUrl !== programEntry.creatorProfileUrl) {
+    throw new Error(`creatorProfileUrl does not match the creator-program profile URL for "${programEntry.displayName}"`);
+  }
+
+  if (!programEntry.allowedTeachingTypes.includes(input.teachingType)) {
+    throw new Error(`teachingType "${input.teachingType}" is not allowed for creator "${programEntry.displayName}"`);
   }
 
   if (!title || !profileConfirmedTitle) {
@@ -169,7 +225,8 @@ function normalizeCandidate(input: XiaohongshuSeedCandidateInput): XiaohongshuSe
 
   return {
     candidateId: getCandidateId(creatorProfileId, postId, title),
-    creatorName,
+    creatorProgramId: programEntry.id,
+    creatorName: programEntry.displayName,
     platform: "xiaohongshu",
     creatorProfileUrl,
     rawUrl,
@@ -177,8 +234,12 @@ function normalizeCandidate(input: XiaohongshuSeedCandidateInput): XiaohongshuSe
     postId,
     title,
     thumbnailUrl: normalizeString(input.thumbnailUrl) || null,
+    teachingType: input.teachingType,
+    languageHint: input.languageHint ?? "unknown",
+    subtitleLanguageHint: input.subtitleLanguageHint ?? "unknown",
+    duplicateClusterHint: normalizeString(input.duplicateClusterHint) || null,
     evidence: {
-      creatorEvidence: buildCreatorEvidence(input, creatorProfileUrl),
+      creatorEvidence: buildCreatorEvidence(input, programEntry, creatorProfileUrl),
       contentEvidence: buildContentEvidence(input),
       thumbnailEvidence: buildThumbnailEvidence(input)
     },
@@ -193,26 +254,30 @@ export function buildXiaohongshuSeedCandidateArtifact(input: {
   generatedAt: string;
   inputs: XiaohongshuSeedCandidateInput[];
   perCreatorLimit?: number;
+  creatorProgram?: XiaohongshuCreatorProgramEntry[];
 }): XiaohongshuSeedCandidateArtifact {
   const perCreatorLimit = input.perCreatorLimit ?? 5;
-  const normalizedCandidates = input.inputs.map((candidate) => normalizeCandidate(candidate));
-  const byCreatorOrder = uniqueStrings(normalizedCandidates.map((candidate) => `${candidate.creatorName}::${candidate.creatorProfileUrl}`));
+  const creatorProgram = input.creatorProgram ?? loadXiaohongshuCreatorProgram();
+  const normalizedCandidates = input.inputs.map((candidate) => normalizeCandidate(candidate, creatorProgram));
   const limitedCandidates: XiaohongshuSeedCandidate[] = [];
   const byCreatorSummary: XiaohongshuSeedCandidateArtifact["summary"]["byCreator"] = [];
 
-  for (const creatorKey of byCreatorOrder) {
-    const [creatorName, creatorProfileUrl] = creatorKey.split("::");
+  for (const creator of creatorProgram) {
     const saved = normalizedCandidates
-      .filter((candidate) => candidate.creatorName === creatorName && candidate.creatorProfileUrl === creatorProfileUrl)
+      .filter((candidate) => candidate.creatorProgramId === creator.id)
       .sort((left, right) => left.priority - right.priority || left.title.localeCompare(right.title))
       .slice(0, perCreatorLimit)
       .map(({ priority: _priority, ...candidate }) => candidate);
 
     limitedCandidates.push(...saved);
     byCreatorSummary.push({
-      creatorName,
-      creatorProfileUrl,
-      savedCount: saved.length
+      creatorProgramId: creator.id,
+      creatorName: creator.displayName,
+      creatorProfileUrl: creator.creatorProfileUrl,
+      creatorProfileStatus: creator.creatorProfileStatus,
+      candidateTarget: creator.candidateTarget,
+      savedCount: saved.length,
+      collectible: canCollectXiaohongshuSeedCandidates(creator)
     });
   }
 
@@ -222,11 +287,14 @@ export function buildXiaohongshuSeedCandidateArtifact(input: {
     methodology: {
       scope: "qa_only_seed_candidates",
       candidateSource: "profile_title_confirmed_search_result_cards",
-      perCreatorLimit
+      perCreatorLimit,
+      creatorProgramVersion: 1,
+      creatorProgramScopeTarget: creatorProgram.reduce((sum, creator) => sum + creator.candidateTarget, 0)
     },
     summary: {
       candidateCount: limitedCandidates.length,
       creatorCount: byCreatorSummary.length,
+      creatorTargetCount: creatorProgram.length,
       byCreator: byCreatorSummary
     },
     candidates: limitedCandidates

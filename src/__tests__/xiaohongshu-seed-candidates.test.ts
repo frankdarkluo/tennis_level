@@ -21,6 +21,10 @@ function createInput(overrides: Partial<XiaohongshuSeedCandidateInput> = {}): Xi
     discoveryQuery: overrides.discoveryQuery ?? "发球全要点（慢动作+细节节奏串联） 盖奥",
     surfaceDateText: overrides.surfaceDateText ?? "04-06",
     surfaceLikeText: overrides.surfaceLikeText ?? "1973",
+    teachingType: overrides.teachingType ?? "serve",
+    languageHint: overrides.languageHint ?? "zh",
+    subtitleLanguageHint: overrides.subtitleLanguageHint ?? "zh",
+    duplicateClusterHint: overrides.duplicateClusterHint ?? null,
     crossPlatformNotes: overrides.crossPlatformNotes ?? null,
     priority: overrides.priority ?? 1
   };
@@ -38,7 +42,7 @@ describe("xiaohongshu seed candidates", () => {
     ).toBeNull();
   });
 
-  it("preserves raw handoff URLs while normalizing canonical note URLs", () => {
+  it("preserves raw handoff URLs while normalizing canonical note URLs and creator aliases", () => {
     const artifact = buildXiaohongshuSeedCandidateArtifact({
       generatedAt: "2026-04-13T00:00:00.000Z",
       inputs: [
@@ -58,23 +62,29 @@ describe("xiaohongshu seed candidates", () => {
 
     expect(artifact.summary).toMatchObject({
       candidateCount: 1,
-      creatorCount: 1
+      creatorCount: 4,
+      creatorTargetCount: 4
     });
     expect(artifact.candidates[0]).toMatchObject({
-      creatorName: "灵熙🎾",
+      creatorProgramId: "lingxi",
+      creatorName: "灵熙",
       creatorProfileUrl: "https://www.xiaohongshu.com/user/profile/63aef7df000000002702a346",
       rawUrl: "https://www.xiaohongshu.com/search_result/69c68c91000000001a0367fd?xsec_token=abc",
       canonicalUrl: "https://www.xiaohongshu.com/explore/69c68c91000000001a0367fd",
       postId: "69c68c91000000001a0367fd",
       title: "发球带点beats",
+      teachingType: "serve",
       reviewStatus: "needs_review"
     });
-    expect(artifact.candidates[0].evidence.creatorEvidence).toContain(
-      "canonical creator profile: https://www.xiaohongshu.com/user/profile/63aef7df000000002702a346"
-    );
-    expect(artifact.candidates[0].evidence.contentEvidence).toContain(
-      "profile title confirmed on creator page: 发球带点beats"
-    );
+    expect(artifact.summary.byCreator).toContainEqual({
+      creatorProgramId: "dabaiyang",
+      creatorName: "奔跑的大白羊",
+      creatorProfileUrl: null,
+      creatorProfileStatus: "pending_profile_verification",
+      candidateTarget: 50,
+      savedCount: 0,
+      collectible: false
+    });
   });
 
   it("requires the saved note title to match the confirmed creator-profile title snapshot", () => {
@@ -89,40 +99,38 @@ describe("xiaohongshu seed candidates", () => {
     })).toThrow(/profileConfirmedTitle/i);
   });
 
-  it("sorts by priority and caps saved candidates at five per creator without filler rows", () => {
-    const inputs = [
-      createInput({ creatorName: "A", creatorProfileUrl: "https://www.xiaohongshu.com/user/profile/a1", priority: 6, title: "A6", profileConfirmedTitle: "A6", rawUrl: "https://www.xiaohongshu.com/search_result/a6", resolvedCanonicalUrl: "https://www.xiaohongshu.com/explore/a6", preliminaryProblemTags: ["serve-rhythm"] }),
-      createInput({ creatorName: "A", creatorProfileUrl: "https://www.xiaohongshu.com/user/profile/a1", priority: 2, title: "A2", profileConfirmedTitle: "A2", rawUrl: "https://www.xiaohongshu.com/search_result/a2", resolvedCanonicalUrl: "https://www.xiaohongshu.com/explore/a2", preliminaryProblemTags: ["serve-rhythm"] }),
-      createInput({ creatorName: "A", creatorProfileUrl: "https://www.xiaohongshu.com/user/profile/a1", priority: 4, title: "A4", profileConfirmedTitle: "A4", rawUrl: "https://www.xiaohongshu.com/search_result/a4", resolvedCanonicalUrl: "https://www.xiaohongshu.com/explore/a4", preliminaryProblemTags: ["serve-rhythm"] }),
-      createInput({ creatorName: "A", creatorProfileUrl: "https://www.xiaohongshu.com/user/profile/a1", priority: 1, title: "A1", profileConfirmedTitle: "A1", rawUrl: "https://www.xiaohongshu.com/search_result/a1", resolvedCanonicalUrl: "https://www.xiaohongshu.com/explore/a1", preliminaryProblemTags: ["serve-rhythm"] }),
-      createInput({ creatorName: "A", creatorProfileUrl: "https://www.xiaohongshu.com/user/profile/a1", priority: 5, title: "A5", profileConfirmedTitle: "A5", rawUrl: "https://www.xiaohongshu.com/search_result/a5", resolvedCanonicalUrl: "https://www.xiaohongshu.com/explore/a5", preliminaryProblemTags: ["serve-rhythm"] }),
-      createInput({ creatorName: "A", creatorProfileUrl: "https://www.xiaohongshu.com/user/profile/a1", priority: 3, title: "A3", profileConfirmedTitle: "A3", rawUrl: "https://www.xiaohongshu.com/search_result/a3", resolvedCanonicalUrl: "https://www.xiaohongshu.com/explore/a3", preliminaryProblemTags: ["serve-rhythm"] }),
-      createInput({ creatorName: "B", creatorProfileUrl: "https://www.xiaohongshu.com/user/profile/b1", priority: 1, title: "B1", profileConfirmedTitle: "B1", rawUrl: "https://www.xiaohongshu.com/search_result/b1", resolvedCanonicalUrl: "https://www.xiaohongshu.com/explore/b1", preliminaryProblemTags: ["serve-rhythm"] })
-    ];
-
-    const artifact = buildXiaohongshuSeedCandidateArtifact({
+  it("rejects creators outside the active program", () => {
+    expect(() => buildXiaohongshuSeedCandidateArtifact({
       generatedAt: "2026-04-13T00:00:00.000Z",
-      inputs
-    });
+      inputs: [
+        createInput({
+          creatorName: "未知博主",
+          creatorProfileUrl: "https://www.xiaohongshu.com/user/profile/unknown01"
+        })
+      ]
+    })).toThrow(/not part of the active Xiaohongshu creator program/i);
+  });
 
-    expect(artifact.summary.byCreator).toEqual([
-      {
-        creatorName: "A",
-        creatorProfileUrl: "https://www.xiaohongshu.com/user/profile/a1",
-        savedCount: 5
-      },
-      {
-        creatorName: "B",
-        creatorProfileUrl: "https://www.xiaohongshu.com/user/profile/b1",
-        savedCount: 1
-      }
-    ]);
-    expect(artifact.candidates.filter((candidate) => candidate.creatorName === "A").map((candidate) => candidate.title)).toEqual([
-      "A1",
-      "A2",
-      "A3",
-      "A4",
-      "A5"
-    ]);
+  it("rejects creators that are still pending profile verification", () => {
+    expect(() => buildXiaohongshuSeedCandidateArtifact({
+      generatedAt: "2026-04-13T00:00:00.000Z",
+      inputs: [
+        createInput({
+          creatorName: "奔跑的大白羊",
+          creatorProfileUrl: "https://www.xiaohongshu.com/user/profile/pending01"
+        })
+      ]
+    })).toThrow(/pending profile verification/i);
+  });
+
+  it("rejects unsupported teaching types", () => {
+    expect(() => buildXiaohongshuSeedCandidateArtifact({
+      generatedAt: "2026-04-13T00:00:00.000Z",
+      inputs: [
+        createInput({
+          teachingType: "lifestyle" as unknown as XiaohongshuSeedCandidateInput["teachingType"]
+        })
+      ]
+    })).toThrow(/not allowed/i);
   });
 });

@@ -1,0 +1,155 @@
+{
+  "version": 1,
+  "decisions": [
+    {
+      "candidateId": "xhs_5c3b619e000000000703fccc_6436d3060000000011012067",
+      "reviewDecision": "verified",
+      "reviewedBy": "repo_bootstrap",
+      "reviewedAt": "2026-04-13T00:00:00.000Z",
+      "notes": "Already promoted into runtime as a verified Xiaohongshu direct-source item.",
+      "readyForRuntime": true,
+      "promotedContentId": "content_xhs_gaiao_02",
+      "promotedCreatorId": "creator_gaiao_xiaohongshu_hidden"
+    },
+    {
+      "candidateId": "xhs_5c3b619e000000000703fccc_69d3aa0b000000002102d993",
+      "reviewDecision": "verified",
+      "reviewedBy": "repo_bootstrap",
+      "reviewedAt": "2026-04-13T00:00:00.000Z",
+      "notes": "Already promoted into runtime as a verified Xiaohongshu direct-source item.",
+      "readyForRuntime": true,
+      "promotedContentId": "content_xhs_gaiao_03",
+      "promotedCreatorId": "creator_gaiao_xiaohongshu_hidden"
+    },
+    {
+      "candidateId": "xhs_5c3b619e000000000703fccc_69a44c1600000000150238d1",
+      "reviewDecision": "verified",
+      "reviewedBy": "repo_bootstrap",
+      "reviewedAt": "2026-04-13T00:00:00.000Z",
+      "notes": "Already promoted into runtime as a verified Xiaohongshu direct-source item.",
+      "readyForRuntime": true,
+      "promotedContentId": "content_xhs_gaiao_04",
+      "promotedCreatorId": "creator_gaiao_xiaohongshu_hidden"
+    },
+    {
+      "candidateId": "xhs_5c3b619e000000000703fccc_69c29c5f0000000021012666",
+      "reviewDecision": "verified",
+      "reviewedBy": "repo_bootstrap",
+      "reviewedAt": "2026-04-13T00:00:00.000Z",
+      "notes": "Already promoted into runtime as a verified Xiaohongshu direct-source item.",
+      "readyForRuntime": true,
+      "promotedContentId": "content_xhs_gaiao_01",
+      "promotedCreatorId": "creator_gaiao_xiaohongshu_hidden"
+    },
+    {
+      "candidateId": "xhs_5c3b619e000000000703fccc_69bab756000000002102f66e",
+      "reviewDecision": "verified",
+      "reviewedBy": "repo_bootstrap",
+      "reviewedAt": "2026-04-13T00:00:00.000Z",
+      "notes": "Already promoted into runtime as a verified Xiaohongshu direct-source item.",
+      "readyForRuntime": true,
+      "promotedContentId": "content_xhs_gaiao_05",
+      "promotedCreatorId": "creator_gaiao_xiaohongshu_hidden"
+    },
+    {
+      "candidateId": "xhs_63aef7df000000002702a346_69dce4c6000000002301dcf1",
+      "reviewDecision": "verified",
+      "reviewedBy": "repo_bootstrap",
+      "reviewedAt": "2026-04-13T00:00:00.000Z",
+      "notes": "Already promoted into runtime as a verified Xiaohongshu direct-source item.",
+      "readyForRuntime": true,
+      "promotedContentId": "content_xhs_lingxi_01",
+      "promotedCreatorId": "creator_lingxi_xiaohongshu_hidden"
+    },
+    {
+      "candidateId": "xhs_63aef7df000000002702a346_69bd3a7c000000001b020f2a",
+      "reviewDecision": "verified",
+      "reviewedBy": "repo_bootstrap",
+      "reviewedAt": "2026-04-13T00:00:00.000Z",
+      "notes": "Already promoted into runtime as a verified Xiaohongshu direct-source item.",
+      "readyForRuntime": true,
+      "promotedContentId": "content_xhs_lingxi_02",
+      "promotedCreatorId": "creator_lingxi_xiaohongshu_hidden"
+    },
+    {
+      "candidateId": "xhs_63aef7df000000002702a346_69b7f9f30000000022027926",
+      "reviewDecision": "verified",
+      "reviewedBy": "repo_bootstrap",
+      "reviewedAt": "2026-04-13T00:00:00.000Z",
+      "notes": "Already promoted into runtime as a verified Xiaohongshu direct-source item.",
+      "readyForRuntime": true,
+      "promotedContentId": "content_xhs_lingxi_04",
+      "promotedCreatorId": "creator_lingxi_xiaohongshu_hidden"
+    },
+    {
+      "candidateId": "xhs_63aef7df000000002702a346_69c68c91000000001a0367fd",
+      "reviewDecision": "verified",
+      "reviewedBy": "repo_bootstrap",
+      "reviewedAt": "2026-04-13T00:00:00.000Z",
+      "notes": "Already promoted into runtime as a verified Xiaohongshu direct-source item.",
+      "readyForRuntime": true,
+      "promotedContentId": "content_xhs_lingxi_05",
+      "promotedCreatorId": "creator_lingxi_xiaohongshu_hidden"
+    },
+    {
+      "candidateId": "xhs_63aef7df000000002702a346_69d1af64000000001a02c33c",
+      "reviewDecision": "verified",
+      "reviewedBy": "repo_bootstrap",
+      "reviewedAt": "2026-04-13T00:00:00.000Z",
+      "notes": "Already promoted into runtime as a verified Xiaohongshu direct-source item.",
+      "readyForRuntime": true,
+      "promotedContentId": "content_xhs_lingxi_03",
+      "promotedCreatorId": "creator_lingxi_xiaohongshu_hidden"
+    },
+    {
+      "candidateId": "xhs_6050684100000000010047d5_69bfd507000000001a033bd7",
+      "reviewDecision": "verified",
+      "reviewedBy": "repo_bootstrap",
+      "reviewedAt": "2026-04-13T00:00:00.000Z",
+      "notes": "Already promoted into runtime as a verified Xiaohongshu direct-source item.",
+      "readyForRuntime": true,
+      "promotedContentId": "content_xhs_mouratoglou_02",
+      "promotedCreatorId": "creator_mouratoglou_xiaohongshu_hidden"
+    },
+    {
+      "candidateId": "xhs_6050684100000000010047d5_69cbda3700000000230205b6",
+      "reviewDecision": "verified",
+      "reviewedBy": "repo_bootstrap",
+      "reviewedAt": "2026-04-13T00:00:00.000Z",
+      "notes": "Already promoted into runtime as a verified Xiaohongshu direct-source item.",
+      "readyForRuntime": true,
+      "promotedContentId": "content_xhs_mouratoglou_01",
+      "promotedCreatorId": "creator_mouratoglou_xiaohongshu_hidden"
+    },
+    {
+      "candidateId": "xhs_6050684100000000010047d5_69c12914000000002103bec0",
+      "reviewDecision": "verified",
+      "reviewedBy": "repo_bootstrap",
+      "reviewedAt": "2026-04-13T00:00:00.000Z",
+      "notes": "Already promoted into runtime as a verified Xiaohongshu direct-source item.",
+      "readyForRuntime": true,
+      "promotedContentId": "content_xhs_mouratoglou_03",
+      "promotedCreatorId": "creator_mouratoglou_xiaohongshu_hidden"
+    },
+    {
+      "candidateId": "xhs_6050684100000000010047d5_69cbc48a000000001f0059d4",
+      "reviewDecision": "verified",
+      "reviewedBy": "repo_bootstrap",
+      "reviewedAt": "2026-04-13T00:00:00.000Z",
+      "notes": "Already promoted into runtime as a verified Xiaohongshu direct-source item.",
+      "readyForRuntime": true,
+      "promotedContentId": "content_xhs_mouratoglou_04",
+      "promotedCreatorId": "creator_mouratoglou_xiaohongshu_hidden"
+    },
+    {
+      "candidateId": "xhs_6050684100000000010047d5_69cbc764000000001b02133b",
+      "reviewDecision": "verified",
+      "reviewedBy": "repo_bootstrap",
+      "reviewedAt": "2026-04-13T00:00:00.000Z",
+      "notes": "Already promoted into runtime as a verified Xiaohongshu direct-source item.",
+      "readyForRuntime": true,
+      "promotedContentId": "content_xhs_mouratoglou_05",
+      "promotedCreatorId": "creator_mouratoglou_xiaohongshu_hidden"
+    }
+  ]
+}

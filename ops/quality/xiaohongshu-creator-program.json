@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "scopeTarget": 350,
+  "allowedTeachingTypes": [
+    "technique_explanation",
+    "drill",
+    "footwork",
+    "tactic",
+    "serve",
+    "return",
+    "doubles",
+    "warmup",
+    "mental_execution"
+  ],
+  "creators": [
+    {
+      "id": "gaiao",
+      "displayName": "盖奥网球",
+      "aliases": ["盖奥", "盖奥网球"],
+      "creatorProfileUrl": "https://www.xiaohongshu.com/user/profile/5c3b619e000000000703fccc",
+      "creatorProfileStatus": "verified_profile",
+      "profileEvidenceNote": "Existing promoted runtime content and hidden creator record already use this profile URL.",
+      "candidateTarget": 100,
+      "runtimePromotionTarget": {
+        "min": 35,
+        "max": 50
+      }
+    },
+    {
+      "id": "lingxi",
+      "displayName": "灵熙",
+      "aliases": ["灵熙", "灵熙🎾"],
+      "creatorProfileUrl": "https://www.xiaohongshu.com/user/profile/63aef7df000000002702a346",
+      "creatorProfileStatus": "verified_profile",
+      "profileEvidenceNote": "Existing promoted runtime content and hidden creator record already use this profile URL.",
+      "candidateTarget": 100,
+      "runtimePromotionTarget": {
+        "min": 25,
+        "max": 40
+      }
+    },
+    {
+      "id": "mouratoglou",
+      "displayName": "冠军教练-莫拉特格鲁",
+      "aliases": ["冠军教练 - 莫拉托格鲁", "冠军教练-莫拉托格鲁", "冠军教练-莫拉特格鲁"],
+      "creatorProfileUrl": "https://www.xiaohongshu.com/user/profile/6050684100000000010047d5",
+      "creatorProfileStatus": "verified_profile",
+      "profileEvidenceNote": "Existing promoted runtime content and hidden creator record already use this profile URL.",
+      "candidateTarget": 100,
+      "runtimePromotionTarget": {
+        "min": 35,
+        "max": 50
+      }
+    },
+    {
+      "id": "dabaiyang",
+      "displayName": "奔跑的大白羊",
+      "aliases": ["奔跑的大白羊"],
+      "creatorProfileUrl": null,
+      "creatorProfileStatus": "pending_profile_verification",
+      "profileEvidenceNote": "Program scope is approved, but no profile URL is stored in the repo yet. Keep this creator QA-only until identity evidence is added.",
+      "candidateTarget": 50,
+      "runtimePromotionTarget": {
+        "min": 15,
+        "max": 30
+      }
+    }
+  ]
+}
