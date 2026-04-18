@@ -37,7 +37,7 @@ describe("xiaohongshu creator program", () => {
         id: "dabaiyang",
         displayName: "奔跑的大白羊",
         candidateTarget: 50,
-        creatorProfileStatus: "pending_profile_verification"
+        creatorProfileStatus: "verified_profile"
       }
     ]);
   });
@@ -53,11 +53,12 @@ describe("xiaohongshu creator program", () => {
     })?.id).toBe("mouratoglou");
   });
 
-  it("keeps pending-profile creators QA-only", () => {
+  it("keeps verified creators collectible for candidate collection", () => {
     const program = loadXiaohongshuCreatorProgram();
-    const pendingCreator = program.find((entry) => entry.id === "dabaiyang");
+    const dabaiyang = program.find((entry) => entry.id === "dabaiyang");
 
-    expect(pendingCreator).toBeTruthy();
-    expect(canCollectXiaohongshuSeedCandidates(pendingCreator!)).toBe(false);
+    expect(dabaiyang).toBeTruthy();
+    expect(canCollectXiaohongshuSeedCandidates(dabaiyang!)).toBe(true);
+    expect(dabaiyang?.creatorProfileStatus).toBe("verified_profile");
   });
 });

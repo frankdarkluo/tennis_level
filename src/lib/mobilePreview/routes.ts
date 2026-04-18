@@ -1,4 +1,8 @@
 import { buildDiagnosisGuidanceContext } from "@/lib/guidance-context/build";
+import {
+  XIAOHONGSHU_LIBRARY_REVIEW_QUERY_KEY,
+  XIAOHONGSHU_LIBRARY_REVIEW_QUERY_VALUE
+} from "@/lib/library/xiaohongshuReviewItems";
 import { buildDiagnosisPlanContext, buildPlanHref } from "@/lib/plans";
 import type { ProblemTag } from "@/types/problemTag";
 
@@ -17,7 +21,8 @@ export type MobilePreviewPreset =
   | "plan-expanded"
   | "plan-collapsed"
   | "diagnose-with-attached-videos"
-  | "library-xhs-mobile";
+  | "library-xhs-mobile"
+  | "library-xhs-review-mobile";
 
 export const DEFAULT_MOBILE_PREVIEW_ROUTE: MobilePreviewRoute = "/library";
 const DEFAULT_MOBILE_PREVIEW_LOCALE: MobilePreviewLocale = "zh";
@@ -28,7 +33,8 @@ const MOBILE_PREVIEW_PRESET_ROUTE: Record<MobilePreviewPreset, MobilePreviewRout
   "plan-expanded": "/plan",
   "plan-collapsed": "/plan",
   "diagnose-with-attached-videos": "/diagnose",
-  "library-xhs-mobile": "/library"
+  "library-xhs-mobile": "/library",
+  "library-xhs-review-mobile": "/library"
 };
 
 export function normalizeMobilePreviewRoute(route: string | null | undefined): MobilePreviewRoute {
@@ -127,6 +133,10 @@ function buildPresetRouteHref(preset: MobilePreviewPreset, locale: MobilePreview
 
   if (preset === "library-xhs-mobile") {
     return "/library?platform=Xiaohongshu";
+  }
+
+  if (preset === "library-xhs-review-mobile") {
+    return `/library?platform=Xiaohongshu&${XIAOHONGSHU_LIBRARY_REVIEW_QUERY_KEY}=${XIAOHONGSHU_LIBRARY_REVIEW_QUERY_VALUE}`;
   }
 
   return "/profile";

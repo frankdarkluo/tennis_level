@@ -20,6 +20,14 @@ import { logEvent } from "@/lib/eventLogger";
 import { useI18n } from "@/lib/i18n/config";
 import { shouldUseCompactMobileLibraryLayout, shouldUseMobileXiaohongshuMasonry } from "@/lib/library/layout";
 import { buildLibraryItems, sortLibraryItems } from "@/lib/library/order";
+import {
+  isXiaohongshuCandidateReviewItem,
+  isXiaohongshuCandidateReviewRequested
+} from "@/lib/library/xiaohongshuReviewItems";
+import {
+  readLocalXiaohongshuReviewBookmarkIds,
+  toggleLocalXiaohongshuReviewBookmark
+} from "@/lib/library/xiaohongshuReviewBookmarks";
 import { addBookmark, getBookmarkedContentIds, getLatestAssessmentResult, removeBookmark } from "@/lib/userData";
 import { getThumbnail } from "@/lib/thumbnail";
 import { cn, toChineseSkill } from "@/lib/utils";
@@ -70,6 +78,9 @@ function LibraryPageContent() {
   const [showBookmarkedOnly, setShowBookmarkedOnly] = useState(false);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [viewportWidth, setViewportWidth] = useState<number | null>(null);
+  const [reviewItems, setReviewItems] = useState<(ReturnType<typeof buildLibraryItems>)>([]);
+  const [reviewCandidateCount, setReviewCandidateCount] = useState(0);
+  const [reviewBookmarkedIds, setReviewBookmarkedIds] = useState<string[]>([]);
   const previousFiltersRef = useRef<Record<string, string | boolean> | null>(null);
   const previousKeywordRef = useRef("");
   // Use a deterministic product seed to avoid server/client ordering differences
@@ -86,10 +97,49 @@ function LibraryPageContent() {
     []
   );
   const platformParam = searchParams.get("platform");
+  const requestedXiaohongshuCandidateReview = isXiaohongshuCandidateReviewRequested(searchParams);
+  const showXiaohongshuCandidateReview = requestedXiaohongshuCandidateReview && selectedPlatform === "Xiaohongshu";
 
   useEffect(() => {
     setSelectedPlatform(normalizeLibraryPlatformParam(platformParam));
   }, [platformParam]);
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadReviewItems() {
+      if (!(requestedXiaohongshuCandidateReview && selectedPlatform === "Xiaohongshu")) {
+        setReviewItems([]);
+        setReviewCandidateCount(0);
+        return;
+      }
+
+      const module = await import("@/lib/library/xiaohongshuReviewItems");
+
+      if (!active) {
+        return;
+      }
+
+      const reviewData = module.loadXiaohongshuCandidateReviewData();
+      setReviewItems(reviewData.items);
+      setReviewCandidateCount(reviewData.summary.candidateCount);
+    }
+
+    void loadReviewItems();
+
+    return () => {
+      active = false;
+    };
+  }, [requestedXiaohongshuCandidateReview, selectedPlatform]);
+
+  useEffect(() => {
+    if (!showXiaohongshuCandidateReview) {
+      setReviewBookmarkedIds([]);
+      return;
+    }
+
+    setReviewBookmarkedIds(readLocalXiaohongshuReviewBookmarkIds());
+  }, [showXiaohongshuCandidateReview]);
 
   useEffect(() => {
     if (loading) {
@@ -247,12 +297,26 @@ function LibraryPageContent() {
 
   useEffect(() => {
     setVisibleCount(PAGE_SIZE);
-  }, [keyword, selectedContentLanguage, selectedPlatform, selectedSubtitleAvailability, showBookmarkedOnly]);
+  }, [keyword, reviewItems.length, selectedContentLanguage, selectedPlatform, selectedSubtitleAvailability, showBookmarkedOnly]);
+
+  const runtimeXiaohongshuCount = useMemo(
+    () => libraryItems.filter((item) => item.platform === "Xiaohongshu").length,
+    [libraryItems]
+  );
+  const effectiveBookmarkedIds = useMemo(
+    () => showXiaohongshuCandidateReview
+      ? Array.from(new Set([...bookmarkedIds, ...reviewBookmarkedIds]))
+      : bookmarkedIds,
+    [bookmarkedIds, reviewBookmarkedIds, showXiaohongshuCandidateReview]
+  );
 
   const filtered = useMemo(() => {
     const query = keyword.trim().toLowerCase();
+    const sourceItems = showXiaohongshuCandidateReview
+      ? [...libraryItems, ...reviewItems]
+      : libraryItems;
 
-    const matchedItems = libraryItems.filter((item) => {
+    const matchedItems = sourceItems.filter((item) => {
       const searchableFields = [
         item.title,
         item.sourceTitle ?? "",
@@ -277,23 +341,40 @@ function LibraryPageContent() {
         : selectedSubtitleAvailability === "english"
           ? itemSubtitleAvailability === "english" || itemSubtitleAvailability === "zh_en" || itemSubtitleAvailability === "not_needed"
           : itemSubtitleAvailability === "none";
-      const hitBookmark = showBookmarkedOnly ? bookmarkedIds.includes(item.id) : true;
+      const hitBookmark = showBookmarkedOnly ? effectiveBookmarkedIds.includes(item.id) : true;
       return hitKeyword && hitPlatform && hitContentLanguage && hitSubtitle && hitBookmark;
     });
 
-    const withThumbnail = sortLibraryItems(
-      matchedItems.filter((item) => Boolean(getThumbnail(item))),
+    const runtimeMatched = matchedItems.filter((item) => !isXiaohongshuCandidateReviewItem(item));
+    const reviewMatched = matchedItems.filter((item) => isXiaohongshuCandidateReviewItem(item));
+    const runtimeWithThumbnail = sortLibraryItems(
+      runtimeMatched.filter((item) => Boolean(getThumbnail(item))),
       `${productSeed}:with-thumb`
     );
-    const withoutThumbnail = sortLibraryItems(
-      matchedItems.filter((item) => !getThumbnail(item)),
+    const runtimeWithoutThumbnail = sortLibraryItems(
+      runtimeMatched.filter((item) => !getThumbnail(item)),
       `${productSeed}:no-thumb`
     );
-    return [...withThumbnail, ...withoutThumbnail];
-  }, [bookmarkedIds, creatorNameById, keyword, productSeed, selectedContentLanguage, selectedPlatform, selectedSubtitleAvailability, showBookmarkedOnly]);
+    const reviewWithThumbnail = reviewMatched.filter((item) => Boolean(getThumbnail(item)));
+    const reviewWithoutThumbnail = reviewMatched.filter((item) => !getThumbnail(item));
+
+    return [...runtimeWithThumbnail, ...runtimeWithoutThumbnail, ...reviewWithThumbnail, ...reviewWithoutThumbnail];
+  }, [
+    effectiveBookmarkedIds,
+    creatorNameById,
+    keyword,
+    libraryItems,
+    productSeed,
+    reviewItems,
+    selectedContentLanguage,
+    selectedPlatform,
+    selectedSubtitleAvailability,
+    showBookmarkedOnly,
+    showXiaohongshuCandidateReview
+  ]);
   const visibleItems = useMemo(
-    () => filtered.slice(0, visibleCount),
-    [filtered, visibleCount]
+    () => (showXiaohongshuCandidateReview ? filtered : filtered.slice(0, visibleCount)),
+    [filtered, showXiaohongshuCandidateReview, visibleCount]
   );
   const xiaohongshuColumns = useMemo(() => {
     const leftColumn: typeof visibleItems = [];
@@ -305,7 +386,7 @@ function LibraryPageContent() {
 
     return [leftColumn, rightColumn] as const;
   }, [visibleItems]);
-  const hasMore = visibleItems.length < filtered.length;
+  const hasMore = !showXiaohongshuCandidateReview && visibleItems.length < filtered.length;
   const isMobilePreview = searchParams.get("mobilePreview") === "1";
   const useCompactMobileLibraryLayout = shouldUseCompactMobileLibraryLayout({
     viewportWidth,
@@ -346,6 +427,16 @@ function LibraryPageContent() {
   };
 
   const handleToggleBookmark = async (contentId: string) => {
+    if (showXiaohongshuCandidateReview && contentId.startsWith("review_xhs_candidate_")) {
+      const next = toggleLocalXiaohongshuReviewBookmark(contentId);
+      setReviewBookmarkedIds(next);
+      logEvent("content.bookmark_toggled", {
+        contentId,
+        bookmarked: next.includes(contentId)
+      }, { page: "/library" });
+      return;
+    }
+
     if (!user?.id || !configured) {
       openLoginModal(t("library.bookmarkLogin"), "bookmark");
       return;
@@ -380,8 +471,8 @@ function LibraryPageContent() {
         key={item.id}
         item={item}
         source="library"
-        bookmarked={bookmarkedIds.includes(item.id)}
-        bookmarkLoading={bookmarkPendingId === item.id}
+        bookmarked={effectiveBookmarkedIds.includes(item.id)}
+        bookmarkLoading={!isXiaohongshuCandidateReviewItem(item) && bookmarkPendingId === item.id}
         onToggleBookmark={() => void handleToggleBookmark(item.id)}
         layoutVariant={useXiaohongshuMobileMasonry && item.platform === "Xiaohongshu" ? "xhs-mobile-note" : "default"}
       />
@@ -439,9 +530,22 @@ function LibraryPageContent() {
           setSelectedSubtitleAvailability={setSelectedSubtitleAvailability}
           showBookmarkedOnly={showBookmarkedOnly}
           setShowBookmarkedOnly={setShowBookmarkedOnly}
-          bookmarkFilterEnabled={Boolean(user?.id && configured)}
+          bookmarkFilterEnabled={Boolean((user?.id && configured) || showXiaohongshuCandidateReview)}
           compactMobile={useCompactMobileLibraryLayout}
         />
+
+        {showXiaohongshuCandidateReview ? (
+          <Card data-testid="library-review-banner" className="space-y-1 border border-[var(--line)]/70 bg-slate-50/90 px-4 py-3 text-sm text-slate-700">
+            <p className="font-semibold text-slate-900">{t("library.review.title")}</p>
+            <p>{t("library.review.body")}</p>
+            <p className="text-xs text-slate-500">
+              {t("library.review.counts", {
+                runtimeCount: runtimeXiaohongshuCount,
+                candidateCount: reviewCandidateCount
+              })}
+            </p>
+          </Card>
+        ) : null}
 
         {filtered.length > 0 ? (
           <div className="space-y-6">

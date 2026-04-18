@@ -68,6 +68,23 @@ describe("MobilePreviewPage", () => {
     expect(screen.getByTestId("mobile-preview-frame-shell")).toHaveClass("rounded-[28px]");
   });
 
+  it("supports a Xiaohongshu candidate review preset on the current library page", async () => {
+    const MobilePreviewPage = await loadMobilePreviewPage();
+    const ui = await MobilePreviewPage({
+      searchParams: Promise.resolve({ preset: "library-xhs-review-mobile", viewport: "430", locale: "zh" })
+    });
+    render(ui);
+
+    expect(screen.getByTitle("Mobile preview frame")).toHaveAttribute(
+      "src",
+      "/library?platform=Xiaohongshu&review=xiaohongshu-candidates&mobilePreview=1&mobilePreviewLocale=zh&mobilePreviewViewport=430&mobilePreviewPreset=library-xhs-review-mobile"
+    );
+    expect(screen.getByRole("link", { name: "Library" })).toHaveAttribute(
+      "href",
+      "/mobile-preview?preset=library-xhs-review-mobile&locale=zh&viewport=430"
+    );
+  });
+
   it("supports deterministic plan and profile review presets", async () => {
     const MobilePreviewPage = await loadMobilePreviewPage();
     const ui = await MobilePreviewPage({

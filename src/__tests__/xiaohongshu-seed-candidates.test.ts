@@ -80,10 +80,85 @@ describe("xiaohongshu seed candidates", () => {
       creatorProgramId: "dabaiyang",
       creatorName: "奔跑的大白羊",
       creatorProfileUrl: "https://www.xiaohongshu.com/user/profile/5676c499b8ce1a5b6e806853",
-      creatorProfileStatus: "pending_profile_verification",
+      creatorProfileStatus: "verified_profile",
       candidateTarget: 50,
       savedCount: 0,
-      collectible: false
+      collectible: true
+    });
+  });
+
+  it("accepts raw Xiaohongshu creator-profile-post URLs and normalizes them to direct note URLs", () => {
+    const artifact = buildXiaohongshuSeedCandidateArtifact({
+      generatedAt: "2026-04-15T00:00:00.000Z",
+      inputs: [
+        createInput({
+          creatorName: "盖奥",
+          creatorProfileUrl: "https://www.xiaohongshu.com/user/profile/5c3b619e000000000703fccc",
+          rawUrl: "https://www.xiaohongshu.com/user/profile/5c3b619e000000000703fccc/69d0e10b00000000230257be?xsec_token=ABC",
+          resolvedCanonicalUrl: "https://www.xiaohongshu.com/user/profile/5c3b619e000000000703fccc/69d0e10b00000000230257be?xsec_token=ABC",
+          title: "网球发球蓄力技巧，用“髋”发球",
+          profileConfirmedTitle: "网球发球蓄力技巧，用“髋”发球",
+          preliminaryProblemTags: ["serve-toss-consistency"],
+          discoveryQuery: "网球发球蓄力技巧 用髋发球 盖奥",
+          teachingType: "serve"
+        })
+      ]
+    });
+
+    expect(artifact.candidates[0]).toMatchObject({
+      rawUrl: "https://www.xiaohongshu.com/user/profile/5c3b619e000000000703fccc/69d0e10b00000000230257be?xsec_token=ABC",
+      canonicalUrl: "https://www.xiaohongshu.com/explore/69d0e10b00000000230257be",
+      postId: "69d0e10b00000000230257be",
+      reviewStatus: "needs_review"
+    });
+  });
+
+  it("supports per-creator pool limit overrides", () => {
+    const artifact = buildXiaohongshuSeedCandidateArtifact({
+      generatedAt: "2026-04-15T00:00:00.000Z",
+      perCreatorLimit: 1,
+      perCreatorLimitByCreatorId: { gaiao: 2 },
+      inputs: [
+        createInput({ priority: 1 }),
+        createInput({
+          creatorName: "盖奥",
+          rawUrl: "https://www.xiaohongshu.com/search_result/69d1af64000000001a02c33c?xsec_token=abc",
+          title: "另一个盖奥笔记",
+          profileConfirmedTitle: "另一个盖奥笔记",
+          priority: 2
+        }),
+        createInput({
+          creatorName: "灵犀🎾",
+          creatorProfileUrl: "https://www.xiaohongshu.com/user/profile/63aef7df000000002702a346",
+          rawUrl: "https://www.xiaohongshu.com/search_result/69c68c91000000001a0367fd?xsec_token=abc",
+          title: "另一个灵犀笔记",
+          profileConfirmedTitle: "另一个灵犀笔记",
+          priority: 2
+        })
+      ]
+    });
+
+    expect(artifact.summary.byCreator.find((creator) => creator.creatorProgramId === "gaiao")?.savedCount).toBe(2);
+    expect(artifact.summary.byCreator.find((creator) => creator.creatorProgramId === "lingxi")?.savedCount).toBe(1);
+  });
+
+  it("fills missing thumbnail evidence from post-id overrides without changing authored titles or URLs", () => {
+    const artifact = buildXiaohongshuSeedCandidateArtifact({
+      generatedAt: "2026-04-15T00:00:00.000Z",
+      thumbnailOverridesByPostId: {
+        "69d3aa0b000000002102d993": "https://sns-webpic-qc.xhscdn.com/override.jpg"
+      },
+      inputs: [
+        createInput({
+          thumbnailUrl: ""
+        })
+      ]
+    });
+
+    expect(artifact.candidates[0]).toMatchObject({
+      rawUrl: "https://www.xiaohongshu.com/search_result/69d3aa0b000000002102d993?xsec_token=abc&xsec_source=",
+      canonicalUrl: "https://www.xiaohongshu.com/explore/69d3aa0b000000002102d993",
+      thumbnailUrl: "https://sns-webpic-qc.xhscdn.com/override.jpg"
     });
   });
 
@@ -117,10 +192,10 @@ describe("xiaohongshu seed candidates", () => {
       inputs: [
         createInput({
           creatorName: "奔跑的大白羊",
-          creatorProfileUrl: "https://www.xiaohongshu.com/user/profile/pending01"
+          creatorProfileUrl: "https://www.xiaohongshu.com/user/profile/mismatch-profile-id"
         })
       ]
-    })).toThrow(/pending profile verification/i);
+    })).toThrow(/creatorProfileUrl does not match/i);
   });
 
   it("rejects unsupported teaching types", () => {

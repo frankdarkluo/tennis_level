@@ -1,0 +1,435 @@
+{
+  "version": 1,
+  "generatedAt": "2026-04-15T17:09:21.762Z",
+  "methodology": {
+    "extractor": "cloned_local_chrome_profile_headless_dump_dom",
+    "chromeProfile": "Default",
+    "tempProfileDir": "/var/folders/77/5n1twslx1y965rds5hly64d00000gn/T/xhs-chrome-profile"
+  },
+  "overrides": [
+    {
+      "candidateId": "xhs_5676c499b8ce1a5b6e806853_69d62d93000000001d019935",
+      "creatorProgramId": "dabaiyang",
+      "postId": "69d62d93000000001d019935",
+      "rawUrl": "https://www.xiaohongshu.com/user/profile/5676c499b8ce1a5b6e806853/69d62d93000000001d019935?xsec_token=ABXqwV-uZ0vB5iB9ViajNlxa8nJAbWctoNd3V7Vt1sUWY=&xsec_source=pc_user",
+      "title": "🎾三个参考要点学会把球“打深”，你都知道吗？",
+      "thumbnailUrl": "https://sns-webpic-qc.xhscdn.com/202604160023/5f54f1b8f71137fab216cd8632074a69/1040g2sg31umr134njme044gvpd29iq2jioldfgg!nc_n_webp_mw_1",
+      "extractedFrom": "profile.note-item.cover img",
+      "checkedAt": "2026-04-15T16:33:47.333Z"
+    },
+    {
+      "candidateId": "xhs_5676c499b8ce1a5b6e806853_69b0d3a90000000026031589",
+      "creatorProgramId": "dabaiyang",
+      "postId": "69b0d3a90000000026031589",
+      "rawUrl": "https://www.xiaohongshu.com/user/profile/5676c499b8ce1a5b6e806853/69b0d3a90000000026031589?xsec_token=ABfvtN2ei3HB6K_hgmFA8n4NxyzV2QJNNR47nP0sEa6Lk=&xsec_source=pc_user",
+      "title": "🎾内角一发➕截止，再老登不过了",
+      "thumbnailUrl": "https://sns-webpic-qc.xhscdn.com/202604160108/e2408f8efd2c6c6daa1bc4227289a74d/1040g00831tibq3j4587044gvpd29iq2jtungv6o!nd_dft_wgth_webp_3",
+      "extractedFrom": "note.imageList[0].urlDefault",
+      "checkedAt": "2026-04-15T17:08:39.710Z"
+    },
+    {
+      "candidateId": "xhs_5676c499b8ce1a5b6e806853_69d9c58700000000210066a2",
+      "creatorProgramId": "dabaiyang",
+      "postId": "69d9c58700000000210066a2",
+      "rawUrl": "https://www.xiaohongshu.com/user/profile/5676c499b8ce1a5b6e806853/69d9c58700000000210066a2?xsec_token=AB6yOKL_zxB77tWbTx1w56MehH2TUf2F24HcMCzUlWEwo=&xsec_source=pc_user",
+      "title": "🎾击球“心流”，两个人一片场，心无杂念回击",
+      "thumbnailUrl": "https://sns-webpic-qc.xhscdn.com/202604160023/3e0d06799ab27ff3af016b8ec5e1712a/1040g00831urm0hpt1m0g44gvpd29iq2jt58qti8!nc_n_webp_mw_1",
+      "extractedFrom": "profile.note-item.cover img",
+      "checkedAt": "2026-04-15T16:33:47.333Z"
+    },
+    {
+      "candidateId": "xhs_5676c499b8ce1a5b6e806853_69db25040000000023026f89",
+      "creatorProgramId": "dabaiyang",
+      "postId": "69db25040000000023026f89",
+      "rawUrl": "https://www.xiaohongshu.com/user/profile/5676c499b8ce1a5b6e806853/69db25040000000023026f89?xsec_token=ABbTmrgOM6T7qEG1Xu8IhZDoG0WZY_dcyTfEFhIVbfgkI=&xsec_source=pc_user",
+      "title": "🎾增加挥拍“伸展度”，提升球质+20%",
+      "thumbnailUrl": "https://sns-webpic-qc.xhscdn.com/202604160023/f223fd4bcbfe6fa1bc04b0365c4c96e8/1040g00831urm0hpt1m0044gvpd29iq2juqcqqco!nc_n_webp_mw_1",
+      "extractedFrom": "profile.note-item.cover img",
+      "checkedAt": "2026-04-15T16:33:47.333Z"
+    },
+    {
+      "candidateId": "xhs_5676c499b8ce1a5b6e806853_69dd123c0000000023012292",
+      "creatorProgramId": "dabaiyang",
+      "postId": "69dd123c0000000023012292",
+      "rawUrl": "https://www.xiaohongshu.com/user/profile/5676c499b8ce1a5b6e806853/69dd123c0000000023012292?xsec_token=ABmrToNDckyeGlumcPgEn6YmfIUxy2YAZbtBx1FX6s0SY=&xsec_source=pc_user",
+      "title": "🎾想击球“更好看”，三个小调整，推荐要试试",
+      "thumbnailUrl": "https://sns-webpic-qc.xhscdn.com/202604160023/f044612196cb9c7bb2c7cbd4dbeb5cff/1040g00831utifppb1m0044gvpd29iq2j5ao6pv8!nc_n_webp_mw_1",
+      "extractedFrom": "profile.note-item.cover img",
+      "checkedAt": "2026-04-15T16:33:47.333Z"
+    },
+    {
+      "candidateId": "xhs_5676c499b8ce1a5b6e806853_69d4eef5000000001b00184c",
+      "creatorProgramId": "dabaiyang",
+      "postId": "69d4eef5000000001b00184c",
+      "rawUrl": "https://www.xiaohongshu.com/user/profile/5676c499b8ce1a5b6e806853/69d4eef5000000001b00184c?xsec_token=AB8gzTo2KfAV3GsW2y_4g-1ZFWIEBdlGQJmSJvXoQW0o4=&xsec_source=pc_user",
+      "title": "🎾步频快才能真的快，3.0选手日常必练",
+      "thumbnailUrl": "https://sns-webpic-qc.xhscdn.com/202604160023/3d31c03fffd3ca94e576f8af7cdd6d14/1040g2sg31ulk7qnjj47044gvpd29iq2j2f7e87o!nc_n_webp_mw_1",
+      "extractedFrom": "profile.note-item.cover img",
+      "checkedAt": "2026-04-15T16:33:47.333Z"
+    },
+    {
+      "candidateId": "xhs_5676c499b8ce1a5b6e806853_69d8c857000000001d019e71",
+      "creatorProgramId": "dabaiyang",
+      "postId": "69d8c857000000001d019e71",
+      "rawUrl": "https://www.xiaohongshu.com/user/profile/5676c499b8ce1a5b6e806853/69d8c857000000001d019e71?xsec_token=ABef82l3OMUGhVNBeZKxac7MrysGfs5eWvM9zIJhskDz4=&xsec_source=pc_user",
+      "title": "🎾理解“随上”击球，技术才能合理进阶",
+      "thumbnailUrl": "https://sns-webpic-qc.xhscdn.com/202604160023/e300cce1035b226bf30e41d12ecbe5c1/1040g00831upchvkdhm0044gvpd29iq2j624pk4o!nc_n_webp_mw_1",
+      "extractedFrom": "profile.note-item.cover img",
+      "checkedAt": "2026-04-15T16:33:47.333Z"
+    },
+    {
+      "candidateId": "xhs_5676c499b8ce1a5b6e806853_69d0e10b00000000230257be",
+      "creatorProgramId": "dabaiyang",
+      "postId": "69d0e10b00000000230257be",
+      "rawUrl": "https://www.xiaohongshu.com/user/profile/5676c499b8ce1a5b6e806853/69d0e10b00000000230257be?xsec_token=ABoECiMyJEe5hHZAcEi_w2L-YUCS8hm3CpIGZSCygwrEQ=&xsec_source=pc_user",
+      "title": "🎾网球发球蓄力技巧，用“髋”发球",
+      "thumbnailUrl": "https://sns-webpic-qc.xhscdn.com/202604160023/51f5c624d502277abf45e25f9f4f5eee/1040g00831uhl765ais0044gvpd29iq2jrvj8k30!nc_n_webp_mw_1",
+      "extractedFrom": "profile.note-item.cover img",
+      "checkedAt": "2026-04-15T16:33:47.333Z"
+    },
+    {
+      "candidateId": "xhs_5676c499b8ce1a5b6e806853_69d3676e000000002200f72c",
+      "creatorProgramId": "dabaiyang",
+      "postId": "69d3676e000000002200f72c",
+      "rawUrl": "https://www.xiaohongshu.com/user/profile/5676c499b8ce1a5b6e806853/69d3676e000000002200f72c?xsec_token=ABFxRRtYoO3os98uJ-xLYK86RX7Cz8yZm99IZJ1PJniE8=&xsec_source=pc_user",
+      "title": "🎾网球提升击球质量，基础必练动作",
+      "thumbnailUrl": "https://sns-webpic-qc.xhscdn.com/202604160023/d7dbf3d7c0f7b9fb904b7f4408c98e99/1040g00831ukg9pksjk0044gvpd29iq2jmhqph6g!nc_n_webp_mw_1",
+      "extractedFrom": "profile.note-item.cover img",
+      "checkedAt": "2026-04-15T16:33:47.333Z"
+    },
+    {
+      "candidateId": "xhs_5676c499b8ce1a5b6e806853_69da46ef00000000210041e6",
+      "creatorProgramId": "dabaiyang",
+      "postId": "69da46ef00000000210041e6",
+      "rawUrl": "https://www.xiaohongshu.com/user/profile/5676c499b8ce1a5b6e806853/69da46ef00000000210041e6?xsec_token=ABew6wnjUyh4xoyCX0mEkrRL1wHP0NXfnn7dCqUh51rU8=&xsec_source=pc_user",
+      "title": "🎾解决正拍力量“释放”，球质提升一个档次",
+      "thumbnailUrl": "https://sns-webpic-qc.xhscdn.com/202604160023/5ec4c56a7ce034e7d23ed9cc1d539fb2/1040g2sg31uqr825rj40044gvpd29iq2j63u76lo!nc_n_webp_mw_1",
+      "extractedFrom": "profile.note-item.cover img",
+      "checkedAt": "2026-04-15T16:33:47.333Z"
+    },
+    {
+      "candidateId": "xhs_5676c499b8ce1a5b6e806853_69d736b9000000001b00188b",
+      "creatorProgramId": "dabaiyang",
+      "postId": "69d736b9000000001b00188b",
+      "rawUrl": "https://www.xiaohongshu.com/user/profile/5676c499b8ce1a5b6e806853/69d736b9000000001b00188b?xsec_token=ABkqTodcLZXe-SyKDzCzyHqek0g8DRw0Ncvw4MH060iyU=&xsec_source=pc_user",
+      "title": "4个“髋部”训练动作，练活髋！",
+      "thumbnailUrl": "https://sns-webpic-qc.xhscdn.com/202604160023/116310a2d7d6bd1d88f7062bdb76324b/1040g2sg31unrcvoihue044gvpd29iq2juk177oo!nc_n_webp_mw_1",
+      "extractedFrom": "profile.note-item.cover img",
+      "checkedAt": "2026-04-15T16:33:47.333Z"
+    },
+    {
+      "candidateId": "xhs_5676c499b8ce1a5b6e806853_69d24c780000000021004e51",
+      "creatorProgramId": "dabaiyang",
+      "postId": "69d24c780000000021004e51",
+      "rawUrl": "https://www.xiaohongshu.com/user/profile/5676c499b8ce1a5b6e806853/69d24c780000000021004e51?xsec_token=ABB02Q8GavE0RI6M5F4YcsJrymXMU8in1Po3qgseX7lMM=&xsec_source=pc_user",
+      "title": "发球｜🎾顺畅发球小tips，亲测有效！",
+      "thumbnailUrl": "https://sns-webpic-qc.xhscdn.com/202604160023/9e14a9db3672dfe2d650153799d40f4c/1040g00831uj1t95phu0044gvpd29iq2j9oa46d8!nc_n_webp_mw_1",
+      "extractedFrom": "profile.note-item.cover img",
+      "checkedAt": "2026-04-15T16:33:47.333Z"
+    },
+    {
+      "candidateId": "xhs_5676c499b8ce1a5b6e806853_69de436c00000000210069bc",
+      "creatorProgramId": "dabaiyang",
+      "postId": "69de436c00000000210069bc",
+      "rawUrl": "https://www.xiaohongshu.com/user/profile/5676c499b8ce1a5b6e806853/69de436c00000000210069bc?xsec_token=AB08SFZxYFMQ-jANshyYzfPW9PA7sj3b6y42OgeWav5lQ=&xsec_source=pc_user",
+      "title": "网球入门&进阶请进，两个视角解析“上旋球”",
+      "thumbnailUrl": "https://sns-webpic-qc.xhscdn.com/202604160023/6e522f777e64c8f573acd9cdb5c3b2f1/1040g00831uunt0i7jm0044gvpd29iq2jrtdujgg!nc_n_webp_mw_1",
+      "extractedFrom": "profile.note-item.cover img",
+      "checkedAt": "2026-04-15T16:33:47.333Z"
+    },
+    {
+      "candidateId": "xhs_5676c499b8ce1a5b6e806853_69cf38490000000021005899",
+      "creatorProgramId": "dabaiyang",
+      "postId": "69cf38490000000021005899",
+      "rawUrl": "https://www.xiaohongshu.com/user/profile/5676c499b8ce1a5b6e806853/69cf38490000000021005899?xsec_token=ABY0-rRVsa5vbYUTHW3lQYiJAcXm18s3ogzUwxZw3KLKI=&xsec_source=pc_user",
+      "title": "网球击球🎾，松弛感怎么做到？？",
+      "thumbnailUrl": "https://sns-webpic-qc.xhscdn.com/202604160023/80df30997b8586c6e24422fd200c0509/1040g2sg31ug186mr36eg44gvpd29iq2j587e36o!nc_n_webp_mw_1",
+      "extractedFrom": "profile.note-item.cover img",
+      "checkedAt": "2026-04-15T16:33:47.333Z"
+    },
+    {
+      "candidateId": "xhs_5676c499b8ce1a5b6e806853_65126ff6000000001e02e3a3",
+      "creatorProgramId": "dabaiyang",
+      "postId": "65126ff6000000001e02e3a3",
+      "rawUrl": "https://www.xiaohongshu.com/user/profile/5676c499b8ce1a5b6e806853/65126ff6000000001e02e3a3?xsec_token=ABWldt-qavBjH1HLBUNk6Ck7zrdhLVg0PXeEPa_IcXDr0=&xsec_source=pc_user",
+      "title": "网球教练，超慢的正拍慢动作",
+      "thumbnailUrl": "https://sns-webpic-qc.xhscdn.com/202604160023/147d8ce0138cbfc22a7b9f938a0f248a/1040g00830pfmck3qls0044gvpd29iq2jri84790!nc_n_webp_mw_1",
+      "extractedFrom": "profile.note-item.cover img",
+      "checkedAt": "2026-04-15T16:33:47.333Z"
+    },
+    {
+      "candidateId": "xhs_6050684100000000010047d5_69519947000000001e00cc2f",
+      "creatorProgramId": "mouratoglou",
+      "postId": "69519947000000001e00cc2f",
+      "rawUrl": "https://www.xiaohongshu.com/user/profile/6050684100000000010047d5/69519947000000001e00cc2f?xsec_token=ABo0LvwE2xxK5BDVNeYnilTnUKlvYJ0QCVgWyIgKCJ8WQ=&xsec_source=pc_user",
+      "title": "【心理】 当你失去信心时应怎么做？",
+      "thumbnailUrl": "https://sns-webpic-qc.xhscdn.com/202604151458/00aedb594aef2af67eb3cdadc1c09adc/spectrum/1040g34o31qlc3dto700g5o2gd10g8hulm51tiug!nd_dft_wlteh_webp_3",
+      "extractedFrom": "note.imageList[0].urlDefault",
+      "checkedAt": "2026-04-15T06:58:28.201Z"
+    },
+    {
+      "candidateId": "xhs_6050684100000000010047d5_694974d4000000001f0043c0",
+      "creatorProgramId": "mouratoglou",
+      "postId": "694974d4000000001f0043c0",
+      "rawUrl": "https://www.xiaohongshu.com/user/profile/6050684100000000010047d5/694974d4000000001f0043c0?xsec_token=ABxuUt1GwmwKfF1A5obi0QvATWDq5ftUeJhXHShA4T7Vs=&xsec_source=pc_user",
+      "title": "【心理】消除网球场上的犹豫！",
+      "thumbnailUrl": "https://sns-webpic-qc.xhscdn.com/202604151503/7ea0a83b03e8367d56ee6c1dbc422da4/spectrum/1040g34o31qdb3tm0720g5o2gd10g8hullr48jjo!nd_dft_wlteh_webp_3",
+      "extractedFrom": "note.imageList[0].urlDefault",
+      "checkedAt": "2026-04-15T07:03:30.652Z"
+    },
+    {
+      "candidateId": "xhs_6050684100000000010047d5_699dbbcc000000001a0344a3",
+      "creatorProgramId": "mouratoglou",
+      "postId": "699dbbcc000000001a0344a3",
+      "rawUrl": "https://www.xiaohongshu.com/user/profile/6050684100000000010047d5/699dbbcc000000001a0344a3?xsec_token=AB0WyMozOQrJiSd-PAWmD9BCXWc6WOV6LaLoCSsvk6b_o=&xsec_source=pc_user",
+      "title": "【重心转移，髋部旋转】一个小调整带来的改变",
+      "thumbnailUrl": "https://sns-webpic-qc.xhscdn.com/202604160108/2c037df775458cf7d64458f4ad22bbcc/spectrum/1040g0k031svna3atla005o2gd10g8hul69ftahg!nd_dft_wlteh_webp_3",
+      "extractedFrom": "note.imageList[0].urlDefault",
+      "checkedAt": "2026-04-15T17:07:58.660Z"
+    },
+    {
+      "candidateId": "xhs_6050684100000000010047d5_6949542e000000001b02423c",
+      "creatorProgramId": "mouratoglou",
+      "postId": "6949542e000000001b02423c",
+      "rawUrl": "https://www.xiaohongshu.com/user/profile/6050684100000000010047d5/6949542e000000001b02423c?xsec_token=ABxuUt1GwmwKfF1A5obi0QvAeqZj_hQWv9FeNIV9EMMJI=&xsec_source=pc_user",
+      "title": "为什么击球时要放松手腕？",
+      "thumbnailUrl": "https://sns-webpic-qc.xhscdn.com/202604151502/ae003db641440583848228dfd56ac8e3/spectrum/1040g0k031qd9mttt0m705o2gd10g8hulh8mkeb8!nd_dft_wlteh_webp_3",
+      "extractedFrom": "note.imageList[0].urlDefault",
+      "checkedAt": "2026-04-15T07:02:06.860Z"
+    },
+    {
+      "candidateId": "xhs_6050684100000000010047d5_694981eb0000000019027d11",
+      "creatorProgramId": "mouratoglou",
+      "postId": "694981eb0000000019027d11",
+      "rawUrl": "https://www.xiaohongshu.com/user/profile/6050684100000000010047d5/694981eb0000000019027d11?xsec_token=ABxuUt1GwmwKfF1A5obi0QvJSHXbiqV_ccM4V7ZTiCpIA=&xsec_source=pc_user",
+      "title": "为何女网选手击球要弯更低？",
+      "thumbnailUrl": "https://sns-webpic-qc.xhscdn.com/202604151500/4e21da5304ae58e65fe9a85d3a460efc/spectrum/1040g34o31qdf7usr700g5o2gd10g8hul2rsrao0!nd_dft_wlteh_webp_3",
+      "extractedFrom": "note.imageList[0].urlDefault",
+      "checkedAt": "2026-04-15T07:00:41.114Z"
+    },
+    {
+      "candidateId": "xhs_6050684100000000010047d5_65ae3eff000000002c0110fd",
+      "creatorProgramId": "mouratoglou",
+      "postId": "65ae3eff000000002c0110fd",
+      "rawUrl": "https://www.xiaohongshu.com/search_result/65ae3eff000000002c0110fd?xsec_token=AB7hci8Essq5wlcD2f8DJtnQCPrjXYVtPjtKj1MPjiqtc=&xsec_source=pc_search",
+      "title": "交叉主导型选手如何打正手球",
+      "thumbnailUrl": "https://sns-webpic-qc.xhscdn.com/202604160107/0db64c8a70d9fa4a655863000ab3997f/spectrum/1040g0k030u7qudvc5e005o2gd10g8hul2e3ukp8!nd_dft_wgth_webp_3",
+      "extractedFrom": "note.imageList[0].urlDefault",
+      "checkedAt": "2026-04-15T17:03:53.570Z"
+    },
+    {
+      "candidateId": "xhs_6050684100000000010047d5_68fa1c59000000000402a60a",
+      "creatorProgramId": "mouratoglou",
+      "postId": "68fa1c59000000000402a60a",
+      "rawUrl": "https://www.xiaohongshu.com/search_result/68fa1c59000000000402a60a?xsec_token=ABsB2-rOF3nc0IxGv_xKP5rWp_fPkzTptIaovIlBF5TZs=&xsec_source=pc_search",
+      "title": "像德约一样发球的关键",
+      "thumbnailUrl": "https://sns-webpic-qc.xhscdn.com/202604151452/93665ae45f8c3084f852c1396e908639/spectrum/1040g34o31nvu4j66ku005o2gd10g8hul8433iu0!nd_dft_wlteh_webp_3",
+      "extractedFrom": "note.imageList[0].urlDefault",
+      "checkedAt": "2026-04-15T06:52:47.022Z"
+    },
+    {
+      "candidateId": "xhs_6050684100000000010047d5_694984b4000000001e039fca",
+      "creatorProgramId": "mouratoglou",
+      "postId": "694984b4000000001e039fca",
+      "rawUrl": "https://www.xiaohongshu.com/user/profile/6050684100000000010047d5/694984b4000000001e039fca?xsec_token=ABxuUt1GwmwKfF1A5obi0QvAu_m77D9zqotDzUmT0QB1I=&xsec_source=pc_user",
+      "title": "发球关键：肘部动作解析",
+      "thumbnailUrl": "https://sns-webpic-qc.xhscdn.com/202604151500/96115119ee20fd49d68ea86d08cca87f/spectrum/1040g0k031qdfkp04gm005o2gd10g8hulu5lf85g!nd_dft_wlteh_webp_3",
+      "extractedFrom": "note.imageList[0].urlDefault",
+      "checkedAt": "2026-04-15T06:59:58.472Z"
+    },
+    {
+      "candidateId": "xhs_6050684100000000010047d5_69519020000000001e0287fc",
+      "creatorProgramId": "mouratoglou",
+      "postId": "69519020000000001e0287fc",
+      "rawUrl": "https://www.xiaohongshu.com/user/profile/6050684100000000010047d5/69519020000000001e0287fc?xsec_token=ABo0LvwE2xxK5BDVNeYnilTovZpHlgnz1soZNCNg7hWR0=&xsec_source=pc_user",
+      "title": "向阿卡与纳达尔学习正手",
+      "thumbnailUrl": "https://sns-webpic-qc.xhscdn.com/202604151501/911b7bfc652358de9cdf45deba2bcda9/spectrum/1040g34o31qlamgbd6u005o2gd10g8hulrrc49q8!nd_dft_wlteh_webp_3",
+      "extractedFrom": "note.imageList[0].urlDefault",
+      "checkedAt": "2026-04-15T07:01:23.482Z"
+    },
+    {
+      "candidateId": "xhs_6050684100000000010047d5_69b5d8bc000000001f006be1",
+      "creatorProgramId": "mouratoglou",
+      "postId": "69b5d8bc000000001f006be1",
+      "rawUrl": "https://www.xiaohongshu.com/user/profile/6050684100000000010047d5/69b5d8bc000000001f006be1?xsec_token=ABoSkLcUERKeRnbEcxJmkRLOieLBH52G9_g_dVdN_D68Q=&xsec_source=pc_user",
+      "title": "如何像德约一样接发球？",
+      "thumbnailUrl": "https://sns-webpic-qc.xhscdn.com/202604151448/4e747c40a481658c7abb4170693f9ba9/spectrum/1040g0k031tn8jfvbmo005o2gd10g8huloc6vgo0!nd_dft_wlteh_webp_3",
+      "extractedFrom": "note.imageList[0].urlDefault",
+      "checkedAt": "2026-04-15T06:48:23.539Z"
+    },
+    {
+      "candidateId": "xhs_6050684100000000010047d5_694058eb000000000d03a0ae",
+      "creatorProgramId": "mouratoglou",
+      "postId": "694058eb000000000d03a0ae",
+      "rawUrl": "https://www.xiaohongshu.com/search_result/694058eb000000000d03a0ae?xsec_token=ABXSj9pCNLMUZqwoH9P43jPXrX7EVKREYURmHa1fBBJ6s=&xsec_source=pc_search",
+      "title": "如何打出深球？",
+      "thumbnailUrl": "https://sns-webpic-qc.xhscdn.com/202604160103/fcb7a23e86fb11324900800a5e7347e7/spectrum/1040g34o31q4gvh0g740g5o2gd10g8hul7i0ftf8!nd_dft_wlteh_webp_3",
+      "extractedFrom": "note.imageList[0].urlDefault",
+      "checkedAt": "2026-04-15T16:59:47.470Z"
+    },
+    {
+      "candidateId": "xhs_6050684100000000010047d5_69519b7f000000001f00feb2",
+      "creatorProgramId": "mouratoglou",
+      "postId": "69519b7f000000001f00feb2",
+      "rawUrl": "https://www.xiaohongshu.com/user/profile/6050684100000000010047d5/69519b7f000000001f00feb2?xsec_token=ABo0LvwE2xxK5BDVNeYnilTkxgwG1gJm4yfShase7X6JU=&xsec_source=pc_user",
+      "title": "如何改变握拍方式？",
+      "thumbnailUrl": "https://sns-webpic-qc.xhscdn.com/202604151457/0a63067658e252fa3fc0d20fb7a37113/spectrum/1040g0k031qlcd4u20m005o2gd10g8huls3b7o10!nd_dft_wlteh_webp_3",
+      "extractedFrom": "note.imageList[0].urlDefault",
+      "checkedAt": "2026-04-15T06:57:41.957Z"
+    },
+    {
+      "candidateId": "xhs_6050684100000000010047d5_69bbf151000000001b003add",
+      "creatorProgramId": "mouratoglou",
+      "postId": "69bbf151000000001b003add",
+      "rawUrl": "https://www.xiaohongshu.com/user/profile/6050684100000000010047d5/69bbf151000000001b003add?xsec_token=AB3xThLazuVxV2B7_81dXrVVWgxpa-aYEqcSUl2ktKT1Q=&xsec_source=pc_user",
+      "title": "如何正确抛球？",
+      "thumbnailUrl": "https://sns-webpic-qc.xhscdn.com/202604160039/355365b4a75761bac340e0b6e6d37f3b/spectrum/1040g34o31tt797k5180g5o2gd10g8hulcf9tofo!nc_n_webp_mw_1",
+      "extractedFrom": "profile.note-item.cover img",
+      "checkedAt": "2026-04-15T16:41:35.853Z"
+    },
+    {
+      "candidateId": "xhs_6050684100000000010047d5_69aff0410000000006030d80",
+      "creatorProgramId": "mouratoglou",
+      "postId": "69aff0410000000006030d80",
+      "rawUrl": "https://www.xiaohongshu.com/user/profile/6050684100000000010047d5/69aff0410000000006030d80?xsec_token=AB2U4fm6jSzqaeqMcUBpNxw_4dXTMpoac7afY5aLUx3bY=&xsec_source=pc_user",
+      "title": "学习丰塞卡的发球练习",
+      "thumbnailUrl": "https://sns-webpic-qc.xhscdn.com/202604160039/f4afee688f4d958053e401084db5f205/spectrum/1040g0k031thg6aom56005o2gd10g8hul9sg00l0!nc_n_webp_mw_1",
+      "extractedFrom": "profile.note-item.cover img",
+      "checkedAt": "2026-04-15T16:41:35.853Z"
+    },
+    {
+      "candidateId": "xhs_6050684100000000010047d5_69519465000000001e000043",
+      "creatorProgramId": "mouratoglou",
+      "postId": "69519465000000001e000043",
+      "rawUrl": "https://www.xiaohongshu.com/user/profile/6050684100000000010047d5/69519465000000001e000043?xsec_token=ABo0LvwE2xxK5BDVNeYnilTtIok5HiHLfwmEx5o-cf2Cw=&xsec_source=pc_user",
+      "title": "放小球全攻略",
+      "thumbnailUrl": "https://sns-webpic-qc.xhscdn.com/202604151459/1f30ffbf3d0fc27d1cba0ef317de05b2/spectrum/1040g34o31qlbg23umu0g5o2gd10g8huln5iosv8!nd_dft_wgth_webp_3",
+      "extractedFrom": "note.imageList[0].urlDefault",
+      "checkedAt": "2026-04-15T06:59:15.279Z"
+    },
+    {
+      "candidateId": "xhs_6050684100000000010047d5_682dc428000000001101f38d",
+      "creatorProgramId": "mouratoglou",
+      "postId": "682dc428000000001101f38d",
+      "rawUrl": "https://www.xiaohongshu.com/search_result/682dc428000000001101f38d?xsec_token=ABS5AKQW7KxySu7aMJi0a53N6N1Re1K0Ii5WBRBnpMTEQ=&xsec_source=pc_search",
+      "title": "深度与角度的完美平衡｜短球处理+反手切削",
+      "thumbnailUrl": "https://sns-webpic-qc.xhscdn.com/202604160050/e8d24db5279ff06193208cba2dab5bef/spectrum/1040g34o31hobt3h8j80g5o2gd10g8hulvu5k1k0!nd_dft_wgth_webp_3",
+      "extractedFrom": "note.imageList[0].urlDefault",
+      "checkedAt": "2026-04-15T16:47:23.034Z"
+    },
+    {
+      "candidateId": "xhs_6050684100000000010047d5_6970108f000000000a031634",
+      "creatorProgramId": "mouratoglou",
+      "postId": "6970108f000000000a031634",
+      "rawUrl": "https://www.xiaohongshu.com/user/profile/6050684100000000010047d5/6970108f000000000a031634?xsec_token=ABEKODYHHB1Fu76bVWSEV3yr4SqxjCn6oJ9cG_haLV1Fw=&xsec_source=pc_user",
+      "title": "球场上有趣的热身指导",
+      "thumbnailUrl": "https://sns-webpic-qc.xhscdn.com/202604151456/2b29db5f9422670d438acc6f1c5493d9/spectrum/1040g34o31rj46nqmi40g5o2gd10g8hulhut0qp0!nd_dft_wlteh_webp_3",
+      "extractedFrom": "note.imageList[0].urlDefault",
+      "checkedAt": "2026-04-15T06:56:54.005Z"
+    },
+    {
+      "candidateId": "xhs_6050684100000000010047d5_69497b9b000000000d03e873",
+      "creatorProgramId": "mouratoglou",
+      "postId": "69497b9b000000000d03e873",
+      "rawUrl": "https://www.xiaohongshu.com/user/profile/6050684100000000010047d5/69497b9b000000000d03e873?xsec_token=ABxuUt1GwmwKfF1A5obi0QvBIPocvU2lANlQAnQGFy0iA=&xsec_source=pc_user",
+      "title": "过网高度与身体重量的正确运用",
+      "thumbnailUrl": "https://sns-webpic-qc.xhscdn.com/202604151502/25d66672b39a2ff2c8f3a28c69849991/spectrum/1040g0k031qde077tgm005o2gd10g8huln65kuf8!nd_dft_wlteh_webp_3",
+      "extractedFrom": "note.imageList[0].urlDefault",
+      "checkedAt": "2026-04-15T07:02:49.456Z"
+    },
+    {
+      "candidateId": "xhs_6050684100000000010047d5_65af1f88000000002c036e46",
+      "creatorProgramId": "mouratoglou",
+      "postId": "65af1f88000000002c036e46",
+      "rawUrl": "https://www.xiaohongshu.com/search_result/65af1f88000000002c036e46?xsec_token=ABcXZdH7nCasg4KeEvtt55nanweLlTTBSh4U7l4uRnUUA=&xsec_source=pc_search",
+      "title": "非交叉主导型选手如何打反手球",
+      "thumbnailUrl": "https://sns-webpic-qc.xhscdn.com/202604160059/db03166d9aa6bc32af006b383b57ad32/spectrum/1040g0k030u8mhel65i005o2gd10g8hul1ua2mag!nd_dft_wgth_webp_3",
+      "extractedFrom": "note.imageList[0].urlDefault",
+      "checkedAt": "2026-04-15T16:55:41.376Z"
+    },
+    {
+      "candidateId": "xhs_6050684100000000010047d5_67bc408d000000002602d709",
+      "creatorProgramId": "mouratoglou",
+      "postId": "67bc408d000000002602d709",
+      "rawUrl": "https://www.xiaohongshu.com/search_result/67bc408d000000002602d709?xsec_token=AB-byI3NUIE20ciZBN8MLXHNxUOkGWXfE30OARFDkj5Ko=&xsec_source=pc_search",
+      "title": "音爆密码：莫式抛球校准术解锁高速旋转杀招",
+      "thumbnailUrl": "https://sns-webpic-qc.xhscdn.com/202604160055/4447b40b69c2edb7e15ab7bdc77f2fb4/spectrum/1040g0k031e9gun1t12005o2gd10g8hul7mf0utg!nd_dft_wgth_webp_3",
+      "extractedFrom": "note.imageList[0].urlDefault",
+      "checkedAt": "2026-04-15T16:51:35.180Z"
+    }
+  ],
+  "failures": [
+    {
+      "candidateId": "xhs_5676c499b8ce1a5b6e806853_69b0d3a90000000026031589",
+      "creatorProgramId": "dabaiyang",
+      "postId": "69b0d3a90000000026031589",
+      "rawUrl": "https://www.xiaohongshu.com/explore/69b0d3a90000000026031589",
+      "title": "🎾内角一发➕截止，再老登不过了",
+      "reason": "all render targets failed: https://www.xiaohongshu.com/user/profile/5676c499b8ce1a5b6e806853/69b0d3a90000000026031589 (Chrome did not produce HTML for https://www.xiaohongshu.com/user/profile/5676c499b8ce1a5b6e806853/69b0d3a90000000026031589. [41294:11616520:0415/011429.245577:ERROR:chrome/browser/process_singleton_posix.cc:345] Failed to create /private/var/folders/77/5n1twslx1y965rds5hly64d00000gn/T/xhs-chrome-profile/SingletonLock: File exists (17)\n[41294:11616520:0415/011429.247047:ERROR:chrome/app/chrome_main_delegate.cc:515] Failed to create a ProcessSingleton for your profile directory. This means that running multiple instances would start multiple browser processes rather than opening a new window in the existing process. Aborting now to avoid profile corruption.) | https://www.xiaohongshu.com/explore/69b0d3a90000000026031589 (Chrome did not produce HTML for https://www.xiaohongshu.com/explore/69b0d3a90000000026031589. [41297:11616534:0415/011429.324355:ERROR:chrome/browser/process_singleton_posix.cc:345] Failed to create /private/var/folders/77/5n1twslx1y965rds5hly64d00000gn/T/xhs-chrome-profile/SingletonLock: File exists (17)\n[41297:11616534:0415/011429.325782:ERROR:chrome/app/chrome_main_delegate.cc:515] Failed to create a ProcessSingleton for your profile directory. This means that running multiple instances would start multiple browser processes rather than opening a new window in the existing process. Aborting now to avoid profile corruption.)",
+      "checkedAt": "2026-04-15T07:14:29.146Z"
+    },
+    {
+      "candidateId": "xhs_6050684100000000010047d5_699dbbcc000000001a0344a3",
+      "creatorProgramId": "mouratoglou",
+      "postId": "699dbbcc000000001a0344a3",
+      "rawUrl": "https://www.xiaohongshu.com/user/profile/6050684100000000010047d5/699dbbcc000000001a0344a3?xsec_token=AB0WyMozOQrJiSd-PAWmD9BCXWc6WOV6LaLoCSsvk6b_o=&xsec_source=pc_user",
+      "title": "【重心转移，髋部旋转】一个小调整带来的改变",
+      "reason": "all render targets failed: https://www.xiaohongshu.com/user/profile/6050684100000000010047d5/699dbbcc000000001a0344a3?xsec_token=AB0WyMozOQrJiSd-PAWmD9BCXWc6WOV6LaLoCSsvk6b_o=&xsec_source=pc_user (Chrome did not produce HTML for https://www.xiaohongshu.com/user/profile/6050684100000000010047d5/699dbbcc000000001a0344a3?xsec_token=AB0WyMozOQrJiSd-PAWmD9BCXWc6WOV6LaLoCSsvk6b_o=&xsec_source=pc_user. [38690:11584837:0415/005653.917904:ERROR:chrome/browser/process_singleton_posix.cc:345] Failed to create /private/var/folders/77/5n1twslx1y965rds5hly64d00000gn/T/xhs-chrome-profile/SingletonLock: File exists (17)\n[38690:11584837:0415/005653.919239:ERROR:chrome/app/chrome_main_delegate.cc:515] Failed to create a ProcessSingleton for your profile directory. This means that running multiple instances would start multiple browser processes rather than opening a new window in the existing process. Aborting now to avoid profile corruption.) | https://www.xiaohongshu.com/explore/699dbbcc000000001a0344a3 (Chrome did not produce HTML for https://www.xiaohongshu.com/explore/699dbbcc000000001a0344a3. [38693:11584849:0415/005654.000792:ERROR:chrome/browser/process_singleton_posix.cc:345] Failed to create /private/var/folders/77/5n1twslx1y965rds5hly64d00000gn/T/xhs-chrome-profile/SingletonLock: File exists (17)\n[38693:11584849:0415/005654.002067:ERROR:chrome/app/chrome_main_delegate.cc:515] Failed to create a ProcessSingleton for your profile directory. This means that running multiple instances would start multiple browser processes rather than opening a new window in the existing process. Aborting now to avoid profile corruption.)",
+      "checkedAt": "2026-04-15T06:56:53.838Z"
+    },
+    {
+      "candidateId": "xhs_6050684100000000010047d5_65ae3eff000000002c0110fd",
+      "creatorProgramId": "mouratoglou",
+      "postId": "65ae3eff000000002c0110fd",
+      "rawUrl": "https://www.xiaohongshu.com/search_result/65ae3eff000000002c0110fd?xsec_token=AB7hci8Essq5wlcD2f8DJtnQCPrjXYVtPjtKj1MPjiqtc=&xsec_source=pc_search",
+      "title": "交叉主导型选手如何打正手球",
+      "reason": "all render targets failed: https://www.xiaohongshu.com/user/profile/6050684100000000010047d5/65ae3eff000000002c0110fd?xsec_token=AB7hci8Essq5wlcD2f8DJtnQCPrjXYVtPjtKj1MPjiqtc=&xsec_source=pc_search (Chrome did not produce HTML for https://www.xiaohongshu.com/user/profile/6050684100000000010047d5/65ae3eff000000002c0110fd?xsec_token=AB7hci8Essq5wlcD2f8DJtnQCPrjXYVtPjtKj1MPjiqtc=&xsec_source=pc_search. [38505:11583041:0415/005523.524194:ERROR:chrome/browser/process_singleton_posix.cc:345] Failed to create /private/var/folders/77/5n1twslx1y965rds5hly64d00000gn/T/xhs-chrome-profile/SingletonLock: File exists (17)\n[38505:11583041:0415/005523.525282:ERROR:chrome/app/chrome_main_delegate.cc:515] Failed to create a ProcessSingleton for your profile directory. This means that running multiple instances would start multiple browser processes rather than opening a new window in the existing process. Aborting now to avoid profile corruption.) | https://www.xiaohongshu.com/explore/65ae3eff000000002c0110fd (Timed out while rendering https://www.xiaohongshu.com/explore/65ae3eff000000002c0110fd) | https://www.xiaohongshu.com/search_result/65ae3eff000000002c0110fd?xsec_token=AB7hci8Essq5wlcD2f8DJtnQCPrjXYVtPjtKj1MPjiqtc=&xsec_source=pc_search (Chrome did not produce HTML for https://www.xiaohongshu.com/search_result/65ae3eff000000002c0110fd?xsec_token=AB7hci8Essq5wlcD2f8DJtnQCPrjXYVtPjtKj1MPjiqtc=&xsec_source=pc_search. [38678:11584699:0415/005653.657913:ERROR:chrome/browser/process_singleton_posix.cc:345] Failed to create /private/var/folders/77/5n1twslx1y965rds5hly64d00000gn/T/xhs-chrome-profile/SingletonLock: File exists (17)\n[38678:11584699:0415/005653.659380:ERROR:chrome/app/chrome_main_delegate.cc:515] Failed to create a ProcessSingleton for your profile directory. This means that running multiple instances would start multiple browser processes rather than opening a new window in the existing process. Aborting now to avoid profile corruption.)",
+      "checkedAt": "2026-04-15T06:55:23.454Z"
+    },
+    {
+      "candidateId": "xhs_6050684100000000010047d5_69b5d8bc000000001f006be1",
+      "creatorProgramId": "mouratoglou",
+      "postId": "69b5d8bc000000001f006be1",
+      "rawUrl": "https://www.xiaohongshu.com/user/profile/6050684100000000010047d5/69b5d8bc000000001f006be1?xsec_token=ABoSkLcUERKeRnbEcxJmkRLOieLBH52G9_g_dVdN_D68Q=&xsec_source=pc_user",
+      "title": "如何像德约一样接发球？",
+      "reason": "all render targets failed: https://www.xiaohongshu.com/user/profile/6050684100000000010047d5/69b5d8bc000000001f006be1?xsec_token=ABoSkLcUERKeRnbEcxJmkRLOieLBH52G9_g_dVdN_D68Q=&xsec_source=pc_user (Unexpected token 'u', ...\"opPrompt\":undefined,\"... is not valid JSON) | https://www.xiaohongshu.com/explore/69b5d8bc000000001f006be1 (Timed out while rendering https://www.xiaohongshu.com/explore/69b5d8bc000000001f006be1)",
+      "checkedAt": "2026-04-15T06:44:47.661Z"
+    },
+    {
+      "candidateId": "xhs_6050684100000000010047d5_694058eb000000000d03a0ae",
+      "creatorProgramId": "mouratoglou",
+      "postId": "694058eb000000000d03a0ae",
+      "rawUrl": "https://www.xiaohongshu.com/search_result/694058eb000000000d03a0ae?xsec_token=ABXSj9pCNLMUZqwoH9P43jPXrX7EVKREYURmHa1fBBJ6s=&xsec_source=pc_search",
+      "title": "如何打出深球？",
+      "reason": "all render targets failed: https://www.xiaohongshu.com/user/profile/6050684100000000010047d5/694058eb000000000d03a0ae?xsec_token=ABXSj9pCNLMUZqwoH9P43jPXrX7EVKREYURmHa1fBBJ6s=&xsec_source=pc_search (Chrome did not produce HTML for https://www.xiaohongshu.com/user/profile/6050684100000000010047d5/694058eb000000000d03a0ae?xsec_token=ABXSj9pCNLMUZqwoH9P43jPXrX7EVKREYURmHa1fBBJ6s=&xsec_source=pc_search. [38496:11582998:0415/005523.290974:ERROR:chrome/browser/process_singleton_posix.cc:345] Failed to create /private/var/folders/77/5n1twslx1y965rds5hly64d00000gn/T/xhs-chrome-profile/SingletonLock: File exists (17)\n[38496:11582998:0415/005523.292026:ERROR:chrome/app/chrome_main_delegate.cc:515] Failed to create a ProcessSingleton for your profile directory. This means that running multiple instances would start multiple browser processes rather than opening a new window in the existing process. Aborting now to avoid profile corruption.) | https://www.xiaohongshu.com/explore/694058eb000000000d03a0ae (Chrome did not produce HTML for https://www.xiaohongshu.com/explore/694058eb000000000d03a0ae. [38499:11583019:0415/005523.366820:ERROR:chrome/browser/process_singleton_posix.cc:345] Failed to create /private/var/folders/77/5n1twslx1y965rds5hly64d00000gn/T/xhs-chrome-profile/SingletonLock: File exists (17)\n[38499:11583019:0415/005523.367996:ERROR:chrome/app/chrome_main_delegate.cc:515] Failed to create a ProcessSingleton for your profile directory. This means that running multiple instances would start multiple browser processes rather than opening a new window in the existing process. Aborting now to avoid profile corruption.) | https://www.xiaohongshu.com/search_result/694058eb000000000d03a0ae?xsec_token=ABXSj9pCNLMUZqwoH9P43jPXrX7EVKREYURmHa1fBBJ6s=&xsec_source=pc_search (Chrome did not produce HTML for https://www.xiaohongshu.com/search_result/694058eb000000000d03a0ae?xsec_token=ABXSj9pCNLMUZqwoH9P43jPXrX7EVKREYURmHa1fBBJ6s=&xsec_source=pc_search. [38502:11583030:0415/005523.451130:ERROR:chrome/browser/process_singleton_posix.cc:345] Failed to create /private/var/folders/77/5n1twslx1y965rds5hly64d00000gn/T/xhs-chrome-profile/SingletonLock: File exists (17)\n[38502:11583030:0415/005523.452228:ERROR:chrome/app/chrome_main_delegate.cc:515] Failed to create a ProcessSingleton for your profile directory. This means that running multiple instances would start multiple browser processes rather than opening a new window in the existing process. Aborting now to avoid profile corruption.)",
+      "checkedAt": "2026-04-15T06:55:23.216Z"
+    },
+    {
+      "candidateId": "xhs_6050684100000000010047d5_682dc428000000001101f38d",
+      "creatorProgramId": "mouratoglou",
+      "postId": "682dc428000000001101f38d",
+      "rawUrl": "https://www.xiaohongshu.com/search_result/682dc428000000001101f38d?xsec_token=ABS5AKQW7KxySu7aMJi0a53N6N1Re1K0Ii5WBRBnpMTEQ=&xsec_source=pc_search",
+      "title": "深度与角度的完美平衡｜短球处理+反手切削",
+      "reason": "all render targets failed: https://www.xiaohongshu.com/user/profile/6050684100000000010047d5/682dc428000000001101f38d?xsec_token=ABS5AKQW7KxySu7aMJi0a53N6N1Re1K0Ii5WBRBnpMTEQ=&xsec_source=pc_search (Chrome did not produce HTML for https://www.xiaohongshu.com/user/profile/6050684100000000010047d5/682dc428000000001101f38d?xsec_token=ABS5AKQW7KxySu7aMJi0a53N6N1Re1K0Ii5WBRBnpMTEQ=&xsec_source=pc_search. [37800:11576158:0415/005116.519054:ERROR:chrome/browser/process_singleton_posix.cc:345] Failed to create /private/var/folders/77/5n1twslx1y965rds5hly64d00000gn/T/xhs-chrome-profile/SingletonLock: File exists (17)\n[37800:11576158:0415/005116.520156:ERROR:chrome/app/chrome_main_delegate.cc:515] Failed to create a ProcessSingleton for your profile directory. This means that running multiple instances would start multiple browser processes rather than opening a new window in the existing process. Aborting now to avoid profile corruption.) | https://www.xiaohongshu.com/explore/682dc428000000001101f38d (Chrome did not produce HTML for https://www.xiaohongshu.com/explore/682dc428000000001101f38d. [37803:11576175:0415/005116.595735:ERROR:chrome/browser/process_singleton_posix.cc:345] Failed to create /private/var/folders/77/5n1twslx1y965rds5hly64d00000gn/T/xhs-chrome-profile/SingletonLock: File exists (17)\n[37803:11576175:0415/005116.596925:ERROR:chrome/app/chrome_main_delegate.cc:515] Failed to create a ProcessSingleton for your profile directory. This means that running multiple instances would start multiple browser processes rather than opening a new window in the existing process. Aborting now to avoid profile corruption.) | https://www.xiaohongshu.com/search_result/682dc428000000001101f38d?xsec_token=ABS5AKQW7KxySu7aMJi0a53N6N1Re1K0Ii5WBRBnpMTEQ=&xsec_source=pc_search (Chrome did not produce HTML for https://www.xiaohongshu.com/search_result/682dc428000000001101f38d?xsec_token=ABS5AKQW7KxySu7aMJi0a53N6N1Re1K0Ii5WBRBnpMTEQ=&xsec_source=pc_search. [37806:11576187:0415/005116.674010:ERROR:chrome/browser/process_singleton_posix.cc:345] Failed to create /private/var/folders/77/5n1twslx1y965rds5hly64d00000gn/T/xhs-chrome-profile/SingletonLock: File exists (17)\n[37806:11576187:0415/005116.675229:ERROR:chrome/app/chrome_main_delegate.cc:515] Failed to create a ProcessSingleton for your profile directory. This means that running multiple instances would start multiple browser processes rather than opening a new window in the existing process. Aborting now to avoid profile corruption.)",
+      "checkedAt": "2026-04-15T06:51:16.419Z"
+    },
+    {
+      "candidateId": "xhs_6050684100000000010047d5_65af1f88000000002c036e46",
+      "creatorProgramId": "mouratoglou",
+      "postId": "65af1f88000000002c036e46",
+      "rawUrl": "https://www.xiaohongshu.com/search_result/65af1f88000000002c036e46?xsec_token=ABcXZdH7nCasg4KeEvtt55nanweLlTTBSh4U7l4uRnUUA=&xsec_source=pc_search",
+      "title": "非交叉主导型选手如何打反手球",
+      "reason": "all render targets failed: https://www.xiaohongshu.com/user/profile/6050684100000000010047d5/65af1f88000000002c036e46?xsec_token=ABcXZdH7nCasg4KeEvtt55nanweLlTTBSh4U7l4uRnUUA=&xsec_source=pc_search (rendered without note image state) | https://www.xiaohongshu.com/explore/65af1f88000000002c036e46 (Timed out while rendering https://www.xiaohongshu.com/explore/65af1f88000000002c036e46) | https://www.xiaohongshu.com/search_result/65af1f88000000002c036e46?xsec_token=ABcXZdH7nCasg4KeEvtt55nanweLlTTBSh4U7l4uRnUUA=&xsec_source=pc_search (Chrome did not produce HTML for https://www.xiaohongshu.com/search_result/65af1f88000000002c036e46?xsec_token=ABcXZdH7nCasg4KeEvtt55nanweLlTTBSh4U7l4uRnUUA=&xsec_source=pc_search. [38489:11582885:0415/005523.211708:ERROR:chrome/browser/process_singleton_posix.cc:345] Failed to create /private/var/folders/77/5n1twslx1y965rds5hly64d00000gn/T/xhs-chrome-profile/SingletonLock: File exists (17)\n[38489:11582885:0415/005523.213022:ERROR:chrome/app/chrome_main_delegate.cc:515] Failed to create a ProcessSingleton for your profile directory. This means that running multiple instances would start multiple browser processes rather than opening a new window in the existing process. Aborting now to avoid profile corruption.)",
+      "checkedAt": "2026-04-15T06:53:28.674Z"
+    },
+    {
+      "candidateId": "xhs_6050684100000000010047d5_67bc408d000000002602d709",
+      "creatorProgramId": "mouratoglou",
+      "postId": "67bc408d000000002602d709",
+      "rawUrl": "https://www.xiaohongshu.com/search_result/67bc408d000000002602d709?xsec_token=AB-byI3NUIE20ciZBN8MLXHNxUOkGWXfE30OARFDkj5Ko=&xsec_source=pc_search",
+      "title": "音爆密码：莫式抛球校准术解锁高速旋转杀招",
+      "reason": "all render targets failed: https://www.xiaohongshu.com/user/profile/6050684100000000010047d5/67bc408d000000002602d709?xsec_token=AB-byI3NUIE20ciZBN8MLXHNxUOkGWXfE30OARFDkj5Ko=&xsec_source=pc_search (Chrome did not produce HTML for https://www.xiaohongshu.com/user/profile/6050684100000000010047d5/67bc408d000000002602d709?xsec_token=AB-byI3NUIE20ciZBN8MLXHNxUOkGWXfE30OARFDkj5Ko=&xsec_source=pc_search. [37809:11576201:0415/005116.748765:ERROR:chrome/browser/process_singleton_posix.cc:345] Failed to create /private/var/folders/77/5n1twslx1y965rds5hly64d00000gn/T/xhs-chrome-profile/SingletonLock: File exists (17)\n[37809:11576201:0415/005116.749968:ERROR:chrome/app/chrome_main_delegate.cc:515] Failed to create a ProcessSingleton for your profile directory. This means that running multiple instances would start multiple browser processes rather than opening a new window in the existing process. Aborting now to avoid profile corruption.) | https://www.xiaohongshu.com/explore/67bc408d000000002602d709 (Timed out while rendering https://www.xiaohongshu.com/explore/67bc408d000000002602d709) | https://www.xiaohongshu.com/search_result/67bc408d000000002602d709?xsec_token=AB-byI3NUIE20ciZBN8MLXHNxUOkGWXfE30OARFDkj5Ko=&xsec_source=pc_search (Chrome did not produce HTML for https://www.xiaohongshu.com/search_result/67bc408d000000002602d709?xsec_token=AB-byI3NUIE20ciZBN8MLXHNxUOkGWXfE30OARFDkj5Ko=&xsec_source=pc_search. [38165:11578688:0415/005247.016618:ERROR:chrome/browser/process_singleton_posix.cc:345] Failed to create /private/var/folders/77/5n1twslx1y965rds5hly64d00000gn/T/xhs-chrome-profile/SingletonLock: File exists (17)\n[38165:11578688:0415/005247.018295:ERROR:chrome/app/chrome_main_delegate.cc:515] Failed to create a ProcessSingleton for your profile directory. This means that running multiple instances would start multiple browser processes rather than opening a new window in the existing process. Aborting now to avoid profile corruption.)",
+      "checkedAt": "2026-04-15T06:51:16.678Z"
+    }
+  ]
+}

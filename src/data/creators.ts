@@ -2421,6 +2421,35 @@ export const creators: Creator[] = [
     environment: ["testing", "production"]
   },
   {
+    id: "creator_dabaiyang_xiaohongshu_hidden",
+    name: "奔跑的大白羊",
+    shortDescription: "小红书候选审核用隐藏博主，暂不参与博主榜",
+    tags: ["正手细节", "发球细节", "步频训练"],
+    region: "domestic",
+    platforms: ["Xiaohongshu"],
+    levels: ["2.5", "3.0", "3.5", "4.0"],
+    specialties: ["forehand", "serve", "movement", "basics"],
+    styleTags: ["候选审核", "非榜单博主", "小红书直链"],
+    bio: "用于承载奔跑的大白羊在小红书候选审核模式下的展示信息，不代表已进入 runtime 内容库，也不参与博主榜展示。",
+    suitableFor: ["候选审核", "小红书直链"],
+    featuredContentIds: [],
+    rankingEligible: false,
+    discoveryEligible: false,
+    profileUrl: "https://www.xiaohongshu.com/user/profile/5676c499b8ce1a5b6e806853",
+    platformLinks: {
+      Xiaohongshu: "https://www.xiaohongshu.com/user/profile/5676c499b8ce1a5b6e806853"
+    },
+    rankingSignals: {
+      subscriberScore: 0,
+      averageViewsScore: 0,
+      activityScore: 0,
+      catalogScore: 0,
+      authorityScore: 0,
+      curatorBoost: 0
+    },
+    environment: ["testing", "production"]
+  },
+  {
     id: "creator_search_curated",
     name: "教练整理搜索入口",
     shortDescription: "暂未绑定单一博主",

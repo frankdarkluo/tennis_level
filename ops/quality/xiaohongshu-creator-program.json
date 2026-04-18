@@ -57,8 +57,8 @@
       "displayName": "奔跑的大白羊",
       "aliases": ["奔跑的大白羊"],
       "creatorProfileUrl": "https://www.xiaohongshu.com/user/profile/5676c499b8ce1a5b6e806853",
-      "creatorProfileStatus": "pending_profile_verification",
-      "profileEvidenceNote": "Program scope is approved, but profile identity is pending internal verification before collection.",
+      "creatorProfileStatus": "verified_profile",
+      "profileEvidenceNote": "Profile identity manually verified; creator is confirmed for collection planning.",
       "candidateTarget": 50,
       "runtimePromotionTarget": {
         "min": 15,

@@ -61,6 +61,7 @@ export type XiaohongshuSeedCandidateArtifact = {
     scope: "qa_only_seed_candidates";
     candidateSource: "profile_title_confirmed_search_result_cards";
     perCreatorLimit: number;
+    perCreatorLimitByCreatorId?: Record<string, number>;
     creatorProgramVersion: 1;
     creatorProgramScopeTarget: number;
   };
@@ -82,6 +83,7 @@ export type XiaohongshuSeedCandidateArtifact = {
 };
 
 const PROFILE_PATTERN = /xiaohongshu\.com\/user\/profile\/([^/?#]+)/i;
+const PROFILE_POST_PATTERN = /xiaohongshu\.com\/user\/profile\/[^/?#]+\/([^/?#]+)/i;
 const SEARCH_RESULT_PATTERN = /xiaohongshu\.com\/search_result\/([^/?#]+)/i;
 
 function normalizeString(value: string | null | undefined): string {
@@ -139,6 +141,15 @@ function getCandidateId(creatorProfileId: string, postId: string | null, fallbac
   return `xhs_${creatorProfileId}_${postId ?? normalizedFallback}`;
 }
 
+function extractCandidatePostId(rawUrl: string): string | null {
+  const fromConnector = xiaohongshuConnector.extractPostId(rawUrl);
+  if (fromConnector) {
+    return fromConnector;
+  }
+
+  return normalizeString(rawUrl).match(PROFILE_POST_PATTERN)?.[1] ?? null;
+}
+
 function canonicalizeRawEntryUrl(rawUrl: string): string {
   const trimmed = normalizeString(rawUrl);
   if (!trimmed.startsWith("http://") && !trimmed.startsWith("https://")) {
@@ -149,7 +160,7 @@ function canonicalizeRawEntryUrl(rawUrl: string): string {
     throw new Error(`rawUrl must point at Xiaohongshu, received "${rawUrl}"`);
   }
 
-  if (!SEARCH_RESULT_PATTERN.test(trimmed) && !xiaohongshuConnector.extractPostId(trimmed)) {
+  if (!SEARCH_RESULT_PATTERN.test(trimmed) && !extractCandidatePostId(trimmed)) {
     throw new Error(`rawUrl must be a Xiaohongshu search-result or direct note URL, received "${rawUrl}"`);
   }
 
@@ -168,7 +179,8 @@ export function canonicalizeXiaohongshuCreatorProfileUrl(url: string): string | 
 
 function normalizeCandidate(
   input: XiaohongshuSeedCandidateInput,
-  creatorProgram: XiaohongshuCreatorProgramEntry[]
+  creatorProgram: XiaohongshuCreatorProgramEntry[],
+  thumbnailOverridesByPostId: Record<string, string>
 ): XiaohongshuSeedCandidate & { priority: number } {
   const creatorName = normalizeString(input.creatorName);
   const title = normalizeString(input.title);
@@ -180,7 +192,10 @@ function normalizeCandidate(
   });
   const rawUrl = canonicalizeRawEntryUrl(input.rawUrl);
   const resolvedCanonicalSource = normalizeString(input.resolvedCanonicalUrl) || rawUrl;
-  const canonicalUrl = xiaohongshuConnector.canonicalizeUrl(resolvedCanonicalSource);
+  const resolvedPostId = extractCandidatePostId(resolvedCanonicalSource);
+  const canonicalUrl = xiaohongshuConnector.canonicalizeUrl(resolvedCanonicalSource)
+    ?? (resolvedPostId ? `https://www.xiaohongshu.com/explore/${resolvedPostId}` : null);
+  const overrideThumbnailUrl = resolvedPostId ? thumbnailOverridesByPostId[resolvedPostId] : undefined;
 
   if (!creatorName) {
     throw new Error("creatorName is required");
@@ -233,7 +248,7 @@ function normalizeCandidate(
     canonicalUrl,
     postId,
     title,
-    thumbnailUrl: normalizeString(input.thumbnailUrl) || null,
+    thumbnailUrl: normalizeString(input.thumbnailUrl) || normalizeString(overrideThumbnailUrl) || null,
     teachingType: input.teachingType,
     languageHint: input.languageHint ?? "unknown",
     subtitleLanguageHint: input.subtitleLanguageHint ?? "unknown",
@@ -254,19 +269,26 @@ export function buildXiaohongshuSeedCandidateArtifact(input: {
   generatedAt: string;
   inputs: XiaohongshuSeedCandidateInput[];
   perCreatorLimit?: number;
+  perCreatorLimitByCreatorId?: Record<string, number>;
+  thumbnailOverridesByPostId?: Record<string, string>;
   creatorProgram?: XiaohongshuCreatorProgramEntry[];
 }): XiaohongshuSeedCandidateArtifact {
   const perCreatorLimit = input.perCreatorLimit ?? 5;
+  const perCreatorLimitByCreatorId = input.perCreatorLimitByCreatorId ?? {};
+  const thumbnailOverridesByPostId = input.thumbnailOverridesByPostId ?? {};
   const creatorProgram = input.creatorProgram ?? loadXiaohongshuCreatorProgram();
-  const normalizedCandidates = input.inputs.map((candidate) => normalizeCandidate(candidate, creatorProgram));
+  const normalizedCandidates = input.inputs.map((candidate) =>
+    normalizeCandidate(candidate, creatorProgram, thumbnailOverridesByPostId)
+  );
   const limitedCandidates: XiaohongshuSeedCandidate[] = [];
   const byCreatorSummary: XiaohongshuSeedCandidateArtifact["summary"]["byCreator"] = [];
 
   for (const creator of creatorProgram) {
+    const creatorLimit = perCreatorLimitByCreatorId[creator.id] ?? perCreatorLimit;
     const saved = normalizedCandidates
       .filter((candidate) => candidate.creatorProgramId === creator.id)
       .sort((left, right) => left.priority - right.priority || left.title.localeCompare(right.title))
-      .slice(0, perCreatorLimit)
+      .slice(0, creatorLimit)
       .map(({ priority: _priority, ...candidate }) => candidate);
 
     limitedCandidates.push(...saved);
@@ -288,6 +310,7 @@ export function buildXiaohongshuSeedCandidateArtifact(input: {
       scope: "qa_only_seed_candidates",
       candidateSource: "profile_title_confirmed_search_result_cards",
       perCreatorLimit,
+      perCreatorLimitByCreatorId,
       creatorProgramVersion: 1,
       creatorProgramScopeTarget: creatorProgram.reduce((sum, creator) => sum + creator.candidateTarget, 0)
     },
