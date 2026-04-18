@@ -1,12 +1,33 @@
+import { getTeachingMetadataByContentId } from "@/data/teachingMetadata";
 import { buildCatalogCorpus } from "@/lib/content-catalog/normalize";
 import type { CatalogContentItem, CatalogQualityReview } from "@/lib/content-catalog/schema";
 import { DIAGNOSIS_CONTENT_PROBLEM_TAG_ALIASES } from "@/lib/diagnose/problemTagSupport";
 import type { GuidanceContext, GuidanceMechanismFamily, GuidancePlanIntent, GuidanceStrokeFamily } from "@/lib/guidance-context/types";
 import { canonicalizeTennisText } from "@/lib/i18n/tennisGlossary";
+import {
+  buildTeachingSearchText,
+  inferActionabilityScore,
+  inferDiagnosticDepthScore,
+  inferSpecificityScore,
+  inferTeachingMechanismFamily,
+  inferTeachingRole,
+  inferTeachingStrokeFamily
+} from "@/lib/recommendations/attached/metadata";
+import { buildTeachingRetrievalIntent } from "@/lib/recommendations/attached/intent";
+import {
+  packageAttachedRecommendations,
+  type PackageableAttachedCandidate
+} from "@/lib/recommendations/attached/package";
 import type { PlanBlueprintRole } from "@/types/plan";
 import type { ContentItem, ContentSubtitleAvailability } from "@/types/content";
+import type {
+  TeachingInstructionalRole,
+  TeachingMetadata,
+  TeachingRecommendationSlot,
+  TeachingRetrievalIntent
+} from "@/types/teachingRecommendation";
 
-export type AttachedInstructionalRole = "explanation" | "drill" | "tactic" | "warmup" | "mental" | "general";
+export type AttachedInstructionalRole = TeachingInstructionalRole;
 
 export type AttachedRecommendationRequest = {
   source: "diagnosis" | "plan";
@@ -27,7 +48,14 @@ export type AttachedRecommendationBreakdown = {
   siblingTagMatch: number;
   mechanismFamilyMatch: number;
   strokeFamilyMatch: number;
+  pinpoint: number;
+  fixAlignment: number;
+  causeAlignment: number;
   planIntentFit: number;
+  roleFit: number;
+  actionability: number;
+  diagnosticDepth: number;
+  specificity: number;
   trainingFocusFit: number;
   skillBandOverlap: number;
   languageFit: number;
@@ -38,6 +66,7 @@ export type AttachedRecommendationBreakdown = {
   linkHealth: number;
   thumbnailHealth: number;
   preferredSeed: number;
+  trustCapAdjustment: number;
   crossPlatformDuplicatePenalty: number;
   sameCreatorPenalty: number;
 };
@@ -46,34 +75,39 @@ export type AttachedRecommendation = {
   item: ContentItem;
   totalScore: number;
   role: AttachedInstructionalRole;
+  slot: TeachingRecommendationSlot;
   duplicateClusterId: string;
   breakdown: AttachedRecommendationBreakdown;
-};
-
-type RankedAttachedCandidate = {
-  catalogItem: CatalogContentItem;
-  role: AttachedInstructionalRole;
-  strokeFamily: GuidanceStrokeFamily;
-  mechanismFamily: GuidanceMechanismFamily;
-  duplicateClusterId: string;
-  crossPlatformDuplicatePenalty: number;
-  breakdown: AttachedRecommendationBreakdown;
-  totalScore: number;
 };
 
 type EligibleAttachedCandidate = {
   catalogItem: CatalogContentItem;
+  metadata: TeachingMetadata | null;
   role: AttachedInstructionalRole;
   strokeFamily: GuidanceStrokeFamily;
   mechanismFamily: GuidanceMechanismFamily;
   duplicateClusterId: string;
+  searchText: string;
+};
+
+type RankedAttachedCandidate = EligibleAttachedCandidate & {
+  rawScore: number;
+  totalScore: number;
+  breakdown: AttachedRecommendationBreakdown;
 };
 
 const EXACT_PRIMARY_TAG_SCORE = 50;
 const SIBLING_TAG_SCORE = 18;
 const MECHANISM_FAMILY_SCORE = 24;
 const STROKE_FAMILY_SCORE = 18;
+const PINPOINT_SCORE = 18;
+const FIX_ALIGNMENT_SCORE = 16;
+const CAUSE_ALIGNMENT_SCORE = 14;
 const PLAN_INTENT_SCORE = 16;
+const ROLE_FIT_SCORE = 14;
+const ACTIONABILITY_SCORE = 12;
+const DIAGNOSTIC_DEPTH_SCORE = 10;
+const SPECIFICITY_SCORE = 8;
 const TRAINING_FOCUS_SCORE = 16;
 const EXACT_SKILL_BAND_SCORE = 14;
 const OVERLAP_SKILL_BAND_SCORE = 8;
@@ -87,8 +121,8 @@ const REQUIRED_SEED_SCORE = 80;
 const SUPPORT_SEED_SCORE = 68;
 const PREFERRED_SEED_SCORE = 36;
 const SAME_CREATOR_PENALTY = 12;
-const DUPLICATE_CLUSTER_PENALTY = 100;
 const TRUSTED_REVIEW_STATUSES = new Set(["verified", "manual_confirmed"]);
+const ROLE_PREFERENCE_SCORE = [ROLE_FIT_SCORE, 10, 6, 3];
 
 const LEVEL_PREFERENCE_MAP: Record<string, string[]> = {
   "2.5": ["2.5", "3.0"],
@@ -99,68 +133,69 @@ const LEVEL_PREFERENCE_MAP: Record<string, string[]> = {
 };
 
 function normalizeText(value: string | null | undefined): string {
-  return value?.trim().toLowerCase() ?? "";
+  return value?.replace(/_/g, " ").trim().toLowerCase() ?? "";
 }
 
-function buildSearchText(item: CatalogContentItem): string {
-  return [
-    item.display.title,
-    item.display.sourceTitle,
-    item.display.originalTitle,
-    item.display.summary,
-    item.display.reason,
-    item.display.coachReason,
-    ...item.display.useCases,
-    ...item.skillCategories,
-    ...item.problemTags
-  ]
-    .filter(Boolean)
-    .join(" ")
-    .toLowerCase();
+function normalizeTerms(values: string[]): string[] {
+  return Array.from(new Set(values.map((value) => normalizeText(value)).filter((value) => value.length >= 2)));
 }
 
-function inferInstructionalRole(item: CatalogContentItem): AttachedInstructionalRole {
-  const text = buildSearchText(item);
+function isDirectSourceCandidate(item: CatalogContentItem): boolean {
+  return item.mediaType === "video" && item.rightsStatus === "direct_source";
+}
 
-  if (/(warm[- ]?up|热身|准备活动)/i.test(text)) return "warmup";
-  if (/(pressure|mental|mindset|routine|关键分|紧张|手紧|心态)/i.test(text)) return "mental";
-  if (/(drill|reps|follow along|跟练|练习|模板|模版|重复|训练组)/i.test(text)) return "drill";
-  if (/(tactic|pattern|point construction|doubles|poach|战术|分点|站位|双打|前四拍)/i.test(text)) return "tactic";
-  if (/(how to|teaching|lesson|masterclass|basics|fundamentals|explanation|教学|讲解|精讲|基础|拆解|秘诀)/i.test(text)) {
-    return "explanation";
+function hasTrustedReviewStatus(item: CatalogContentItem): boolean {
+  const status = item.qualityReview?.reviewStatus;
+  return Boolean(status && TRUSTED_REVIEW_STATUSES.has(status));
+}
+
+function isHealthyHttpStatus(status: number | undefined): boolean {
+  return typeof status === "number" && status >= 200 && status < 400;
+}
+
+function isLocalStaticResource(item: CatalogContentItem): boolean {
+  return item.canonicalUrl.startsWith("/") || item.sourceItem.url.startsWith("/");
+}
+
+function passesLinkHealthGate(item: CatalogContentItem): boolean {
+  if (isLocalStaticResource(item)) {
+    return true;
   }
 
-  if (item.teachingIntent === "teaching") {
-    return "explanation";
+  if (typeof item.qualityReview?.httpStatus === "number") {
+    return isHealthyHttpStatus(item.qualityReview.httpStatus);
   }
 
-  return "general";
+  return hasTrustedReviewStatus(item);
 }
 
-function inferStrokeFamily(item: CatalogContentItem): GuidanceStrokeFamily {
-  const text = buildSearchText(item);
+function passesThumbnailHealthGate(item: CatalogContentItem): boolean {
+  if (!item.display.thumbnail) {
+    return false;
+  }
 
-  if (/(serve|second serve|toss|double fault|发球|二发|抛球)/i.test(text)) return "serve";
-  if (/(return|return of serve|接发|接发球)/i.test(text)) return "return";
-  if (/(volley|net|doubles|截击|网前|双打)/i.test(text)) return "volley";
-  if (/(overhead|smash|高压|扣杀)/i.test(text)) return "overhead";
-  if (/(slice|切削|切球)/i.test(text)) return "slice";
-  if (/(backhand|反手)/i.test(text)) return "backhand";
-  if (/(forehand|正手)/i.test(text)) return "forehand";
-  return "general";
+  return item.qualityReview?.thumbnailStatus !== "broken" && item.qualityReview?.thumbnailStatus !== "missing";
 }
 
-function inferMechanismFamily(item: CatalogContentItem): GuidanceMechanismFamily {
-  const text = buildSearchText(item);
+function hasZhSubtitles(subtitleAvailability?: ContentSubtitleAvailability): boolean {
+  return subtitleAvailability === "zh" || subtitleAvailability === "zh_en";
+}
 
-  if (/(pressure|anxiety|tight|关键分|紧张|手紧)/i.test(text)) return "pressure_regulation";
-  if (/(decision|pattern|point construction|战术|分点|前四拍)/i.test(text)) return "decision";
-  if (/(position|poach|doubles formation|站位|位置)/i.test(text)) return "positioning";
-  if (/(recovery|footwork|movement|回位|脚步|移动|跑动)/i.test(text)) return "recovery";
-  if (/(spacing|distance|jammed|挤到|距离|站不开)/i.test(text)) return "spacing";
-  if (/(rhythm|timing|beat|tempo|节奏|时机)/i.test(text)) return "rhythm";
-  if (/(contact|window|in front|击球点|触球|击球窗口)/i.test(text)) return "contact_window";
-  return "shape_control";
+function hasEnSubtitles(subtitleAvailability?: ContentSubtitleAvailability): boolean {
+  return subtitleAvailability === "english" || subtitleAvailability === "zh_en" || subtitleAvailability === "not_needed";
+}
+
+function isLanguageUsable(item: CatalogContentItem, preference: GuidanceContext["languagePreference"]): boolean {
+  if (preference === "zh") {
+    return item.language === "zh" || item.contentLanguage === "zh" || hasZhSubtitles(item.subtitleAvailability);
+  }
+
+  return item.language === "en" || item.contentLanguage === "en" || hasEnSubtitles(item.subtitleAvailability);
+}
+
+function isSkillBandCompatible(item: CatalogContentItem, skillBand: GuidanceContext["skillBand"]): boolean {
+  const preferredLevels = LEVEL_PREFERENCE_MAP[skillBand] ?? [skillBand];
+  return item.levelRange.includes(skillBand) || item.levelRange.some((level) => preferredLevels.includes(level));
 }
 
 function normalizeDuplicateClusterText(item: CatalogContentItem): string {
@@ -195,108 +230,22 @@ function buildCrossPlatformClusterMap(items: CatalogContentItem[]): Map<string, 
   return map;
 }
 
-function isDirectSourceCandidate(item: CatalogContentItem): boolean {
-  return item.mediaType === "video" && item.rightsStatus === "direct_source";
-}
-
-function hasTrustedReviewStatus(item: CatalogContentItem): boolean {
-  const status = item.qualityReview?.reviewStatus;
-  return Boolean(status && TRUSTED_REVIEW_STATUSES.has(status));
-}
-
-function shouldEnforceTrustedReviewGate(request: AttachedRecommendationRequest): boolean {
-  return Array.isArray(request.qualityReviews) && request.qualityReviews.length > 0;
-}
-
-function passesReviewEligibilityGate(item: CatalogContentItem, strictReviewGate: boolean): boolean {
-  if (strictReviewGate) {
-    return hasTrustedReviewStatus(item);
-  }
-
-  return item.qualityReview?.reviewStatus !== "rejected" && item.qualityReview?.reviewStatus !== "suspect";
-}
-
-function isHealthyHttpStatus(status: number | undefined): boolean {
-  return typeof status === "number" && status >= 200 && status < 400;
-}
-
-function isLocalStaticResource(item: CatalogContentItem): boolean {
-  return item.canonicalUrl.startsWith("/") || item.sourceItem.url.startsWith("/");
-}
-
-function passesLinkHealthGate(item: CatalogContentItem, strictReviewGate: boolean): boolean {
-  if (isLocalStaticResource(item)) {
-    return true;
-  }
-
-  const httpStatus = item.qualityReview?.httpStatus;
-  if (typeof httpStatus === "number") {
-    return isHealthyHttpStatus(httpStatus);
-  }
-
-  return strictReviewGate ? hasTrustedReviewStatus(item) : true;
-}
-
-function passesThumbnailHealthGate(item: CatalogContentItem, strictReviewGate: boolean): boolean {
-  if (strictReviewGate) {
-    if (!item.display.thumbnail) {
-      return false;
-    }
-
-    return item.qualityReview?.thumbnailStatus !== "broken" && item.qualityReview?.thumbnailStatus !== "missing";
-  }
-
-  if (item.qualityReview?.thumbnailStatus === "broken" || item.qualityReview?.thumbnailStatus === "missing") {
-    return false;
-  }
-
-  return true;
-}
-
-function isSkillBandCompatible(item: CatalogContentItem, skillBand: GuidanceContext["skillBand"]): boolean {
-  const preferredLevels = LEVEL_PREFERENCE_MAP[skillBand] ?? [skillBand];
-  return item.levelRange.includes(skillBand) || item.levelRange.some((level) => preferredLevels.includes(level));
-}
-
-function isLanguageUsable(
-  item: CatalogContentItem,
-  preference: GuidanceContext["languagePreference"],
-  strictReviewGate: boolean
-): boolean {
-  if (preference === "zh") {
-    return item.language === "zh" || item.contentLanguage === "zh" || hasZhSubtitles(item.subtitleAvailability);
-  }
-
-  if (!strictReviewGate) {
-    return true;
-  }
-
-  return item.language === "en"
-    || item.contentLanguage === "en"
-    || item.subtitleAvailability === "english"
-    || item.subtitleAvailability === "zh_en";
-}
-
-function hasZhSubtitles(subtitleAvailability?: ContentSubtitleAvailability): boolean {
-  return subtitleAvailability === "zh" || subtitleAvailability === "zh_en";
-}
-
-function hasEnSubtitles(subtitleAvailability?: ContentSubtitleAvailability): boolean {
-  return subtitleAvailability === "english" || subtitleAvailability === "zh_en" || subtitleAvailability === "not_needed";
-}
-
 function overlapCount(left: string[], right: string[]): number {
   const rightSet = new Set(right);
   return left.reduce((sum, value) => sum + (rightSet.has(value) ? 1 : 0), 0);
 }
 
-function hasRelevantTagFamily(item: CatalogContentItem, guidanceContext: GuidanceContext): boolean {
+function countSearchTextHits(searchText: string, terms: string[]): number {
+  return terms.reduce((sum, term) => sum + (searchText.includes(term) ? 1 : 0), 0);
+}
+
+function hasRelevantTagFamily(item: CatalogContentItem, intent: TeachingRetrievalIntent): boolean {
   const expandedItemTags = new Set(
     item.problemTags.flatMap((tag) => [tag, ...(DIAGNOSIS_CONTENT_PROBLEM_TAG_ALIASES[tag] ?? [])])
   );
 
-  return expandedItemTags.has(guidanceContext.primaryProblemTag)
-    || guidanceContext.secondaryProblemTags.some((tag) => expandedItemTags.has(tag));
+  return expandedItemTags.has(intent.primaryProblemTag)
+    || intent.secondaryProblemTags.some((tag) => expandedItemTags.has(tag));
 }
 
 function scoreSkillBandOverlap(item: CatalogContentItem, skillBand: GuidanceContext["skillBand"]): number {
@@ -351,9 +300,8 @@ function scoreLinkHealth(item: CatalogContentItem): number {
     return LINK_HEALTH_SCORE;
   }
 
-  const httpStatus = item.qualityReview?.httpStatus;
-  if (typeof httpStatus === "number") {
-    return isHealthyHttpStatus(httpStatus) ? LINK_HEALTH_SCORE : 0;
+  if (typeof item.qualityReview?.httpStatus === "number") {
+    return isHealthyHttpStatus(item.qualityReview.httpStatus) ? LINK_HEALTH_SCORE : 0;
   }
 
   return hasTrustedReviewStatus(item) ? TRUSTED_REVIEW_FALLBACK_LINK_SCORE : 0;
@@ -385,25 +333,29 @@ function scoreFreshness(item: CatalogContentItem): number {
   return 0;
 }
 
-function scorePlanIntentFit(role: AttachedInstructionalRole, guidanceContext: GuidanceContext, stepRole?: PlanBlueprintRole): number {
+function scorePlanIntentFit(
+  role: AttachedInstructionalRole,
+  guidanceContext: GuidanceContext,
+  stepRole?: PlanBlueprintRole
+): number {
   const intent = guidanceContext.planIntent;
 
-  if (stepRole === "review_reset" && role === "explanation") {
+  if (stepRole === "review_reset" && (role === "explanation" || role === "mental")) {
     return PLAN_INTENT_SCORE;
   }
   if (stepRole === "pressure_repetition" && (role === "drill" || role === "mental")) {
     return PLAN_INTENT_SCORE;
   }
-  if (stepRole === "transfer" && role === "tactic") {
+  if (stepRole === "transfer" && (role === "tactic" || role === "explanation")) {
     return PLAN_INTENT_SCORE;
   }
 
   if (intent === "stabilize_under_pressure" && (role === "mental" || role === "drill")) return PLAN_INTENT_SCORE;
-  if (intent === "arrive_earlier" && role === "drill") return PLAN_INTENT_SCORE;
-  if (intent === "organize_tactics" && role === "tactic") return PLAN_INTENT_SCORE;
-  if (intent === "rebuild_mechanics" && (role === "explanation" || role === "drill")) return PLAN_INTENT_SCORE;
-  if (intent === "stabilize_primary_pattern" && (role === "explanation" || role === "drill")) return PLAN_INTENT_SCORE;
-  if (intent === "assessment_priority" && role === "explanation") return PLAN_INTENT_SCORE;
+  if (intent === "arrive_earlier" && (role === "primary_fix" || role === "drill")) return PLAN_INTENT_SCORE;
+  if (intent === "organize_tactics" && (role === "tactic" || role === "explanation")) return PLAN_INTENT_SCORE;
+  if (intent === "rebuild_mechanics" && (role === "primary_fix" || role === "explanation" || role === "drill")) return PLAN_INTENT_SCORE;
+  if (intent === "stabilize_primary_pattern" && (role === "primary_fix" || role === "drill" || role === "explanation")) return 14;
+  if (intent === "assessment_priority" && (role === "primary_fix" || role === "explanation")) return 12;
 
   if (role === "explanation" || role === "drill") {
     return 8;
@@ -412,69 +364,162 @@ function scorePlanIntentFit(role: AttachedInstructionalRole, guidanceContext: Gu
   return 0;
 }
 
-function scoreTrainingFocusFit(item: CatalogContentItem, guidanceContext: GuidanceContext, lexicalTerms: string[]): number {
-  const searchText = buildSearchText(item);
-  const focusTerms = [
-    guidanceContext.trainingFocus,
-    guidanceContext.planIntent.replace(/_/g, " "),
-    ...lexicalTerms
-  ]
-    .map((term) => normalizeText(term))
-    .filter((term) => term.length >= 3);
+function scoreRoleFit(role: AttachedInstructionalRole, intent: TeachingRetrievalIntent): number {
+  const roleIndex = intent.preferredRoles.indexOf(role);
+  if (roleIndex === -1) {
+    return role === "explanation" ? 4 : 0;
+  }
 
-  const hitCount = focusTerms.reduce((sum, term) => sum + (searchText.includes(term) ? 1 : 0), 0);
+  return ROLE_PREFERENCE_SCORE[Math.min(roleIndex, ROLE_PREFERENCE_SCORE.length - 1)] ?? 0;
+}
+
+function scoreTrainingFocusFit(candidate: EligibleAttachedCandidate, intent: TeachingRetrievalIntent): number {
+  const focusTerms = normalizeTerms([
+    intent.trainingFocus,
+    intent.planIntent.replace(/_/g, " "),
+    ...intent.symptomTerms,
+    ...intent.contextTerms
+  ]).filter((term) => term.length >= 3);
+  const hitCount = countSearchTextHits(candidate.searchText, focusTerms);
+
   return Math.min(TRAINING_FOCUS_SCORE, hitCount * 4);
 }
 
+function scorePinpoint(candidate: EligibleAttachedCandidate, intent: TeachingRetrievalIntent): number {
+  const intentTerms = normalizeTerms([
+    intent.primaryProblemTag,
+    ...intent.secondaryProblemTags,
+    ...intent.symptomTerms
+  ]);
+  const metadataTerms = normalizeTerms(candidate.metadata?.symptomTags ?? []);
+  const metadataHitCount = overlapCount(metadataTerms, intentTerms);
+
+  if (metadataHitCount > 0) {
+    return Math.min(
+      PINPOINT_SCORE,
+      metadataHitCount * 8 + (candidate.catalogItem.problemTags.includes(intent.primaryProblemTag) ? 2 : 0)
+    );
+  }
+
+  const textHitCount = countSearchTextHits(candidate.searchText, intentTerms);
+  return Math.min(PINPOINT_SCORE, textHitCount * 3 + (candidate.catalogItem.problemTags.includes(intent.primaryProblemTag) ? 2 : 0));
+}
+
+function scoreFixAlignment(candidate: EligibleAttachedCandidate, intent: TeachingRetrievalIntent): number {
+  const candidateFixTerms = normalizeTerms([
+    ...candidate.metadata?.fixTags ?? [],
+    ...candidate.metadata?.drillTags ?? []
+  ]);
+  const intentFixTerms = normalizeTerms([
+    ...intent.fixTargets,
+    ...intent.drillTargets,
+    intent.trainingFocus
+  ]);
+  const metadataHitCount = overlapCount(candidateFixTerms, intentFixTerms);
+
+  if (metadataHitCount > 0) {
+    return Math.min(FIX_ALIGNMENT_SCORE, metadataHitCount * 6);
+  }
+
+  const textHitCount = countSearchTextHits(candidate.searchText, intentFixTerms);
+  return Math.min(FIX_ALIGNMENT_SCORE, textHitCount * 2);
+}
+
+function scoreCauseAlignment(candidate: EligibleAttachedCandidate, intent: TeachingRetrievalIntent): number {
+  const candidateCauseTerms = normalizeTerms(candidate.metadata?.causeTags ?? []);
+  const intentCauseTerms = normalizeTerms([
+    ...intent.causeCandidates,
+    intent.mechanismFamily,
+    intent.strokeFamily
+  ]);
+  const metadataHitCount = overlapCount(candidateCauseTerms, intentCauseTerms);
+
+  if (metadataHitCount > 0) {
+    return Math.min(CAUSE_ALIGNMENT_SCORE, metadataHitCount * 6);
+  }
+
+  const textHitCount = countSearchTextHits(candidate.searchText, intentCauseTerms);
+  return Math.min(CAUSE_ALIGNMENT_SCORE, textHitCount * 2);
+}
+
+function buildTrustCapAdjustment(item: CatalogContentItem, rawScore: number): number {
+  if (isLocalStaticResource(item)) {
+    return 0;
+  }
+
+  const fullCap = typeof item.qualityReview?.httpStatus === "number" && isHealthyHttpStatus(item.qualityReview.httpStatus)
+    && item.qualityReview?.thumbnailStatus === "ok";
+  if (fullCap) {
+    return 0;
+  }
+
+  const cap = typeof item.qualityReview?.httpStatus === "number" && isHealthyHttpStatus(item.qualityReview.httpStatus)
+    ? 188
+    : 176;
+
+  return rawScore > cap ? cap - rawScore : 0;
+}
+
 function buildBaseBreakdown(input: {
-  item: CatalogContentItem;
-  role: AttachedInstructionalRole;
-  strokeFamily: GuidanceStrokeFamily;
-  mechanismFamily: GuidanceMechanismFamily;
-  guidanceContext: GuidanceContext;
-  lexicalTerms: string[];
+  candidate: EligibleAttachedCandidate;
+  intent: TeachingRetrievalIntent;
   requiredOrder: Map<string, number>;
   supportOrder: Map<string, number>;
   preferredOrder: Map<string, number>;
   crossPlatformDuplicatePenalty: number;
   stepRole?: PlanBlueprintRole;
 }): AttachedRecommendationBreakdown {
-  const exactPrimaryTagMatch = input.item.problemTags.includes(input.guidanceContext.primaryProblemTag)
+  const { candidate, intent } = input;
+  const exactPrimaryTagMatch = candidate.catalogItem.problemTags.includes(intent.primaryProblemTag)
     ? EXACT_PRIMARY_TAG_SCORE
     : 0;
-  const siblingTagMatch = input.guidanceContext.secondaryProblemTags.some((tag) => input.item.problemTags.includes(tag))
+  const siblingTagMatch = intent.secondaryProblemTags.some((tag) => candidate.catalogItem.problemTags.includes(tag))
     ? SIBLING_TAG_SCORE
     : 0;
-  const mechanismFamilyMatch = input.mechanismFamily === input.guidanceContext.mechanismFamily
+  const mechanismFamilyMatch = candidate.mechanismFamily === intent.mechanismFamily
     ? MECHANISM_FAMILY_SCORE
     : 0;
-  const strokeFamilyMatch = input.strokeFamily === input.guidanceContext.strokeFamily
+  const strokeFamilyMatch = candidate.strokeFamily === intent.strokeFamily
     ? STROKE_FAMILY_SCORE
     : 0;
-  const planIntentFit = scorePlanIntentFit(input.role, input.guidanceContext, input.stepRole);
-  const trainingFocusFit = scoreTrainingFocusFit(input.item, input.guidanceContext, input.lexicalTerms);
-  const skillBandOverlap = scoreSkillBandOverlap(input.item, input.guidanceContext.skillBand);
-  const languageFit = scoreLanguageFit(input.item, input.guidanceContext.languagePreference);
-  const subtitleFit = scoreSubtitleFit(input.item, input.guidanceContext.languagePreference);
-  const creatorQualityScore = scoreCreatorQuality(input.item);
-  const reviewStatus = scoreReviewStatus(input.item);
-  const freshness = scoreFreshness(input.item);
-  const linkHealth = scoreLinkHealth(input.item);
-  const thumbnailHealth = scoreThumbnailHealth(input.item);
-  const preferredSeed = input.requiredOrder.has(input.item.id)
-    ? Math.max(0, REQUIRED_SEED_SCORE - ((input.requiredOrder.get(input.item.id) ?? 0) * 18))
-    : input.supportOrder.has(input.item.id)
-      ? Math.max(0, SUPPORT_SEED_SCORE - ((input.supportOrder.get(input.item.id) ?? 0) * 4))
-    : input.preferredOrder.has(input.item.id)
-      ? Math.max(0, PREFERRED_SEED_SCORE - ((input.preferredOrder.get(input.item.id) ?? 0) * 4))
-      : 0;
+  const pinpoint = scorePinpoint(candidate, intent);
+  const fixAlignment = scoreFixAlignment(candidate, intent);
+  const causeAlignment = scoreCauseAlignment(candidate, intent);
+  const planIntentFit = scorePlanIntentFit(candidate.role, intent.guidanceContext, input.stepRole);
+  const roleFit = scoreRoleFit(candidate.role, intent);
+  const actionability = Math.round(inferActionabilityScore(candidate.catalogItem, candidate.metadata) * ACTIONABILITY_SCORE);
+  const diagnosticDepth = Math.round(inferDiagnosticDepthScore(candidate.catalogItem, candidate.metadata) * DIAGNOSTIC_DEPTH_SCORE);
+  const specificity = Math.round(inferSpecificityScore(candidate.catalogItem, candidate.metadata) * SPECIFICITY_SCORE);
+  const trainingFocusFit = scoreTrainingFocusFit(candidate, intent);
+  const skillBandOverlap = scoreSkillBandOverlap(candidate.catalogItem, intent.skillBand);
+  const languageFit = scoreLanguageFit(candidate.catalogItem, intent.languagePreference);
+  const subtitleFit = scoreSubtitleFit(candidate.catalogItem, intent.languagePreference);
+  const creatorQualityScore = scoreCreatorQuality(candidate.catalogItem);
+  const reviewStatus = scoreReviewStatus(candidate.catalogItem);
+  const freshness = scoreFreshness(candidate.catalogItem);
+  const linkHealth = scoreLinkHealth(candidate.catalogItem);
+  const thumbnailHealth = scoreThumbnailHealth(candidate.catalogItem);
+  const preferredSeed = input.requiredOrder.has(candidate.catalogItem.id)
+    ? Math.max(0, REQUIRED_SEED_SCORE - ((input.requiredOrder.get(candidate.catalogItem.id) ?? 0) * 18))
+    : input.supportOrder.has(candidate.catalogItem.id)
+      ? Math.max(0, SUPPORT_SEED_SCORE - ((input.supportOrder.get(candidate.catalogItem.id) ?? 0) * 4))
+      : input.preferredOrder.has(candidate.catalogItem.id)
+        ? Math.max(0, PREFERRED_SEED_SCORE - ((input.preferredOrder.get(candidate.catalogItem.id) ?? 0) * 4))
+        : 0;
 
   return {
     exactPrimaryTagMatch,
     siblingTagMatch,
     mechanismFamilyMatch,
     strokeFamilyMatch,
+    pinpoint,
+    fixAlignment,
+    causeAlignment,
     planIntentFit,
+    roleFit,
+    actionability,
+    diagnosticDepth,
+    specificity,
     trainingFocusFit,
     skillBandOverlap,
     languageFit,
@@ -485,6 +530,7 @@ function buildBaseBreakdown(input: {
     linkHealth,
     thumbnailHealth,
     preferredSeed,
+    trustCapAdjustment: 0,
     crossPlatformDuplicatePenalty: input.crossPlatformDuplicatePenalty,
     sameCreatorPenalty: 0
   };
@@ -494,80 +540,103 @@ function sumBreakdown(breakdown: AttachedRecommendationBreakdown): number {
   return Object.values(breakdown).reduce((sum, value) => sum + value, 0);
 }
 
-function buildEligibleCandidatePool(request: AttachedRecommendationRequest): EligibleAttachedCandidate[] {
-  const requiredIdSet = new Set(request.requiredIds ?? []);
-  const preferredIdSet = new Set(request.preferredIds ?? []);
-  const supportIdSet = new Set(request.supportIds ?? []);
-  const strictReviewGate = shouldEnforceTrustedReviewGate(request);
+function buildEligibleCandidatePool(request: AttachedRecommendationRequest): {
+  eligibleCandidates: EligibleAttachedCandidate[];
+  intent: TeachingRetrievalIntent;
+} {
+  const intent = buildTeachingRetrievalIntent(request);
+  const seedIds = new Set([...intent.requiredIds, ...intent.preferredIds, ...intent.supportIds]);
   const catalog = buildCatalogCorpus({
     curatedContents: request.contentPool,
     expandedContents: request.expandedContentPool,
     qualityReviews: request.qualityReviews
   });
 
-  return catalog
+  const eligibleCandidates = catalog
     .filter((item) =>
       isDirectSourceCandidate(item)
-      && passesReviewEligibilityGate(item, strictReviewGate)
-      && passesLinkHealthGate(item, strictReviewGate)
-      && passesThumbnailHealthGate(item, strictReviewGate)
-      && isSkillBandCompatible(item, request.guidanceContext.skillBand)
-      && isLanguageUsable(item, request.guidanceContext.languagePreference, strictReviewGate)
-      && (
-        hasRelevantTagFamily(item, request.guidanceContext)
-        || requiredIdSet.has(item.id)
-        || preferredIdSet.has(item.id)
-        || supportIdSet.has(item.id)
-      )
+      && hasTrustedReviewStatus(item)
+      && passesLinkHealthGate(item)
+      && passesThumbnailHealthGate(item)
+      && isSkillBandCompatible(item, intent.skillBand)
+      && isLanguageUsable(item, intent.languagePreference)
     )
-    .map((item) => ({
-      catalogItem: item,
-      role: inferInstructionalRole(item),
-      strokeFamily: inferStrokeFamily(item),
-      mechanismFamily: inferMechanismFamily(item),
-      duplicateClusterId: buildAttachedDuplicateClusterId(item)
-    }));
+    .map((item) => {
+      const metadata = getTeachingMetadataByContentId(item.id);
+      return {
+        catalogItem: item,
+        metadata,
+        role: inferTeachingRole(item, metadata),
+        strokeFamily: inferTeachingStrokeFamily(item, metadata),
+        mechanismFamily: inferTeachingMechanismFamily(item, metadata),
+        duplicateClusterId: buildAttachedDuplicateClusterId(item),
+        searchText: buildTeachingSearchText(item, metadata)
+      };
+    })
+    .filter((candidate) => {
+      if (seedIds.has(candidate.catalogItem.id)) {
+        return true;
+      }
+
+      const metadataTerms = normalizeTerms([
+        ...candidate.metadata?.symptomTags ?? [],
+        ...candidate.metadata?.causeTags ?? [],
+        ...candidate.metadata?.fixTags ?? [],
+        ...candidate.metadata?.drillTags ?? [],
+        ...candidate.metadata?.contextTags ?? []
+      ]);
+      const intentTerms = normalizeTerms([
+        ...intent.symptomTerms,
+        ...intent.causeCandidates,
+        ...intent.fixTargets,
+        ...intent.drillTargets,
+        ...intent.contextTerms
+      ]);
+
+      return hasRelevantTagFamily(candidate.catalogItem, intent)
+        || candidate.strokeFamily === intent.strokeFamily
+        || candidate.mechanismFamily === intent.mechanismFamily
+        || overlapCount(metadataTerms, intentTerms) > 0
+        || intentTerms.some((term) => candidate.searchText.includes(term));
+    });
+
+  return { eligibleCandidates, intent };
 }
 
 function scoreEligibleCandidatePool(
   eligibleCandidates: EligibleAttachedCandidate[],
-  request: AttachedRecommendationRequest
+  request: AttachedRecommendationRequest,
+  intent: TeachingRetrievalIntent
 ): RankedAttachedCandidate[] {
-  const requiredIds = request.requiredIds ?? [];
-  const requiredOrder = new Map(requiredIds.map((id, index) => [id, index]));
-  const supportIds = request.supportIds ?? [];
-  const supportOrder = new Map(supportIds.map((id, index) => [id, index]));
-  const preferredIds = request.preferredIds ?? [];
-  const preferredOrder = new Map(preferredIds.map((id, index) => [id, index]));
-  const lexicalTerms = (request.lexicalTerms ?? []).map((term) => normalizeText(term)).filter((term) => term.length >= 3);
+  const requiredOrder = new Map((request.requiredIds ?? []).map((id, index) => [id, index]));
+  const supportOrder = new Map((request.supportIds ?? []).map((id, index) => [id, index]));
+  const preferredOrder = new Map((request.preferredIds ?? []).map((id, index) => [id, index]));
   const clusterMap = buildCrossPlatformClusterMap(eligibleCandidates.map((candidate) => candidate.catalogItem));
 
   return eligibleCandidates
     .map((candidate) => {
       const crossPlatformDuplicatePenalty = (clusterMap.get(candidate.duplicateClusterId)?.size ?? 0) > 1 ? -8 : 0;
-      const breakdown = buildBaseBreakdown({
-        item: candidate.catalogItem,
-        role: candidate.role,
-        strokeFamily: candidate.strokeFamily,
-        mechanismFamily: candidate.mechanismFamily,
-        guidanceContext: request.guidanceContext,
-        lexicalTerms,
+      const baseBreakdown = buildBaseBreakdown({
+        candidate,
+        intent,
         requiredOrder,
         supportOrder,
         preferredOrder,
         crossPlatformDuplicatePenalty,
         stepRole: request.stepRole
       });
+      const rawScore = sumBreakdown(baseBreakdown);
+      const trustCapAdjustment = buildTrustCapAdjustment(candidate.catalogItem, rawScore);
+      const breakdown = {
+        ...baseBreakdown,
+        trustCapAdjustment
+      };
 
       return {
-        catalogItem: candidate.catalogItem,
-        role: candidate.role,
-        strokeFamily: candidate.strokeFamily,
-        mechanismFamily: candidate.mechanismFamily,
-        duplicateClusterId: candidate.duplicateClusterId,
-        crossPlatformDuplicatePenalty,
-        breakdown,
-        totalScore: sumBreakdown(breakdown)
+        ...candidate,
+        rawScore,
+        totalScore: rawScore + trustCapAdjustment,
+        breakdown
       };
     })
     .sort((left, right) => {
@@ -581,6 +650,36 @@ function scoreEligibleCandidatePool(
 
       return left.catalogItem.id.localeCompare(right.catalogItem.id);
     });
+}
+
+function selectBestRequiredCandidate(
+  candidates: RankedAttachedCandidate[],
+  requiredIds: string[],
+  selected: RankedAttachedCandidate[]
+): RankedAttachedCandidate | null {
+  if (requiredIds.length === 0) {
+    return null;
+  }
+
+  const candidateById = new Map(candidates.map((candidate) => [candidate.catalogItem.id, candidate]));
+  const selectedClusters = new Set(selected.map((candidate) => candidate.duplicateClusterId));
+
+  for (const requiredId of requiredIds) {
+    const candidate = candidateById.get(requiredId);
+    if (!candidate) {
+      continue;
+    }
+    if (selected.some((entry) => entry.catalogItem.id === candidate.catalogItem.id)) {
+      continue;
+    }
+    if (selectedClusters.has(candidate.duplicateClusterId)) {
+      continue;
+    }
+
+    return candidate;
+  }
+
+  return null;
 }
 
 function selectBestRoleCandidate(
@@ -598,7 +697,10 @@ function selectBestRoleCandidate(
     if (selectedClusters.has(candidate.duplicateClusterId)) {
       continue;
     }
-    if (selectedCreators.has(candidate.catalogItem.creatorId) && candidates.some((entry) => entry.role === role && !selectedCreators.has(entry.catalogItem.creatorId))) {
+    if (
+      selectedCreators.has(candidate.catalogItem.creatorId)
+      && candidates.some((entry) => entry.role === role && !selectedCreators.has(entry.catalogItem.creatorId))
+    ) {
       continue;
     }
 
@@ -632,7 +734,10 @@ function selectBestSupportCandidate(
     if (selectedClusters.has(candidate.duplicateClusterId)) {
       continue;
     }
-    if (selectedCreators.has(candidate.catalogItem.creatorId) && candidates.some((entry) => supportIds.includes(entry.catalogItem.id) && !selectedCreators.has(entry.catalogItem.creatorId))) {
+    if (
+      selectedCreators.has(candidate.catalogItem.creatorId)
+      && candidates.some((entry) => supportIds.includes(entry.catalogItem.id) && !selectedCreators.has(entry.catalogItem.creatorId))
+    ) {
       continue;
     }
 
@@ -644,45 +749,27 @@ function selectBestSupportCandidate(
 
 function rerankCandidates(
   candidates: RankedAttachedCandidate[],
-  maxResults: number,
-  requiredIds: string[],
-  supportIds: string[]
+  request: AttachedRecommendationRequest,
+  intent: TeachingRetrievalIntent
 ): RankedAttachedCandidate[] {
+  const maxResults = request.maxResults ?? 3;
   const selected: RankedAttachedCandidate[] = [];
   const creatorUsage = new Map<string, number>();
   const selectedClusters = new Set<string>();
-  const supportIdSet = new Set(supportIds);
+  const supportIdSet = new Set(request.supportIds ?? []);
 
-  const requiredCandidate = selectBestRequiredCandidate(candidates, requiredIds, selected);
+  const requiredCandidate = selectBestRequiredCandidate(candidates, request.requiredIds ?? [], selected);
   if (requiredCandidate) {
     selected.push(requiredCandidate);
     selectedClusters.add(requiredCandidate.duplicateClusterId);
     creatorUsage.set(requiredCandidate.catalogItem.creatorId, 1);
   }
 
-  if (supportIds.length > 0 && selected.length < maxResults) {
-    const earlySupportCandidate = selectBestSupportCandidate(candidates, supportIds, selected);
-    if (earlySupportCandidate && !selectedClusters.has(earlySupportCandidate.duplicateClusterId)) {
-      selected.push(earlySupportCandidate);
-      selectedClusters.add(earlySupportCandidate.duplicateClusterId);
-      creatorUsage.set(
-        earlySupportCandidate.catalogItem.creatorId,
-        (creatorUsage.get(earlySupportCandidate.catalogItem.creatorId) ?? 0) + 1
-      );
-    }
-  }
-
-  const roleCandidates: AttachedInstructionalRole[] = [];
-  if (!selected.some((candidate) => candidate.role === "explanation") && candidates.some((candidate) => candidate.role === "explanation")) {
-    roleCandidates.push("explanation");
-  }
-  if (!selected.some((candidate) => candidate.role === "drill") && candidates.some((candidate) => candidate.role === "drill")) {
-    roleCandidates.push("drill");
-  }
-
-  const roleSeedLimit = supportIds.length > 0
-    ? Math.max(selected.length, Math.min(maxResults - 1, 3))
-    : Math.min(maxResults, 3);
+  const roleSeedLimit = Math.min(maxResults, 3);
+  const roleCandidates = intent.preferredRoles.filter(
+    (role, index, list) =>
+      list.indexOf(role) === index && candidates.some((candidate) => candidate.role === role)
+  );
 
   for (const role of roleCandidates) {
     if (selected.length >= roleSeedLimit) {
@@ -697,8 +784,8 @@ function rerankCandidates(
     }
   }
 
-  if (selected.length < Math.min(maxResults, 3)) {
-    const supportCandidate = selectBestSupportCandidate(candidates, supportIds, selected);
+  if (selected.length < roleSeedLimit) {
+    const supportCandidate = selectBestSupportCandidate(candidates, request.supportIds ?? [], selected);
     if (supportCandidate && !selectedClusters.has(supportCandidate.duplicateClusterId)) {
       selected.push(supportCandidate);
       selectedClusters.add(supportCandidate.duplicateClusterId);
@@ -721,15 +808,13 @@ function rerankCandidates(
     }
 
     const sameCreatorPenalty = (creatorUsage.get(candidate.catalogItem.creatorId) ?? 0) * SAME_CREATOR_PENALTY;
-    const adjustedScore = candidate.totalScore - sameCreatorPenalty;
-    const breakdown = {
-      ...candidate.breakdown,
-      sameCreatorPenalty: -sameCreatorPenalty
-    };
     const adjustedCandidate = {
       ...candidate,
-      breakdown,
-      totalScore: adjustedScore
+      totalScore: candidate.totalScore - sameCreatorPenalty,
+      breakdown: {
+        ...candidate.breakdown,
+        sameCreatorPenalty: -sameCreatorPenalty
+      }
     };
 
     if (selected.length < 2) {
@@ -752,7 +837,7 @@ function rerankCandidates(
   }
 
   const topScore = selected[0].totalScore;
-  const minimumScore = topScore >= 90 ? topScore - 36 : topScore >= 65 ? topScore - 28 : topScore >= 42 ? topScore - 18 : topScore;
+  const minimumScore = topScore >= 110 ? topScore - 34 : topScore >= 84 ? topScore - 26 : topScore >= 60 ? topScore - 18 : topScore;
 
   return selected
     .filter((candidate, index) =>
@@ -765,51 +850,36 @@ function rerankCandidates(
 }
 
 export function recommendAttachedVideos(request: AttachedRecommendationRequest): AttachedRecommendation[] {
-  const eligibleCandidates = buildEligibleCandidatePool(request);
-  const candidates = scoreEligibleCandidatePool(eligibleCandidates, request);
-  const reranked = rerankCandidates(candidates, request.maxResults ?? 3, request.requiredIds ?? [], request.supportIds ?? []);
+  const { eligibleCandidates, intent } = buildEligibleCandidatePool(request);
+  const rankedCandidates = scoreEligibleCandidatePool(eligibleCandidates, request, intent);
+  const reranked = rerankCandidates(rankedCandidates, request, intent);
+  const packaged = packageAttachedRecommendations<AttachedRecommendationBreakdown>(
+    reranked.map((candidate) => ({
+      item: candidate.catalogItem.sourceItem,
+      role: candidate.role,
+      duplicateClusterId: candidate.duplicateClusterId,
+      mechanismFamily: candidate.mechanismFamily,
+      totalScore: candidate.totalScore,
+      breakdown: candidate.breakdown
+    })),
+    {
+      intentMechanismFamily: intent.mechanismFamily
+    }
+  );
 
-  return reranked.map((candidate) => ({
-    item: candidate.catalogItem.sourceItem,
+  return packaged.map((candidate) => ({
+    item: candidate.item,
     totalScore: candidate.totalScore,
     role: candidate.role,
+    slot: candidate.slot,
     duplicateClusterId: candidate.duplicateClusterId,
     breakdown: candidate.breakdown
   }));
 }
 
-function selectBestRequiredCandidate(
-  candidates: RankedAttachedCandidate[],
-  requiredIds: string[],
-  selected: RankedAttachedCandidate[]
-): RankedAttachedCandidate | null {
-  if (requiredIds.length === 0) {
-    return null;
-  }
-
-  const candidateById = new Map(candidates.map((candidate) => [candidate.catalogItem.id, candidate]));
-  const selectedClusters = new Set(selected.map((candidate) => candidate.duplicateClusterId));
-
-  for (const requiredId of requiredIds) {
-    const candidate = candidateById.get(requiredId);
-    if (!candidate) {
-      continue;
-    }
-    if (selected.some((entry) => entry.catalogItem.id === candidate.catalogItem.id)) {
-      continue;
-    }
-    if (selectedClusters.has(candidate.duplicateClusterId)) {
-      continue;
-    }
-
-    return candidate;
-  }
-
-  return null;
-}
-
 function getRoleLabel(role: AttachedInstructionalRole, locale: "zh" | "en"): string {
   if (locale === "en") {
+    if (role === "primary_fix") return "fix-first";
     if (role === "drill") return "practice-first";
     if (role === "tactic") return "decision-first";
     if (role === "warmup") return "warm-up";
@@ -817,6 +887,7 @@ function getRoleLabel(role: AttachedInstructionalRole, locale: "zh" | "en"): str
     return "explanation-first";
   }
 
+  if (role === "primary_fix") return "主修正式";
   if (role === "drill") return "练习型";
   if (role === "tactic") return "战术型";
   if (role === "warmup") return "热身型";
@@ -884,8 +955,9 @@ export function buildAttachedRecommendationNarrative(input: {
     curatedContents: [input.item],
     expandedContents: []
   })[0];
-  const role = inferInstructionalRole(catalogItem);
-  const mechanismFamily = inferMechanismFamily(catalogItem);
+  const metadata = getTeachingMetadataByContentId(input.item.id);
+  const role = inferTeachingRole(catalogItem, metadata);
+  const mechanismFamily = inferTeachingMechanismFamily(catalogItem, metadata);
   const primaryMatch = catalogItem.problemTags.includes(input.guidanceContext.primaryProblemTag);
   const siblingMatch = input.guidanceContext.secondaryProblemTags.some((tag) => catalogItem.problemTags.includes(tag));
   const matchLabel = primaryMatch

@@ -82,6 +82,26 @@ describe("attached recommendations", () => {
     });
 
     expect(recommendations.map((entry) => entry.item.id)).toEqual(["verified_good"]);
+    expect(recommendations.map((entry) => entry.slot)).toEqual(["primary"]);
+  });
+
+  it("rejects needs_review items from attached recommendations", () => {
+    const recommendations = recommendAttachedVideos({
+      source: "diagnosis",
+      guidanceContext,
+      contentPool: [
+        createItem({ id: "verified_good" }),
+        createItem({ id: "needs_review_candidate", title: "未完成审核的内容" })
+      ],
+      expandedContentPool: [],
+      qualityReviews: [
+        createQualityReview({ contentId: "verified_good", reviewStatus: "verified" }),
+        createQualityReview({ contentId: "needs_review_candidate", reviewStatus: "needs_review" })
+      ],
+      maxResults: 3
+    });
+
+    expect(recommendations.map((entry) => entry.item.id)).toEqual(["verified_good"]);
   });
 
   it("rejects unhealthy links and thumbnails before scoring", () => {
@@ -228,6 +248,36 @@ describe("attached recommendations", () => {
     expect(recommendations.map((entry) => entry.item.id)).toEqual(["good_explanation"]);
   });
 
+  it("uses teaching metadata to override heuristic role inference", () => {
+    const recommendations = recommendAttachedVideos({
+      source: "diagnosis",
+      guidanceContext,
+      contentPool: [
+        createItem({
+          id: "content_xhs_lingxi_05",
+          title: "发球带点beats",
+          summary: "模糊标题也要走 metadata role",
+          reason: "元数据应把它视为主修正内容"
+        }),
+        createItem({
+          id: "content_xhs_gaiao_03",
+          title: "发球全要点",
+          summary: "作为说明型内容"
+        })
+      ],
+      expandedContentPool: [],
+      qualityReviews: [
+        createQualityReview({ contentId: "content_xhs_lingxi_05" }),
+        createQualityReview({ contentId: "content_xhs_gaiao_03" })
+      ],
+      maxResults: 3
+    });
+
+    expect(recommendations[0]?.item.id).toBe("content_xhs_lingxi_05");
+    expect(recommendations[0]?.role).toBe("primary_fix");
+    expect(recommendations[0]?.slot).toBe("primary");
+  });
+
   it("reranks into a small diverse set with explanation and drill coverage while suppressing duplicates", () => {
     const recommendations = recommendAttachedVideos({
       source: "diagnosis",
@@ -274,13 +324,53 @@ describe("attached recommendations", () => {
     });
 
     const ids = recommendations.map((entry) => entry.item.id);
+    const slots = recommendations.map((entry) => entry.slot);
 
     expect(ids[0]).toBe("explanation_a");
     expect(ids.some((id) => id === "drill_b" || id === "duplicate_drill_c")).toBe(true);
     expect(ids).not.toEqual(expect.arrayContaining(["drill_b", "duplicate_drill_c"]));
     expect(new Set(recommendations.map((entry) => entry.item.creatorId)).size).toBe(2);
-    expect(recommendations.some((entry) => entry.role === "explanation")).toBe(true);
-    expect(recommendations.some((entry) => entry.role === "drill")).toBe(true);
+    expect(slots).toEqual(["primary", "drill"]);
+  });
+
+  it("packages candidates into fixed primary -> explanation -> drill slots", () => {
+    const recommendations = recommendAttachedVideos({
+      source: "diagnosis",
+      guidanceContext,
+      contentPool: [
+        createItem({
+          id: "content_xhs_lingxi_05",
+          title: "发球带点beats",
+          summary: "发球节奏主修正"
+        }),
+        createItem({
+          id: "content_xhs_gaiao_03",
+          title: "发球全要点（慢动作+细节节奏串联）",
+          summary: "发球解释型内容"
+        }),
+        createItem({
+          id: "serve_drill",
+          creatorId: "creator_c",
+          title: "二发跟练 20 次",
+          summary: "跟练型二发训练",
+          reason: "马上跟练二发节奏"
+        })
+      ],
+      expandedContentPool: [],
+      qualityReviews: [
+        createQualityReview({ contentId: "content_xhs_lingxi_05" }),
+        createQualityReview({ contentId: "content_xhs_gaiao_03" }),
+        createQualityReview({ contentId: "serve_drill" })
+      ],
+      maxResults: 3
+    });
+
+    expect(recommendations.map((entry) => entry.slot)).toEqual(["primary", "explanation", "drill"]);
+    expect(recommendations.map((entry) => entry.item.id)).toEqual([
+      "content_xhs_lingxi_05",
+      "content_xhs_gaiao_03",
+      "serve_drill"
+    ]);
   });
 
   it("pins required seeds first while still reserving room for support candidates", () => {
@@ -289,9 +379,9 @@ describe("attached recommendations", () => {
       guidanceContext,
       contentPool: [
         createItem({
-          id: "required_seed",
-          title: "关键分二发先求进区",
-          summary: "关键分先把球发进区",
+          id: "content_xhs_lingxi_05",
+          title: "发球带点beats",
+          summary: "关键分先修正二发目标区和出手节奏",
           reason: "先给自己一个更简单的落点目标",
           coachReason: "比赛里先稳住执行",
           useCases: ["二发容易双误"]
@@ -313,20 +403,91 @@ describe("attached recommendations", () => {
       ],
       expandedContentPool: [],
       qualityReviews: [
-        createQualityReview({ contentId: "required_seed" }),
+        createQualityReview({ contentId: "content_xhs_lingxi_05" }),
         createQualityReview({ contentId: "explanation_a" }),
         createQualityReview({ contentId: "support_c" })
       ],
       maxResults: 3,
-      requiredIds: ["required_seed"],
-      preferredIds: ["required_seed", "support_c"],
+      requiredIds: ["content_xhs_lingxi_05"],
+      preferredIds: ["content_xhs_lingxi_05", "support_c"],
       supportIds: ["support_c"]
     });
 
     const ids = recommendations.map((entry) => entry.item.id);
 
-    expect(ids[0]).toBe("required_seed");
+    expect(ids[0]).toBe("content_xhs_lingxi_05");
     expect(ids).toContain("support_c");
+  });
+
+  it("does not let trusted seed lists bypass eligibility", () => {
+    const recommendations = recommendAttachedVideos({
+      source: "diagnosis",
+      guidanceContext,
+      contentPool: [
+        createItem({
+          id: "required_unreviewed",
+          title: "二发节奏讲解",
+          summary: "未审核内容不该被 required 放进 attached pool"
+        }),
+        createItem({
+          id: "verified_primary",
+          title: "二发节奏主修正",
+          summary: "已审核可信内容"
+        })
+      ],
+      expandedContentPool: [],
+      qualityReviews: [createQualityReview({ contentId: "verified_primary", reviewStatus: "verified" })],
+      requiredIds: ["required_unreviewed"],
+      preferredIds: ["required_unreviewed"],
+      supportIds: ["required_unreviewed"],
+      maxResults: 3
+    });
+
+    expect(recommendations.map((entry) => entry.item.id)).toEqual(["verified_primary"]);
+  });
+
+  it("leaves weak explanation and warmup fallback slots empty instead of padding to three items", () => {
+    const recommendations = recommendAttachedVideos({
+      source: "diagnosis",
+      guidanceContext,
+      contentPool: [
+        createItem({
+          id: "content_xhs_lingxi_05",
+          title: "发球带点beats",
+          summary: "发球节奏主修正",
+          reason: "先稳住二发节奏"
+        }),
+        createItem({
+          id: "weak_explanation",
+          creatorId: "creator_weak_explanation",
+          title: "节奏基础概念",
+          summary: "很泛的节奏说明，不够贴问题。",
+          reason: "只是泛解释，不够聚焦。",
+          problemTags: ["general-improvement"],
+          skills: ["basics"]
+        }),
+        createItem({
+          id: "warmup_mismatch",
+          creatorId: "creator_warmup",
+          title: "发球前热身摆臂",
+          summary: "偏热身准备，不是针对二发节奏主修正。",
+          reason: "热身活动。",
+          problemTags: ["serve-basics"],
+          skills: ["serve", "training"]
+        })
+      ],
+      expandedContentPool: [],
+      qualityReviews: [
+        createQualityReview({ contentId: "content_xhs_lingxi_05", reviewStatus: "verified" }),
+        createQualityReview({ contentId: "weak_explanation", reviewStatus: "verified" }),
+        createQualityReview({ contentId: "warmup_mismatch", reviewStatus: "verified" })
+      ],
+      supportIds: ["warmup_mismatch"],
+      maxResults: 3
+    });
+
+    expect(recommendations.map((entry) => entry.item.id)).toEqual(["content_xhs_lingxi_05"]);
+    expect(recommendations.map((entry) => entry.slot)).toEqual(["primary"]);
   });
 
   it("builds rationale text from the same guidance context contract", () => {
