@@ -21,7 +21,7 @@ const PORTRAIT_IMAGE_CLASS =
   "absolute inset-0 h-full w-full object-cover object-[center_40%] transition duration-300 group-hover:scale-[1.14]";
 
 const NOTE_IMAGE_CLASS =
-  "absolute inset-0 h-full w-full object-cover object-[center_38%] transition duration-300 group-hover:scale-[1.2]";
+  "absolute inset-0 h-full w-full object-cover object-[center_18%] transition duration-300 group-hover:scale-[1.2]";
 
 function getLibraryAspectClass(platform: ContentPlatform) {
   return platform === "Xiaohongshu" ? "aspect-[3/4]" : "aspect-[16/9]";

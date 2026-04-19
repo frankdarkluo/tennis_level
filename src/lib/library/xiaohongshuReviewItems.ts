@@ -1,5 +1,6 @@
 import { contents } from "@/data/contents";
 import { creators } from "@/data/creators";
+import { buildLibraryItems } from "@/lib/library/order";
 import type { ContentItem, ContentLanguageCode, ContentSubtitleAvailability } from "@/types/content";
 import type { ProblemTag } from "@/types/problemTag";
 import localThumbnailManifest from "../../../ops/quality/xiaohongshu-local-thumbnails.json";
@@ -25,7 +26,10 @@ type LocalThumbnailManifestEntry = {
 export type XiaohongshuCandidateReviewData = {
   items: ContentItem[];
   summary: {
+    runtimeCount: number;
     candidateCount: number;
+    duplicateSuppressedCount: number;
+    mergedCount: number;
     byCreator: Array<{
       creatorProgramId: string;
       creatorName: string;
@@ -120,6 +124,41 @@ function buildReviewReason(candidate: XiaohongshuSeedCandidate) {
   return `QA candidate overlay for ${formatTeachingTypeLabel(candidate.teachingType)}. Not promoted into runtime yet.`;
 }
 
+function normalizeXiaohongshuTitleForDedup(title: string) {
+  return (
+    title
+      .trim()
+      .toLowerCase()
+      .match(/[a-z0-9\u3400-\u9fff]+/g)
+      ?.join("") ?? ""
+  );
+}
+
+function extractXiaohongshuPostId(url: string) {
+  const match = url.match(/([0-9a-f]{24})/i);
+  return match?.[1]?.toLowerCase() ?? null;
+}
+
+function buildXiaohongshuUrlDedupKey(url: string) {
+  const postId = extractXiaohongshuPostId(url);
+
+  if (postId) {
+    return postId;
+  }
+
+  try {
+    const parsedUrl = new URL(url);
+    const normalizedPath = parsedUrl.pathname.replace(/\/+$/, "").toLowerCase();
+    return `${parsedUrl.origin.toLowerCase()}${normalizedPath}`;
+  } catch {
+    return url.trim().replace(/\/+$/, "").toLowerCase();
+  }
+}
+
+function buildCreatorTitleDedupKey(item: Pick<ContentItem, "creatorId" | "title">) {
+  return `${item.creatorId}::${normalizeXiaohongshuTitleForDedup(item.title)}`;
+}
+
 function getCreatorForProgramId(creatorProgramId: keyof typeof CREATOR_ID_BY_PROGRAM_ID) {
   return creators.find((creator) => creator.id === CREATOR_ID_BY_PROGRAM_ID[creatorProgramId]) ?? null;
 }
@@ -162,8 +201,7 @@ export function isXiaohongshuCandidateReviewItem(item: ContentItem) {
   return item.id.startsWith(XIAOHONGSHU_LIBRARY_REVIEW_ITEM_PREFIX);
 }
 
-export function loadXiaohongshuCandidateReviewData(): XiaohongshuCandidateReviewData {
-  const items = seedCandidateArtifact.candidates.map((candidate) => buildReviewItem(candidate));
+function buildCandidateReviewSummary(items: ContentItem[]) {
   const byCreatorMap = new Map<string, { creatorProgramId: string; creatorName: string; count: number }>();
 
   seedCandidateArtifact.candidates.forEach((candidate) => {
@@ -181,10 +219,42 @@ export function loadXiaohongshuCandidateReviewData(): XiaohongshuCandidateReview
   });
 
   return {
+    runtimeCount: 0,
+    candidateCount: items.length,
+    duplicateSuppressedCount: 0,
+    mergedCount: items.length,
+    byCreator: Array.from(byCreatorMap.values())
+  };
+}
+
+export function loadXiaohongshuCandidateReviewData(): XiaohongshuCandidateReviewData {
+  const items = seedCandidateArtifact.candidates.map((candidate) => buildReviewItem(candidate));
+
+  return {
     items,
+    summary: buildCandidateReviewSummary(items)
+  };
+}
+
+export function loadMergedXiaohongshuLibraryData(): XiaohongshuCandidateReviewData {
+  const runtimeItems = buildLibraryItems().filter((item) => item.platform === "Xiaohongshu");
+  const reviewData = loadXiaohongshuCandidateReviewData();
+  const runtimeTitleKeys = new Set(runtimeItems.map((item) => buildCreatorTitleDedupKey(item)));
+  const runtimeUrlKeys = new Set(runtimeItems.map((item) => buildXiaohongshuUrlDedupKey(item.url)));
+  const dedupedCandidateItems = reviewData.items.filter((item) => {
+    const titleKey = buildCreatorTitleDedupKey(item);
+    const urlKey = buildXiaohongshuUrlDedupKey(item.url);
+    return !runtimeTitleKeys.has(titleKey) && !runtimeUrlKeys.has(urlKey);
+  });
+  const duplicateSuppressedCount = reviewData.items.length - dedupedCandidateItems.length;
+
+  return {
+    items: [...runtimeItems, ...dedupedCandidateItems],
     summary: {
-      candidateCount: items.length,
-      byCreator: Array.from(byCreatorMap.values())
+      ...reviewData.summary,
+      runtimeCount: runtimeItems.length,
+      duplicateSuppressedCount,
+      mergedCount: runtimeItems.length + dedupedCandidateItems.length
     }
   };
 }

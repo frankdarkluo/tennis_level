@@ -7,13 +7,32 @@ const mockAuthState = {
   configured: false,
   loading: false
 };
+let mockHasCompletedAssessment = true;
 
 const mockSearchParamsState = {
   value: "platform=Xiaohongshu&mobilePreview=1"
 };
 
-const loadXiaohongshuCandidateReviewData = vi.fn(() => ({
+const loadMergedXiaohongshuLibraryData = vi.fn(() => ({
   items: [
+    {
+      id: "content_xhs_runtime_01",
+      title: "已推广小红书内容",
+      creatorId: "creator_gaiao_xiaohongshu_hidden",
+      platform: "Xiaohongshu",
+      type: "video",
+      levels: ["3.0"],
+      skills: ["forehand"],
+      problemTags: ["forehand-basics"],
+      language: "zh",
+      subtitleAvailability: "zh",
+      summary: "summary",
+      reason: "reason",
+      useCases: ["use-case"],
+      coachReason: "runtime",
+      thumbnail: "https://example.com/runtime.jpg",
+      url: "https://www.xiaohongshu.com/explore/runtime-01"
+    },
     {
       id: "review_xhs_candidate_alpha",
       title: "候选帖子 A",
@@ -53,7 +72,9 @@ const loadXiaohongshuCandidateReviewData = vi.fn(() => ({
   ],
   summary: {
     runtimeCount: 1,
-    candidateCount: 2
+    candidateCount: 3,
+    duplicateSuppressedCount: 1,
+    mergedCount: 3
   }
 }));
 
@@ -100,9 +121,9 @@ vi.mock("@/lib/i18n/config", () => ({
         "library.empty": "暂无内容",
         "library.clear": "清空",
         "library.bookmarkLogin": "登录后收藏",
-        "library.review.title": "小红书候选审核模式",
-        "library.review.body": "当前页叠加显示 QA 候选帖，默认 runtime 内容不变。",
-        "library.review.counts": "已显示 {runtimeCount} 条 runtime 内容 + {candidateCount} 条候选帖"
+        "library.review.title": "小红书合并内容视图",
+        "library.review.body": "当前页合并显示 runtime 小红书内容与 QA 补充帖，重复标题已自动去重。",
+        "library.review.counts": "当前显示 {runtimeCount} 条 runtime 内容 + {uniqueCandidateCount} 条 QA 补充帖，已去重 {duplicateSuppressedCount} 条重复帖"
       };
 
       const template = map[key] ?? key;
@@ -123,7 +144,7 @@ vi.mock("@/lib/eventLogger", () => ({
 
 vi.mock("@/lib/assessmentStorage", () => ({
   readAssessmentResultFromStorage: vi.fn(() => ({ level: "3.0" })),
-  hasCompletedAssessmentResult: vi.fn(() => true),
+  hasCompletedAssessmentResult: vi.fn(() => mockHasCompletedAssessment),
   writeAssessmentResultToStorage: vi.fn()
 }));
 
@@ -158,7 +179,7 @@ vi.mock("@/lib/library/order", () => ({
 }));
 
 vi.mock("@/lib/library/xiaohongshuReviewItems", () => ({
-  loadXiaohongshuCandidateReviewData,
+  loadMergedXiaohongshuLibraryData,
   isXiaohongshuCandidateReviewRequested: (searchParams: { get(name: string): string | null }) =>
     searchParams.get("review") === "xiaohongshu-candidates",
   isXiaohongshuCandidateReviewItem: (item: { id: string }) => item.id.startsWith("review_xhs_candidate_")
@@ -196,6 +217,7 @@ describe("library xiaohongshu review mode", () => {
   beforeEach(() => {
     cleanup();
     vi.clearAllMocks();
+    mockHasCompletedAssessment = true;
     mockAuthState.user = null;
     mockAuthState.configured = false;
     mockAuthState.loading = false;
@@ -208,19 +230,20 @@ describe("library xiaohongshu review mode", () => {
     cleanup();
   });
 
-  it("keeps the default Xiaohongshu library path on runtime items only", async () => {
+  it("shows the merged deduped Xiaohongshu list on the default Xiaohongshu library path", async () => {
     const LibraryPage = await loadLibraryPage();
 
     render(React.createElement(LibraryPage));
 
     expect(await screen.findByText("找内容")).toBeInTheDocument();
     expect(await screen.findByText("已推广小红书内容")).toBeInTheDocument();
-    expect(screen.queryByText("候选帖子 A")).not.toBeInTheDocument();
+    expect(await screen.findByText("候选帖子 A")).toBeInTheDocument();
+    expect(await screen.findByText("候选帖子 B")).toBeInTheDocument();
     expect(screen.queryByTestId("library-review-banner")).not.toBeInTheDocument();
-    expect(loadXiaohongshuCandidateReviewData).not.toHaveBeenCalled();
+    expect(loadMergedXiaohongshuLibraryData).toHaveBeenCalledTimes(1);
   });
 
-  it("adds QA candidates onto the current Xiaohongshu library page only when review mode is explicitly requested", async () => {
+  it("keeps review-query compatibility while rendering the same merged deduped Xiaohongshu set", async () => {
     mockSearchParamsState.value = "platform=Xiaohongshu&mobilePreview=1&review=xiaohongshu-candidates";
     const LibraryPage = await loadLibraryPage();
 
@@ -229,15 +252,31 @@ describe("library xiaohongshu review mode", () => {
     expect(await screen.findByText("已推广小红书内容")).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(loadXiaohongshuCandidateReviewData).toHaveBeenCalledTimes(1);
+      expect(loadMergedXiaohongshuLibraryData).toHaveBeenCalledTimes(1);
     });
 
     expect(await screen.findByText("候选帖子 A")).toBeInTheDocument();
     expect(await screen.findByText("候选帖子 B")).toBeInTheDocument();
-    expect(screen.getByTestId("library-review-banner")).toHaveTextContent("小红书候选审核模式");
-    expect(screen.getByTestId("library-review-banner")).toHaveTextContent("已显示 1 条 runtime 内容 + 2 条候选帖");
+    expect(screen.queryByTestId("library-review-banner")).not.toBeInTheDocument();
     expect(screen.getByTestId("content-card-content_xhs_runtime_01")).toHaveAttribute("data-bookmark-enabled", "1");
     expect(screen.getByTestId("content-card-review_xhs_candidate_alpha")).toHaveAttribute("data-bookmark-enabled", "1");
     expect(screen.getByTestId("content-card-review_xhs_candidate_beta")).toHaveAttribute("data-bookmark-enabled", "1");
+  });
+
+  it("allows explicit Xiaohongshu review mode to bypass the assessment gate", async () => {
+    mockHasCompletedAssessment = false;
+    mockSearchParamsState.value = "platform=Xiaohongshu&review=xiaohongshu-candidates";
+    const LibraryPage = await loadLibraryPage();
+
+    render(React.createElement(LibraryPage));
+
+    await waitFor(() => {
+      expect(loadMergedXiaohongshuLibraryData).toHaveBeenCalledTimes(1);
+    });
+
+    expect(await screen.findByText("已推广小红书内容")).toBeInTheDocument();
+    expect(screen.queryByText("先完成一次水平评估")).not.toBeInTheDocument();
+    expect(await screen.findByText("候选帖子 A")).toBeInTheDocument();
+    expect(await screen.findByText("候选帖子 B")).toBeInTheDocument();
   });
 });

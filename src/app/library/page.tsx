@@ -22,7 +22,8 @@ import { shouldUseCompactMobileLibraryLayout, shouldUseMobileXiaohongshuMasonry 
 import { buildLibraryItems, sortLibraryItems } from "@/lib/library/order";
 import {
   isXiaohongshuCandidateReviewItem,
-  isXiaohongshuCandidateReviewRequested
+  isXiaohongshuCandidateReviewRequested,
+  type XiaohongshuCandidateReviewData
 } from "@/lib/library/xiaohongshuReviewItems";
 import {
   readLocalXiaohongshuReviewBookmarkIds,
@@ -78,8 +79,8 @@ function LibraryPageContent() {
   const [showBookmarkedOnly, setShowBookmarkedOnly] = useState(false);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [viewportWidth, setViewportWidth] = useState<number | null>(null);
-  const [reviewItems, setReviewItems] = useState<(ReturnType<typeof buildLibraryItems>)>([]);
-  const [reviewCandidateCount, setReviewCandidateCount] = useState(0);
+  const [mergedXiaohongshuItems, setMergedXiaohongshuItems] = useState<(ReturnType<typeof buildLibraryItems>)>([]);
+  const [, setMergedXiaohongshuSummary] = useState<XiaohongshuCandidateReviewData["summary"] | null>(null);
   const [reviewBookmarkedIds, setReviewBookmarkedIds] = useState<string[]>([]);
   const previousFiltersRef = useRef<Record<string, string | boolean> | null>(null);
   const previousKeywordRef = useRef("");
@@ -98,7 +99,9 @@ function LibraryPageContent() {
   );
   const platformParam = searchParams.get("platform");
   const requestedXiaohongshuCandidateReview = isXiaohongshuCandidateReviewRequested(searchParams);
-  const showXiaohongshuCandidateReview = requestedXiaohongshuCandidateReview && selectedPlatform === "Xiaohongshu";
+  const requestedXiaohongshuReviewMode = requestedXiaohongshuCandidateReview
+    && normalizeLibraryPlatformParam(platformParam) === "Xiaohongshu";
+  const showMergedXiaohongshuLibrary = selectedPlatform === "Xiaohongshu";
 
   useEffect(() => {
     setSelectedPlatform(normalizeLibraryPlatformParam(platformParam));
@@ -108,9 +111,9 @@ function LibraryPageContent() {
     let active = true;
 
     async function loadReviewItems() {
-      if (!(requestedXiaohongshuCandidateReview && selectedPlatform === "Xiaohongshu")) {
-        setReviewItems([]);
-        setReviewCandidateCount(0);
+      if (!showMergedXiaohongshuLibrary) {
+        setMergedXiaohongshuItems([]);
+        setMergedXiaohongshuSummary(null);
         return;
       }
 
@@ -120,9 +123,9 @@ function LibraryPageContent() {
         return;
       }
 
-      const reviewData = module.loadXiaohongshuCandidateReviewData();
-      setReviewItems(reviewData.items);
-      setReviewCandidateCount(reviewData.summary.candidateCount);
+      const mergedData = module.loadMergedXiaohongshuLibraryData();
+      setMergedXiaohongshuItems(mergedData.items);
+      setMergedXiaohongshuSummary(mergedData.summary);
     }
 
     void loadReviewItems();
@@ -130,18 +133,23 @@ function LibraryPageContent() {
     return () => {
       active = false;
     };
-  }, [requestedXiaohongshuCandidateReview, selectedPlatform]);
+  }, [showMergedXiaohongshuLibrary]);
 
   useEffect(() => {
-    if (!showXiaohongshuCandidateReview) {
+    if (!showMergedXiaohongshuLibrary) {
       setReviewBookmarkedIds([]);
       return;
     }
 
     setReviewBookmarkedIds(readLocalXiaohongshuReviewBookmarkIds());
-  }, [showXiaohongshuCandidateReview]);
+  }, [showMergedXiaohongshuLibrary]);
 
   useEffect(() => {
+    if (requestedXiaohongshuReviewMode) {
+      setGateState("ready");
+      return;
+    }
+
     if (loading) {
       return;
     }
@@ -178,7 +186,7 @@ function LibraryPageContent() {
     return () => {
       active = false;
     };
-  }, [configured, loading, router, user?.id]);
+  }, [configured, loading, requestedXiaohongshuReviewMode, router, user?.id]);
 
   useEffect(() => {
     if (gateState !== "ready") {
@@ -297,23 +305,18 @@ function LibraryPageContent() {
 
   useEffect(() => {
     setVisibleCount(PAGE_SIZE);
-  }, [keyword, reviewItems.length, selectedContentLanguage, selectedPlatform, selectedSubtitleAvailability, showBookmarkedOnly]);
-
-  const runtimeXiaohongshuCount = useMemo(
-    () => libraryItems.filter((item) => item.platform === "Xiaohongshu").length,
-    [libraryItems]
-  );
+  }, [keyword, mergedXiaohongshuItems.length, selectedContentLanguage, selectedPlatform, selectedSubtitleAvailability, showBookmarkedOnly]);
   const effectiveBookmarkedIds = useMemo(
-    () => showXiaohongshuCandidateReview
+    () => showMergedXiaohongshuLibrary
       ? Array.from(new Set([...bookmarkedIds, ...reviewBookmarkedIds]))
       : bookmarkedIds,
-    [bookmarkedIds, reviewBookmarkedIds, showXiaohongshuCandidateReview]
+    [bookmarkedIds, reviewBookmarkedIds, showMergedXiaohongshuLibrary]
   );
 
   const filtered = useMemo(() => {
     const query = keyword.trim().toLowerCase();
-    const sourceItems = showXiaohongshuCandidateReview
-      ? [...libraryItems, ...reviewItems]
+    const sourceItems = showMergedXiaohongshuLibrary
+      ? mergedXiaohongshuItems
       : libraryItems;
 
     const matchedItems = sourceItems.filter((item) => {
@@ -364,17 +367,17 @@ function LibraryPageContent() {
     creatorNameById,
     keyword,
     libraryItems,
+    mergedXiaohongshuItems,
     productSeed,
-    reviewItems,
     selectedContentLanguage,
     selectedPlatform,
     selectedSubtitleAvailability,
     showBookmarkedOnly,
-    showXiaohongshuCandidateReview
+    showMergedXiaohongshuLibrary
   ]);
   const visibleItems = useMemo(
-    () => (showXiaohongshuCandidateReview ? filtered : filtered.slice(0, visibleCount)),
-    [filtered, showXiaohongshuCandidateReview, visibleCount]
+    () => (showMergedXiaohongshuLibrary ? filtered : filtered.slice(0, visibleCount)),
+    [filtered, showMergedXiaohongshuLibrary, visibleCount]
   );
   const xiaohongshuColumns = useMemo(() => {
     const leftColumn: typeof visibleItems = [];
@@ -386,7 +389,7 @@ function LibraryPageContent() {
 
     return [leftColumn, rightColumn] as const;
   }, [visibleItems]);
-  const hasMore = !showXiaohongshuCandidateReview && visibleItems.length < filtered.length;
+  const hasMore = !showMergedXiaohongshuLibrary && visibleItems.length < filtered.length;
   const isMobilePreview = searchParams.get("mobilePreview") === "1";
   const useCompactMobileLibraryLayout = shouldUseCompactMobileLibraryLayout({
     viewportWidth,
@@ -427,7 +430,7 @@ function LibraryPageContent() {
   };
 
   const handleToggleBookmark = async (contentId: string) => {
-    if (showXiaohongshuCandidateReview && contentId.startsWith("review_xhs_candidate_")) {
+    if (contentId.startsWith("review_xhs_candidate_")) {
       const next = toggleLocalXiaohongshuReviewBookmark(contentId);
       setReviewBookmarkedIds(next);
       logEvent("content.bookmark_toggled", {
@@ -530,22 +533,9 @@ function LibraryPageContent() {
           setSelectedSubtitleAvailability={setSelectedSubtitleAvailability}
           showBookmarkedOnly={showBookmarkedOnly}
           setShowBookmarkedOnly={setShowBookmarkedOnly}
-          bookmarkFilterEnabled={Boolean((user?.id && configured) || showXiaohongshuCandidateReview)}
+          bookmarkFilterEnabled={Boolean((user?.id && configured) || showMergedXiaohongshuLibrary)}
           compactMobile={useCompactMobileLibraryLayout}
         />
-
-        {showXiaohongshuCandidateReview ? (
-          <Card data-testid="library-review-banner" className="space-y-1 border border-[var(--line)]/70 bg-slate-50/90 px-4 py-3 text-sm text-slate-700">
-            <p className="font-semibold text-slate-900">{t("library.review.title")}</p>
-            <p>{t("library.review.body")}</p>
-            <p className="text-xs text-slate-500">
-              {t("library.review.counts", {
-                runtimeCount: runtimeXiaohongshuCount,
-                candidateCount: reviewCandidateCount
-              })}
-            </p>
-          </Card>
-        ) : null}
 
         {filtered.length > 0 ? (
           <div className="space-y-6">

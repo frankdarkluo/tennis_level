@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-04-18T01:04:27.413Z",
+  "generatedAt": "2026-04-18T17:37:30.740Z",
   "methodology": {
     "scope": "qa_only_seed_candidates",
     "candidateSource": "profile_title_confirmed_search_result_cards",
@@ -15,7 +15,7 @@
     "creatorProgramScopeTarget": 350
   },
   "summary": {
-    "candidateCount": 50,
+    "candidateCount": 56,
     "creatorCount": 4,
     "creatorTargetCount": 4,
     "byCreator": [
@@ -25,7 +25,7 @@
         "creatorProfileUrl": "https://www.xiaohongshu.com/user/profile/5c3b619e000000000703fccc",
         "creatorProfileStatus": "verified_profile",
         "candidateTarget": 100,
-        "savedCount": 5,
+        "savedCount": 7,
         "collectible": true
       },
       {
@@ -34,7 +34,7 @@
         "creatorProfileUrl": "https://www.xiaohongshu.com/user/profile/63aef7df000000002702a346",
         "creatorProfileStatus": "verified_profile",
         "candidateTarget": 100,
-        "savedCount": 5,
+        "savedCount": 9,
         "collectible": true
       },
       {
@@ -142,48 +142,6 @@
       "reviewStatus": "needs_review"
     },
     {
-      "candidateId": "xhs_5c3b619e000000000703fccc_69a44c1600000000150238d1",
-      "creatorProgramId": "gaiao",
-      "creatorName": "盖奥网球",
-      "platform": "xiaohongshu",
-      "creatorProfileUrl": "https://www.xiaohongshu.com/user/profile/5c3b619e000000000703fccc",
-      "rawUrl": "https://www.xiaohongshu.com/search_result/69a44c1600000000150238d1?xsec_token=ABPiBbVr8jdORkqUKjP_Xg2xdZ52A9gAXMKrQKiDCk7ZE=&xsec_source=",
-      "canonicalUrl": "https://www.xiaohongshu.com/explore/69a44c1600000000150238d1",
-      "postId": "69a44c1600000000150238d1",
-      "title": "顺畅、丝滑发球的秘诀（细节全流程图）",
-      "thumbnailUrl": "https://sns-webpic-qc.xhscdn.com/202604140051/05b96dc70ad5f499051fd303b43965ca/1040g2sg31t64c8df5se05n1rc6f1vv6ctep67a0!nc_n_nwebp_mw_1",
-      "teachingType": "serve",
-      "languageHint": "zh",
-      "subtitleLanguageHint": "zh",
-      "duplicateClusterHint": null,
-      "evidence": {
-        "creatorEvidence": [
-          "creator program id: gaiao",
-          "canonical creator profile: https://www.xiaohongshu.com/user/profile/5c3b619e000000000703fccc",
-          "profile evidence note: Existing promoted runtime content and hidden creator record already use this profile URL.",
-          "creator share link: https://xhslink.com/m/3nXlLxIQQcu"
-        ],
-        "contentEvidence": [
-          "profile title confirmed on creator page: 顺畅、丝滑发球的秘诀（细节全流程图）",
-          "search query used to locate note: 顺畅、丝滑发球的秘诀（细节全流程图） 盖奥",
-          "search-result card date text: 03-01",
-          "search-result card likes text: 8843",
-          "teaching type: serve",
-          "language hint: zh",
-          "subtitle hint: zh"
-        ],
-        "thumbnailEvidence": [
-          "search-result card thumbnail: https://sns-webpic-qc.xhscdn.com/202604140051/05b96dc70ad5f499051fd303b43965ca/1040g2sg31t64c8df5se05n1rc6f1vv6ctep67a0!nc_n_nwebp_mw_1"
-        ]
-      },
-      "preliminaryProblemTags": [
-        "serve-rhythm",
-        "serve-timing"
-      ],
-      "crossPlatformNotes": "Potential semantic overlap with existing Bilibili serve-flow teaching items from the same creator; keep as a separate Xiaohongshu record until manual review confirms equivalence.",
-      "reviewStatus": "needs_review"
-    },
-    {
       "candidateId": "xhs_5c3b619e000000000703fccc_69c29c5f0000000021012666",
       "creatorProgramId": "gaiao",
       "creatorName": "盖奥网球",
@@ -265,6 +223,126 @@
         "forehand-no-power"
       ],
       "crossPlatformNotes": "Potential semantic overlap with existing Bilibili forehand-acceleration teaching items from the same creator; keep as a separate Xiaohongshu record until manual review confirms equivalence.",
+      "reviewStatus": "needs_review"
+    },
+    {
+      "candidateId": "xhs_5c3b619e000000000703fccc_69d648c1000000001a022156",
+      "creatorProgramId": "gaiao",
+      "creatorName": "盖奥网球",
+      "platform": "xiaohongshu",
+      "creatorProfileUrl": "https://www.xiaohongshu.com/user/profile/5c3b619e000000000703fccc",
+      "rawUrl": "https://www.xiaohongshu.com/explore/69d648c1000000001a022156",
+      "canonicalUrl": "https://www.xiaohongshu.com/explore/69d648c1000000001a022156",
+      "postId": "69d648c1000000001a022156",
+      "title": "网球跟练：专治正手打不顺",
+      "thumbnailUrl": "http://sns-webpic-qc.xhscdn.com/202604181303/4d273c2b2449b813ef7fbff6d11e559e/1040g00831umujqd22o005n1rc6f1vv6c5ql5nko!nc_n_webp_mw_1",
+      "teachingType": "drill",
+      "languageHint": "zh",
+      "subtitleLanguageHint": "zh",
+      "duplicateClusterHint": null,
+      "evidence": {
+        "creatorEvidence": [
+          "creator program id: gaiao",
+          "canonical creator profile: https://www.xiaohongshu.com/user/profile/5c3b619e000000000703fccc",
+          "profile evidence note: Existing promoted runtime content and hidden creator record already use this profile URL.",
+          "creator share link: https://xhslink.com/m/3nXlLxIQQcu"
+        ],
+        "contentEvidence": [
+          "profile title confirmed on creator page: 网球跟练：专治正手打不顺",
+          "search query used to locate note: 网球跟练：专治正手打不顺 盖奥",
+          "teaching type: drill",
+          "language hint: zh",
+          "subtitle hint: zh"
+        ],
+        "thumbnailEvidence": [
+          "search-result card thumbnail: http://sns-webpic-qc.xhscdn.com/202604181303/4d273c2b2449b813ef7fbff6d11e559e/1040g00831umujqd22o005n1rc6f1vv6c5ql5nko!nc_n_webp_mw_1"
+        ]
+      },
+      "preliminaryProblemTags": [
+        "forehand-basics",
+        "rally-consistency"
+      ],
+      "crossPlatformNotes": "Harvested from the creator's own Xiaohongshu profile feed after profile-title confirmation. Keep as a separate Xiaohongshu direct-source QA candidate until manual review confirms whether it overlaps with existing Bilibili drills.",
+      "reviewStatus": "needs_review"
+    },
+    {
+      "candidateId": "xhs_5c3b619e000000000703fccc_695bca03000000002103dee7",
+      "creatorProgramId": "gaiao",
+      "creatorName": "盖奥网球",
+      "platform": "xiaohongshu",
+      "creatorProfileUrl": "https://www.xiaohongshu.com/user/profile/5c3b619e000000000703fccc",
+      "rawUrl": "https://www.xiaohongshu.com/explore/695bca03000000002103dee7",
+      "canonicalUrl": "https://www.xiaohongshu.com/explore/695bca03000000002103dee7",
+      "postId": "695bca03000000002103dee7",
+      "title": "发球进阶跟练（小合集）",
+      "thumbnailUrl": "http://sns-webpic-qc.xhscdn.com/202604181303/dfc051762009ef9bbd147d0300f6bc58/1040g2sg31qvaj5f3gae05n1rc6f1vv6cpnfkbo8!nc_n_webp_mw_1",
+      "teachingType": "serve",
+      "languageHint": "zh",
+      "subtitleLanguageHint": "zh",
+      "duplicateClusterHint": null,
+      "evidence": {
+        "creatorEvidence": [
+          "creator program id: gaiao",
+          "canonical creator profile: https://www.xiaohongshu.com/user/profile/5c3b619e000000000703fccc",
+          "profile evidence note: Existing promoted runtime content and hidden creator record already use this profile URL.",
+          "creator share link: https://xhslink.com/m/3nXlLxIQQcu"
+        ],
+        "contentEvidence": [
+          "profile title confirmed on creator page: 发球进阶跟练（小合集）",
+          "search query used to locate note: 发球进阶跟练（小合集） 盖奥",
+          "teaching type: serve",
+          "language hint: zh",
+          "subtitle hint: zh"
+        ],
+        "thumbnailEvidence": [
+          "search-result card thumbnail: http://sns-webpic-qc.xhscdn.com/202604181303/dfc051762009ef9bbd147d0300f6bc58/1040g2sg31qvaj5f3gae05n1rc6f1vv6cpnfkbo8!nc_n_webp_mw_1"
+        ]
+      },
+      "preliminaryProblemTags": [
+        "serve-rhythm",
+        "serve-timing"
+      ],
+      "crossPlatformNotes": "Harvested from the creator's own Xiaohongshu profile feed after profile-title confirmation. Keep as a separate Xiaohongshu direct-source QA candidate until manual review confirms whether it overlaps with existing Bilibili serve drills.",
+      "reviewStatus": "needs_review"
+    },
+    {
+      "candidateId": "xhs_5c3b619e000000000703fccc_695287ae000000002203a22c",
+      "creatorProgramId": "gaiao",
+      "creatorName": "盖奥网球",
+      "platform": "xiaohongshu",
+      "creatorProfileUrl": "https://www.xiaohongshu.com/user/profile/5c3b619e000000000703fccc",
+      "rawUrl": "https://www.xiaohongshu.com/explore/695287ae000000002203a22c",
+      "canonicalUrl": "https://www.xiaohongshu.com/explore/695287ae000000002203a22c",
+      "postId": "695287ae000000002203a22c",
+      "title": "网球绳梯步伐（超30动作汇总）",
+      "thumbnailUrl": "http://sns-webpic-qc.xhscdn.com/202604181303/1466319461e033b047a8c3a6dd1c17d3/1040g2sg31qm98a6h7oe05n1rc6f1vv6c3lp6psg!nc_n_webp_mw_1",
+      "teachingType": "footwork",
+      "languageHint": "zh",
+      "subtitleLanguageHint": "zh",
+      "duplicateClusterHint": null,
+      "evidence": {
+        "creatorEvidence": [
+          "creator program id: gaiao",
+          "canonical creator profile: https://www.xiaohongshu.com/user/profile/5c3b619e000000000703fccc",
+          "profile evidence note: Existing promoted runtime content and hidden creator record already use this profile URL.",
+          "creator share link: https://xhslink.com/m/3nXlLxIQQcu"
+        ],
+        "contentEvidence": [
+          "profile title confirmed on creator page: 网球绳梯步伐（超30动作汇总）",
+          "search query used to locate note: 网球绳梯步伐（超30动作汇总） 盖奥",
+          "teaching type: footwork",
+          "language hint: zh",
+          "subtitle hint: zh"
+        ],
+        "thumbnailEvidence": [
+          "search-result card thumbnail: http://sns-webpic-qc.xhscdn.com/202604181303/1466319461e033b047a8c3a6dd1c17d3/1040g2sg31qm98a6h7oe05n1rc6f1vv6c3lp6psg!nc_n_webp_mw_1"
+        ]
+      },
+      "preliminaryProblemTags": [
+        "movement-slow",
+        "recovery-delay"
+      ],
+      "crossPlatformNotes": "Harvested from the creator's own Xiaohongshu profile feed after profile-title confirmation. Keep as a separate Xiaohongshu direct-source QA candidate until manual review confirms whether it overlaps with existing Bilibili footwork drills.",
       "reviewStatus": "needs_review"
     },
     {
@@ -470,6 +548,166 @@
         "passive-point-construction"
       ],
       "crossPlatformNotes": "No confirmed Bilibili surface is known for this creator. Treat Xiaohongshu as the primary direct-source surface and keep this record platform-specific.",
+      "reviewStatus": "needs_review"
+    },
+    {
+      "candidateId": "xhs_63aef7df000000002702a346_6880bfff000000002400ea5e",
+      "creatorProgramId": "lingxi",
+      "creatorName": "灵熙",
+      "platform": "xiaohongshu",
+      "creatorProfileUrl": "https://www.xiaohongshu.com/user/profile/63aef7df000000002702a346",
+      "rawUrl": "https://www.xiaohongshu.com/explore/6880bfff000000002400ea5e",
+      "canonicalUrl": "https://www.xiaohongshu.com/explore/6880bfff000000002400ea5e",
+      "postId": "6880bfff000000002400ea5e",
+      "title": "提升球质 实际上是做“慢”",
+      "thumbnailUrl": "https://sns-webpic-qc.xhscdn.com/202604190044/a65d5d1e210c8cec51f3ca90d8ba0523/1040g00831k9djrebj2005oteuvfpt8q6kt4hb3o!nc_n_webp_mw_1",
+      "teachingType": "technique_explanation",
+      "languageHint": "zh",
+      "subtitleLanguageHint": "zh",
+      "duplicateClusterHint": null,
+      "evidence": {
+        "creatorEvidence": [
+          "creator program id: lingxi",
+          "canonical creator profile: https://www.xiaohongshu.com/user/profile/63aef7df000000002702a346",
+          "profile evidence note: Existing promoted runtime content and hidden creator record already use this profile URL.",
+          "creator share link: https://xhslink.com/m/2pkWMTS4aVj"
+        ],
+        "contentEvidence": [
+          "profile title confirmed on creator page: 提升球质 实际上是做“慢”",
+          "search query used to locate note: 灵熙 课堂",
+          "teaching type: technique_explanation",
+          "language hint: zh",
+          "subtitle hint: zh"
+        ],
+        "thumbnailEvidence": [
+          "search-result card thumbnail: https://sns-webpic-qc.xhscdn.com/202604190044/a65d5d1e210c8cec51f3ca90d8ba0523/1040g00831k9djrebj2005oteuvfpt8q6kt4hb3o!nc_n_webp_mw_1"
+        ]
+      },
+      "preliminaryProblemTags": [
+        "forehand-no-power",
+        "general-improvement"
+      ],
+      "crossPlatformNotes": "Recovered from Xiaohongshu search-result harvesting, then filtered back to the verified 灵熙🎾 profile before inclusion. Keep this as a Xiaohongshu-only QA candidate until manual review confirms the teaching scope and any cross-platform overlap.",
+      "reviewStatus": "needs_review"
+    },
+    {
+      "candidateId": "xhs_63aef7df000000002702a346_68b8142f000000001c00ddeb",
+      "creatorProgramId": "lingxi",
+      "creatorName": "灵熙",
+      "platform": "xiaohongshu",
+      "creatorProfileUrl": "https://www.xiaohongshu.com/user/profile/63aef7df000000002702a346",
+      "rawUrl": "https://www.xiaohongshu.com/explore/68b8142f000000001c00ddeb",
+      "canonicalUrl": "https://www.xiaohongshu.com/explore/68b8142f000000001c00ddeb",
+      "postId": "68b8142f000000001c00ddeb",
+      "title": "正手肩部打开过早",
+      "thumbnailUrl": "https://sns-webpic-qc.xhscdn.com/202604190044/172370cbfb4a0426081490a8f2d6fed9/1040g00831lvekt965u005oteuvfpt8q6ssji9mg!nc_n_webp_mw_1",
+      "teachingType": "technique_explanation",
+      "languageHint": "zh",
+      "subtitleLanguageHint": "zh",
+      "duplicateClusterHint": null,
+      "evidence": {
+        "creatorEvidence": [
+          "creator program id: lingxi",
+          "canonical creator profile: https://www.xiaohongshu.com/user/profile/63aef7df000000002702a346",
+          "profile evidence note: Existing promoted runtime content and hidden creator record already use this profile URL.",
+          "creator share link: https://xhslink.com/m/2pkWMTS4aVj"
+        ],
+        "contentEvidence": [
+          "profile title confirmed on creator page: 正手肩部打开过早",
+          "search query used to locate note: 灵熙 课堂",
+          "teaching type: technique_explanation",
+          "language hint: zh",
+          "subtitle hint: zh"
+        ],
+        "thumbnailEvidence": [
+          "search-result card thumbnail: https://sns-webpic-qc.xhscdn.com/202604190044/172370cbfb4a0426081490a8f2d6fed9/1040g00831lvekt965u005oteuvfpt8q6ssji9mg!nc_n_webp_mw_1"
+        ]
+      },
+      "preliminaryProblemTags": [
+        "forehand-out",
+        "timing-off"
+      ],
+      "crossPlatformNotes": "Recovered from Xiaohongshu search-result harvesting, then filtered back to the verified 灵熙🎾 profile before inclusion. Keep this as a Xiaohongshu-only QA candidate until manual review confirms the teaching scope and any cross-platform overlap.",
+      "reviewStatus": "needs_review"
+    },
+    {
+      "candidateId": "xhs_63aef7df000000002702a346_68653d19000000001d00e0aa",
+      "creatorProgramId": "lingxi",
+      "creatorName": "灵熙",
+      "platform": "xiaohongshu",
+      "creatorProfileUrl": "https://www.xiaohongshu.com/user/profile/63aef7df000000002702a346",
+      "rawUrl": "https://www.xiaohongshu.com/explore/68653d19000000001d00e0aa",
+      "canonicalUrl": "https://www.xiaohongshu.com/explore/68653d19000000001d00e0aa",
+      "postId": "68653d19000000001d00e0aa",
+      "title": "借力到底在借什么力？",
+      "thumbnailUrl": "https://sns-webpic-qc.xhscdn.com/202604190044/61262d4d935a43ecf632fccad63ae655/1040g2sg31jehtc5rj4005oteuvfpt8q6a2755u8!nc_n_webp_mw_1",
+      "teachingType": "technique_explanation",
+      "languageHint": "zh",
+      "subtitleLanguageHint": "zh",
+      "duplicateClusterHint": null,
+      "evidence": {
+        "creatorEvidence": [
+          "creator program id: lingxi",
+          "canonical creator profile: https://www.xiaohongshu.com/user/profile/63aef7df000000002702a346",
+          "profile evidence note: Existing promoted runtime content and hidden creator record already use this profile URL.",
+          "creator share link: https://xhslink.com/m/2pkWMTS4aVj"
+        ],
+        "contentEvidence": [
+          "profile title confirmed on creator page: 借力到底在借什么力？",
+          "search query used to locate note: 灵熙 步伐",
+          "teaching type: technique_explanation",
+          "language hint: zh",
+          "subtitle hint: zh"
+        ],
+        "thumbnailEvidence": [
+          "search-result card thumbnail: https://sns-webpic-qc.xhscdn.com/202604190044/61262d4d935a43ecf632fccad63ae655/1040g2sg31jehtc5rj4005oteuvfpt8q6a2755u8!nc_n_webp_mw_1"
+        ]
+      },
+      "preliminaryProblemTags": [
+        "forehand-no-power",
+        "general-improvement"
+      ],
+      "crossPlatformNotes": "Recovered from Xiaohongshu search-result harvesting, then filtered back to the verified 灵熙🎾 profile before inclusion. Keep this as a Xiaohongshu-only QA candidate until manual review confirms the teaching scope and any cross-platform overlap.",
+      "reviewStatus": "needs_review"
+    },
+    {
+      "candidateId": "xhs_63aef7df000000002702a346_69650150000000001a02651e",
+      "creatorProgramId": "lingxi",
+      "creatorName": "灵熙",
+      "platform": "xiaohongshu",
+      "creatorProfileUrl": "https://www.xiaohongshu.com/user/profile/63aef7df000000002702a346",
+      "rawUrl": "https://www.xiaohongshu.com/explore/69650150000000001a02651e",
+      "canonicalUrl": "https://www.xiaohongshu.com/explore/69650150000000001a02651e",
+      "postId": "69650150000000001a02651e",
+      "title": "切削想要过网低 向前是关键",
+      "thumbnailUrl": "https://sns-webpic-qc.xhscdn.com/202604190044/43cc357c29f8b439bcb75ca53e14a511/1040g2sg31r8759djnp305oteuvfpt8q67dh05sg!nc_n_webp_mw_1",
+      "teachingType": "technique_explanation",
+      "languageHint": "zh",
+      "subtitleLanguageHint": "zh",
+      "duplicateClusterHint": null,
+      "evidence": {
+        "creatorEvidence": [
+          "creator program id: lingxi",
+          "canonical creator profile: https://www.xiaohongshu.com/user/profile/63aef7df000000002702a346",
+          "profile evidence note: Existing promoted runtime content and hidden creator record already use this profile URL.",
+          "creator share link: https://xhslink.com/m/2pkWMTS4aVj"
+        ],
+        "contentEvidence": [
+          "profile title confirmed on creator page: 切削想要过网低 向前是关键",
+          "search query used to locate note: 灵熙 步伐",
+          "teaching type: technique_explanation",
+          "language hint: zh",
+          "subtitle hint: zh"
+        ],
+        "thumbnailEvidence": [
+          "search-result card thumbnail: https://sns-webpic-qc.xhscdn.com/202604190044/43cc357c29f8b439bcb75ca53e14a511/1040g2sg31r8759djnp305oteuvfpt8q67dh05sg!nc_n_webp_mw_1"
+        ]
+      },
+      "preliminaryProblemTags": [
+        "backhand-slice-floating",
+        "slice-depth-control"
+      ],
+      "crossPlatformNotes": "Recovered from Xiaohongshu search-result harvesting, then filtered back to the verified 灵熙🎾 profile before inclusion. Keep this as a Xiaohongshu-only QA candidate until manual review confirms the teaching scope and any cross-platform overlap.",
       "reviewStatus": "needs_review"
     },
     {
@@ -752,44 +990,6 @@
         "topspin-low"
       ],
       "crossPlatformNotes": "Potential semantic overlap with existing Bilibili Mouratoglou backhand technique clips; keep as a separate Xiaohongshu record until manual review confirms equivalence.",
-      "reviewStatus": "needs_review"
-    },
-    {
-      "candidateId": "xhs_6050684100000000010047d5_67bc408d000000002602d709",
-      "creatorProgramId": "mouratoglou",
-      "creatorName": "冠军教练-莫拉特格鲁",
-      "platform": "xiaohongshu",
-      "creatorProfileUrl": "https://www.xiaohongshu.com/user/profile/6050684100000000010047d5",
-      "rawUrl": "https://www.xiaohongshu.com/search_result/67bc408d000000002602d709?xsec_token=AB-byI3NUIE20ciZBN8MLXHNxUOkGWXfE30OARFDkj5Ko=&xsec_source=pc_search",
-      "canonicalUrl": "https://www.xiaohongshu.com/explore/67bc408d000000002602d709",
-      "postId": "67bc408d000000002602d709",
-      "title": "音爆密码：莫式抛球校准术解锁高速旋转杀招",
-      "thumbnailUrl": "https://sns-webpic-qc.xhscdn.com/202604160055/4447b40b69c2edb7e15ab7bdc77f2fb4/spectrum/1040g0k031e9gun1t12005o2gd10g8hul7mf0utg!nd_dft_wgth_webp_3",
-      "teachingType": "serve",
-      "languageHint": "zh",
-      "subtitleLanguageHint": "zh",
-      "duplicateClusterHint": null,
-      "evidence": {
-        "creatorEvidence": [
-          "creator program id: mouratoglou",
-          "canonical creator profile: https://www.xiaohongshu.com/user/profile/6050684100000000010047d5",
-          "profile evidence note: Existing promoted runtime content and hidden creator record already use this profile URL.",
-          "creator share link: https://xhslink.com/m/3yjLTuwVbKr"
-        ],
-        "contentEvidence": [
-          "profile title confirmed on creator page: 音爆密码：莫式抛球校准术解锁高速旋转杀招",
-          "search query used to locate note: 莫式抛球校准术 解锁 高速旋转杀招 莫拉特格鲁",
-          "teaching type: serve",
-          "language hint: zh",
-          "subtitle hint: zh"
-        ],
-        "thumbnailEvidence": []
-      },
-      "preliminaryProblemTags": [
-        "serve-toss-consistency",
-        "serve-rhythm"
-      ],
-      "crossPlatformNotes": "Potential semantic overlap with existing Bilibili Mouratoglou serve mechanics clips; keep as a separate Xiaohongshu record until manual review confirms equivalence.",
       "reviewStatus": "needs_review"
     },
     {

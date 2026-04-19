@@ -21,8 +21,10 @@ describe("thumbnail framing", () => {
     });
 
     expect(framing.mediaClassName).toContain("aspect-[3/4]");
-    expect(framing.imageClassName).toContain("object-[center_38%]");
+    expect(framing.imageClassName).toContain("object-[center_18%]");
     expect(framing.imageClassName).toContain("group-hover:scale-[1.2]");
+    expect(framing.imageClassName).not.toContain("origin-top");
+    expect(framing.imageClassName).not.toContain("scale-[1.22]");
     expect(framing.imageClassName).not.toContain("scale-[1.0]");
   });
 
